@@ -1,0 +1,11 @@
+/* Global styles — cleaned up from Vite defaults */
+:root {
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
