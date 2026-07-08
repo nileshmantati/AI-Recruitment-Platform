@@ -78,7 +78,7 @@ const Dashboard = () => {
         }
     }, [isRecruiter]);
 
-    const handleJobClick = async (job) => {
+    async function handleJobClick(job) {
         setSelectedJob(job);
         setApplicants([]);
         try {
@@ -88,7 +88,7 @@ const Dashboard = () => {
             console.error(err);
             setError('Could not fetch applicants.');
         }
-    };
+    }
 
     const handleGenerateQuestions = async (applicationId) => {
         setQuestionsLoading(prev => ({ ...prev, [applicationId]: true }));

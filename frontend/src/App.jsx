@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import JobBoard from './pages/JobBoard';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -16,19 +17,18 @@ function App() {
       <Router>
         <div className="bg-light min-vh-100">
           <Navigation />
-          <div className="pt-2">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/jobs" element={<JobBoard />} />
-            </Routes>
-          </div>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/jobs" element={<JobBoard />} />
+          </Routes>
+          <Footer />
         </div>
       </Router>
     </AuthProvider>

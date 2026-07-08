@@ -10,7 +10,6 @@ const AnalyticsOverview = () => {
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
-                // Call the new Django endpoint
                 const response = await api.get('analytics/recruiter-stats/');
                 setStats(response.data);
             } catch (error) {
@@ -27,7 +26,6 @@ const AnalyticsOverview = () => {
 
     return (
         <div className="mb-4">
-            {/* Top Stat Cards */}
             <Row className="mb-4">
                 <Col md={4}>
                     <Card className="shadow-sm border-0 rounded-4 border-start border-4 border-primary bg-white h-100 p-3">
@@ -69,7 +67,6 @@ const AnalyticsOverview = () => {
                     </Card>
                 </Col>
             </Row>
-            {/* Recharts Bar Chart */}
             {stats.total_jobs > 0 && (
                 < Card className="shadow-sm border-0 rounded-4 p-4 bg-white">
                     <h6 className="fw-bold text-dark mb-4">Applications Per Job</h6>

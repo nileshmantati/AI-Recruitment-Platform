@@ -1,59 +1,72 @@
-import { Navbar, Nav, Container, Button } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaUserCircle } from 'react-icons/fa';
+import React from 'react'
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ArrowRight, User } from "lucide-react";
+import PrimaryButton from './PrimaryButton';
+import { T } from '../Js/theme';
 
 const Navigation = () => {
     const navigate = useNavigate();
     const { auth, logout } = useAuth();
+    const [scrolled, setScrolled] = useState(false);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
-    return (
-        <Navbar bg="white" expand="lg" className="shadow-sm mb-4 py-3">
-            <Container>
-                <Navbar.Brand as={Link} to="/" className="text-primary fw-bold">
-                    <i className="bi bi-robot me-2"></i>AI Recruiter
-                </Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="ms-auto align-items-center">
-                        <Nav.Link as={Link} to="/jobs" className="me-3 fw-semibold text-dark">
-                            Find Jobs
-                        </Nav.Link>
-                        {auth.isAuthenticated ? (
-                            <>
-                                <Nav.Link as={Link} to="/dashboard" className="me-3 fw-semibold text-dark">
-                                    Dashboard
-                                </Nav.Link>
-                                <div className="d-flex align-items-center me-4 px-3 py-1 rounded-pill bg-white shadow-sm border">
-                                    {/* User Icon */}
-                                    <FaUserCircle size={24} className="text-primary me-2" />
+    useEffect(() => {
+        const h = () => setScrolled(window.scrollY > 8);
+        window.addEventListener("scroll", h);
+        return () => window.removeEventListener("scroll", h);
+    }, []);
 
-                                    {/* User Name */}
-                                    <span className="fw-bold text-dark" style={{ fontSize: "15px", letterSpacing: "0.5px" }}>
-                                        {auth.username}
-                                    </span>
-                                </div>
-                                <Button variant="outline-danger" size="sm" onClick={handleLogout}>
-                                    Logout
-                                </Button>
-                            </>
-                        ) : (
-                            <>
-                                <Nav.Link as={Link} to="/login" className="me-2">Login</Nav.Link>
-                                <Button as={Link} to="/register" variant="primary" size="sm">
-                                    Sign Up
-                                </Button>
-                            </>
-                        )}
-                    </Nav>
-                </Navbar.Collapse>
-            </Container>
-        </Navbar>
+    return (
+        <nav
+            className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled ? "py-3 shadow-sm" : "py-3"}`}
+            style={{ background: scrolled ? "rgba(248, 250, 252, 0.35)" : `radial-gradient(1200px 600px at 50% -10%, ${T.primary}14, transparent), radial-gradient(800px 500px at 90% 10%, ${T.secondary}14, transparent)`, backdropFilter: scrolled ? "blur(12px)" : "none" }}
+        >
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
+                <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-black tracking-tight">
+                        <i className="bi bi-robot me-2" style={{ color: T.primary }}></i>
+                        <span className="text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
+                            AI
+                        </span> Recruiter
+                    </span>
+                </div>
+                <div className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
+                    <a href="#features" className="text-black! hover:text-primary! text-decoration-none">Features</a>
+                    <a href="#how" className="text-black hover:text-primary text-decoration-none">How it works</a>
+                    <a href="#faq" className="text-black hover:text-primary text-decoration-none">FAQ</a>
+                </div>
+                <div className="flex items-center gap-4">
+                    {auth.isAuthenticated ? (
+                        <>
+                            <Link to="/dashboard" className="text-sm font-semibold text-slate-700 hover:text-slate-900">
+                                Dashboard
+                            </Link>
+                            <div className="hidden sm:flex items-center gap-2 rounded-full bg-white px-3 py-1.5 shadow-sm border border-slate-200">
+                                <User size={18} className="text-indigo-600" />
+                                <span className="text-sm font-bold text-slate-800">
+                                    {auth.username}
+                                </span>
+                            </div>
+                            <button onClick={handleLogout} className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <PrimaryButton className="px-3! py-2.5! text-sm! rounded-xl!" onClick={() => navigate("/login")}>
+                                Log in <ArrowRight size={16} />
+                            </PrimaryButton>
+                        </>
+                    )}
+                </div>
+            </div>
+        </nav>
     );
 };
 

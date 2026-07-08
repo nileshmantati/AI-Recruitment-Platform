@@ -21,20 +21,15 @@ const ApplyJobModal = ({ show, handleClose, job }) => {
         }
 
         setIsLoading(true);
-
-        // File uploads require FormData instead of standard JSON
         const formData = new FormData();
         formData.append('job', job.id);
         formData.append('resume', resumeFile);
 
         try {
-            // Send to Django. Axios will automatically set the correct multi-part headers 
-            // because we are passing a FormData object.
             await api.post('applications/apply/', formData);
 
             setMessage({ type: 'success', text: 'Application submitted! The AI is reviewing your resume.' });
 
-            // Close modal after 2 seconds on success
             setTimeout(() => {
                 handleClose();
                 setResumeFile(null);
@@ -43,7 +38,6 @@ const ApplyJobModal = ({ show, handleClose, job }) => {
 
         } catch (error) {
             console.error("Application error:", error.response?.data || error.message);
-            // Handle all possible DRF error response formats
             let errorMsg = 'Failed to submit application. Please try again.';
             const data = error.response?.data;
             if (data) {
@@ -56,7 +50,6 @@ const ApplyJobModal = ({ show, handleClose, job }) => {
                 } else if (data.non_field_errors) {
                     errorMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors.join(' ') : data.non_field_errors;
                 } else {
-                    // Field-level errors: e.g. { "job": ["This field is required."] }
                     const firstKey = Object.keys(data)[0];
                     if (firstKey) {
                         const val = data[firstKey];
