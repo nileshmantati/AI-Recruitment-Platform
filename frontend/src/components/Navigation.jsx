@@ -45,7 +45,10 @@ const Navigation = () => {
                 <div className="flex items-center gap-4">
                     {auth.isAuthenticated ? (
                         <>
-                            <Link to="/dashboard" className="text-sm font-semibold text-slate-700 hover:text-slate-900">
+                            <Link to="/jobs" className="text-sm text-decoration-none font-semibold text-indigo-500! hover:text-slate-900!">
+                                Jobs
+                            </Link>
+                            <Link to="/dashboard" className="text-sm text-decoration-none  font-semibold text-indigo-500! hover:text-slate-900!">
                                 Dashboard
                             </Link>
                             <div className="hidden sm:flex items-center gap-2 rounded-full bg-white px-3 py-1.5 shadow-sm border border-slate-200">

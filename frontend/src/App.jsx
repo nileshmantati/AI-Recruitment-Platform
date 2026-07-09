@@ -1,5 +1,5 @@
 // frontend/src/App.jsx
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -12,25 +12,33 @@ import JobBoard from './pages/JobBoard';
 import ResumeAnalyzer from './pages/ResumeAnalyzer';
 import Footer from './components/Footer';
 
+const MainLayout = () => (
+  <>
+    <Navigation />
+    <Outlet />
+    <Footer />
+  </>
+);
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="bg-light min-vh-100">
-          <Navigation />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/jobs" element={<JobBoard />} />
+              <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
+            </Route>
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             } />
-            <Route path="/jobs" element={<JobBoard />} />
-            <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
           </Routes>
-          <Footer />
         </div>
       </Router>
     </AuthProvider>
