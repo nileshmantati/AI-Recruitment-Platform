@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HireVision AI | Resume Analyzer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#4f46e5",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#3730a3",
+                        "on-primary-container": "#e0e7ff",
+                        "secondary": "#00d4ff",
+                        "on-secondary": "#001920",
+                        "secondary-container": "#004e5c",
+                        "on-secondary-container": "#acedff",
+                        "tertiary": "#8b5cf6",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#0b1326",
+                        "on-surface": "#f1f5f9",
+                        "surface-variant": "#1e293b",
+                        "on-surface-variant": "#94a3b8",
+                        "outline": "#475569",
+                        "outline-variant": "#334155",
+                        "surface-container-lowest": "#060e20",
+                        "surface-container-low": "#131b2e",
+                        "surface-container": "#1c253b",
+                        "surface-container-high": "#28334e",
+                        "surface-container-highest": "#334155",
+                        "error": "#ef4444",
+                        "on-error": "#ffffff",
+                        "error-container": "#7f1d1d",
+                        "on-error-container": "#fecaca"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "sans": ["Hanken Grotesk", "sans-serif"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "display-sm": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Hanken Grotesk', sans-serif; }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .ai-border-glow {
+            border: 1px solid transparent;
+            background-image: linear-gradient(#0b1326, #0b1326), linear-gradient(to right, #4f46e5, #00d4ff);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(0.98); }
+        }
+        .progress-glow {
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5);
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface/60 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-tertiary">HireVision AI</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center bg-white/5 rounded-full text-primary hover:bg-white/10 transition-all border border-white/10">
+<span class="material-symbols-outlined">psychology</span>
+</button>
+</header>
+<main class="pt-24 px-4 space-y-6 max-w-lg mx-auto">
+<!-- Header Section -->
+<section class="space-y-1 px-2">
+<h1 class="text-headline-lg text-on-surface font-bold">Resume Analyzer</h1>
+<p class="text-on-surface-variant text-label-md">Analyze and optimize your profile for Senior Product roles.</p>
+</section>
+<!-- Bento Grid: Top Row (Upload) -->
+<div class="glass-card rounded-3xl p-8 text-center space-y-4 border-dashed border-2 border-primary/40 relative overflow-hidden group active:scale-95 transition-transform" id="drop-area">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="relative z-10 space-y-4">
+<div class="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto animate-pulse-subtle">
+<span class="material-symbols-outlined text-primary text-4xl">upload_file</span>
+</div>
+<div>
+<h3 class="text-headline-md font-bold text-on-surface">Upload Resume</h3>
+<p class="text-label-sm text-on-surface-variant">PDF, DOCX up to 10MB</p>
+</div>
+<button class="px-8 py-2.5 bg-primary text-white rounded-full font-semibold text-label-md hover:bg-primary-container transition-all shadow-lg shadow-primary/20">
+                    Select File
+                </button>
+</div>
+</div>
+<!-- Bento Grid: Analysis Results -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Overall Score -->
+<div class="glass-card rounded-3xl p-6 flex flex-col items-center justify-center space-y-3 ai-border-glow">
+<span class="text-label-sm font-bold uppercase tracking-widest text-on-surface-variant">AI SCORE</span>
+<div class="relative w-20 h-20 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-white/10" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-width="6"></circle>
+<circle class="text-primary" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-dasharray="213.6" stroke-dashoffset="32" stroke-linecap="round" stroke-width="6"></circle>
+</svg>
+<span class="absolute text-headline-md font-bold text-on-surface">85</span>
+</div>
+</div>
+<!-- Match Percentage -->
+<div class="glass-card rounded-3xl p-6 flex flex-col items-center justify-center space-y-1">
+<span class="text-label-sm font-bold uppercase tracking-widest text-on-surface-variant">MATCH %</span>
+<div class="text-display-sm font-bold text-secondary">92%</div>
+<span class="text-label-sm text-on-surface-variant text-center">Senior PM Role</span>
+</div>
+</div>
+<!-- Strengths & Weaknesses -->
+<div class="glass-card rounded-3xl overflow-hidden">
+<div class="p-6 space-y-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h3 class="text-headline-md font-bold text-on-surface">AI Insights</h3>
+</div>
+<div class="space-y-5">
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="text-label-md font-semibold text-on-surface">Experience Relevancy</span>
+<span class="text-label-sm text-secondary">Excellent</span>
+</div>
+<div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary w-[90%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-3 p-4 bg-secondary/10 rounded-2xl border border-secondary/20">
+<span class="material-symbols-outlined text-secondary text-lg">check_circle</span>
+<p class="text-label-md text-on-surface-variant leading-tight">Strong data-driven decision making evidence in past roles.</p>
+</div>
+<div class="flex items-start gap-3 p-4 bg-error/10 rounded-2xl border border-error/20">
+<span class="material-symbols-outlined text-error text-lg">warning</span>
+<p class="text-label-md text-on-surface-variant leading-tight">Needs more emphasis on cross-functional leadership metrics.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Resume Preview -->
+<div class="glass-card rounded-3xl p-6 space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="text-headline-md font-bold text-on-surface">Resume Preview</h3>
+<button class="text-label-sm text-primary font-bold">Expand</button>
+</div>
+<div class="aspect-[3/4] bg-surface-container rounded-2xl border border-white/10 relative overflow-hidden shadow-inner">
+<div class="absolute inset-0 p-4 space-y-3 opacity-40">
+<div class="h-4 w-1/2 bg-white/20 rounded"></div>
+<div class="h-2 w-1/3 bg-white/10 rounded"></div>
+<div class="h-2 w-full bg-white/10 rounded"></div>
+<div class="h-2 w-full bg-white/10 rounded"></div>
+<div class="h-2 w-3/4 bg-white/10 rounded"></div>
+<div class="pt-4 space-y-2">
+<div class="h-3 w-1/4 bg-white/20 rounded"></div>
+<div class="h-2 w-full bg-white/10 rounded"></div>
+<div class="h-2 w-full bg-white/10 rounded"></div>
+</div>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container via-transparent to-transparent"></div>
+</div>
+</div>
+<!-- Skills Gap Analysis -->
+<div class="glass-card rounded-3xl p-6 space-y-4">
+<h3 class="text-headline-md font-bold text-on-surface">Skills Gap</h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1.5 bg-primary/20 text-on-primary-container border border-primary/30 rounded-full text-label-sm">Product Strategy</span>
+<span class="px-3 py-1.5 bg-primary/20 text-on-primary-container border border-primary/30 rounded-full text-label-sm">A/B Testing</span>
+<span class="px-3 py-1.5 bg-primary/20 text-on-primary-container border border-primary/30 rounded-full text-label-sm">User Research</span>
+<span class="px-3 py-1.5 bg-white/5 text-on-surface-variant border border-white/10 rounded-full text-label-sm flex items-center gap-1">
+                    SQL <span class="material-symbols-outlined text-[14px]">add</span>
+</span>
+<span class="px-3 py-1.5 bg-white/5 text-on-surface-variant border border-white/10 rounded-full text-label-sm flex items-center gap-1">
+                    Python <span class="material-symbols-outlined text-[14px]">add</span>
+</span>
+</div>
+<p class="text-label-md text-on-surface-variant italic font-medium opacity-80">"Acquiring SQL certification could boost match score by 8%."</p>
+</div>
+<!-- Recommendation Bento -->
+<div class="bg-primary text-white rounded-3xl p-8 space-y-4 shadow-[0_20px_50px_-12px_rgba(79,70,229,0.5)]">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">tips_and_updates</span>
+</div>
+<h3 class="text-headline-md font-bold">AI Strategy</h3>
+</div>
+<p class="text-body-md text-white/90">Rewrite your "Experience" section using the STAR method. Focus on the impact of your user growth initiatives at Acme Corp.</p>
+<button class="w-full py-4 bg-white text-primary rounded-2xl font-bold text-label-md hover:scale-[1.02] transition-transform active:scale-95 shadow-xl">
+                Apply AI Suggestions
+            </button>
+</div>
+</main>
+<!-- Fixed Bottom Actions -->
+<footer class="fixed bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-2xl px-6 py-6 border-t border-white/5 z-50">
+<div class="flex gap-4 max-w-lg mx-auto">
+<button class="flex-1 py-4 bg-gradient-to-r from-primary to-tertiary text-white rounded-2xl font-bold text-label-md shadow-lg shadow-primary/30 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">download</span>
+                Download Report
+            </button>
+<button class="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-on-surface-variant hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</footer>
+<!-- Floating Background Atmosphere -->
+<div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+<div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[100px]"></div>
+</div>
+<script>
+        const dropArea = document.getElementById('drop-area');
+
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('scale-105', 'bg-primary/5');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('scale-105', 'bg-primary/5');
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('scale-105', 'bg-primary/5');
+            alert('AI is analyzing your resume...');
+        });
+    </script>
+</body></html>

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import User, CandidateProfile
+from .models import User, CandidateProfile, RecruiterProfile
+from rest_framework.exceptions import AuthenticationFailed
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,18 +25,21 @@ class RegisterSerializer(serializers.ModelSerializer):
             phone=validated_data.get('phone', '')
         )
         
-        # Automatically create a CandidateProfile if the user is a candidate
-        if user.role == 'CANDIDATE':
-            CandidateProfile.objects.create(user=user)
-            
         return user
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """Custom JWT serializer that includes user role and username in the response."""
+    role = serializers.CharField(write_only=True, required=False)
     
     def validate(self, attrs):
+        provided_role = attrs.get('role')
         data = super().validate(attrs)
+        
+        # Enforce that the role selected on the frontend matches the user's actual role
+        if provided_role and self.user.role != provided_role:
+            raise AuthenticationFailed("Invalid role selected. Please select your correct role to log in.")
+
         # Add extra fields to the response (not the token itself)
         data['role'] = self.user.role
         data['username'] = self.user.username
