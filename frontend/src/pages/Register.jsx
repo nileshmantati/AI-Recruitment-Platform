@@ -1,17 +1,20 @@
-// frontend/src/pages/Register.jsx
 import { useState } from 'react';
-import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
-import { useNavigate, Link, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { GlassCard, TextField } from '../ui/AuthUI';
+import { GraduationCap, Building2, Users, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import PrimaryButton from '../components/PrimaryButton';
+import { T } from '../Js/theme';
 
 const Register = () => {
     const { auth } = useAuth();
+    const [showPass, setShowPass] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: '',
-        role: 'CANDIDATE' // Default role
+        role: 'RECRUITER' // Default role
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -47,44 +50,70 @@ const Register = () => {
     };
 
     return (
-        <Container className="d-flex justify-content-center align-items-center mt-5">
-            <Card className="shadow p-4" style={{ width: '400px' }}>
-                <h3 className="text-center mb-4">Create Account</h3>
-                {error && <Alert variant="danger">{error}</Alert>}
+        <div className="py-10! flex items-center justify-center relative overflow-hidden" style={{ background: `radial-gradient(1200px 600px at 50% -10%, ${T.primary}14, transparent), radial-gradient(800px 500px at 90% 10%, ${T.secondary}14, transparent)` }}>
+            <div className="relative z-10 w-full max-w-md px-6">
+                <GlassCard className="px-8 py-4">
+                    <h1 className="mb-2 text-3xl text-center font-extrabold text-slate-900">Create Account</h1>
 
-                <Form onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Username</Form.Label>
-                        <Form.Control type="text" name="username" required onChange={handleChange} />
-                    </Form.Group>
+                    {error && (
+                        <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600 border border-red-100">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                            {error}
+                        </div>
+                    )}
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Email</Form.Label>
-                        <Form.Control type="email" name="email" required onChange={handleChange} />
-                    </Form.Group>
+                    <form onSubmit={handleSubmit} className='mt-3'>
+                        <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+                            {[{ id: "RECRUITER", label: "Recruiter", icon: Building2 }, { id: "CANDIDATE", label: "Candidate", icon: GraduationCap }].map((r) => (
+                                <button
+                                    key={r.id}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, role: r.id })}
+                                    className={`flex items-center justify-center gap-2 rounded-xl! py-2.5 text-sm font-semibold transition-all ${formData.role === r.id ? "bg-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                                    style={formData.role === r.id ? { color: T.primary } : {}}
+                                >
+                                    <r.icon size={16} /> {r.label}
+                                </button>
+                            ))}
+                        </div>
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" name="password" required onChange={handleChange} />
-                    </Form.Group>
+                        <TextField
+                            icon={Users}
+                            label="Username"
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            placeholder="Alex Morgan"
+                        />
+                        <TextField
+                            icon={Mail}
+                            label="Email address"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder="you@company.com"
+                        />
+                        <TextField
+                            icon={Lock}
+                            label="Password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            type={showPass ? "text" : "password"}
+                            placeholder="Create a password"
+                            rightIcon={showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                            onRightClick={() => setShowPass(!showPass)}
+                        />
 
-                    <Form.Group className="mb-4">
-                        <Form.Label>I am a...</Form.Label>
-                        <Form.Select name="role" onChange={handleChange}>
-                            <option value="CANDIDATE">Candidate (Looking for Jobs)</option>
-                            <option value="RECRUITER">Recruiter (Hiring)</option>
-                        </Form.Select>
-                    </Form.Group>
+                        <PrimaryButton type="submit" className="w-full! rounded-2xl! my-3 py-2.5!" >Sign Up</PrimaryButton>
 
-                    <Button variant="primary" type="submit" className="w-100 mb-3">
-                        Register
-                    </Button>
-                </Form>
-                <div className="text-center">
-                    Already have an account? <Link to="/login">Login here</Link>
-                </div>
-            </Card>
-        </Container>
+                        <p className="mt-6 text-center text-sm text-slate-500">
+                            Already have an account? <button type="button" onClick={() => navigate("/login")} className="font-semibold transition-opacity hover:opacity-80" style={{ color: T.primary }}>Log in</button>
+                        </p>
+                    </form>
+                </GlassCard>
+            </div>
+        </div>
     );
 };
 

@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import JobBoard from './pages/JobBoard';
+import ResumeAnalyzer from './pages/ResumeAnalyzer';
 import Footer from './components/Footer';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/jobs" element={<JobBoard />} />
+            <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
           </Routes>
           <Footer />
         </div>

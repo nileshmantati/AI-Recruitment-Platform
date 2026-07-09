@@ -1,4 +1,3 @@
-import React from 'react'
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -37,9 +36,11 @@ const Navigation = () => {
                     </span>
                 </div>
                 <div className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-                    <a href="#features" className="text-black! hover:text-primary! text-decoration-none">Features</a>
-                    <a href="#how" className="text-black hover:text-primary text-decoration-none">How it works</a>
-                    <a href="#faq" className="text-black hover:text-primary text-decoration-none">FAQ</a>
+                    <Link to="/" className="text-black! hover:text-primary! text-decoration-none">Home</Link>
+                    <Link to="/resume-analyzer" className="text-black! hover:text-primary! text-decoration-none">Resume Analyzer</Link>
+                    <Link to="/" className="text-black! hover:text-primary! text-decoration-none">Features</Link>
+                    <Link to="/" className="text-black hover:text-primary text-decoration-none">How it works</Link>
+                    <Link to="/" className="text-black hover:text-primary text-decoration-none">FAQ</Link>
                 </div>
                 <div className="flex items-center gap-4">
                     {auth.isAuthenticated ? (
@@ -53,7 +54,7 @@ const Navigation = () => {
                                     {auth.username}
                                 </span>
                             </div>
-                            <button onClick={handleLogout} className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                            <button onClick={handleLogout} className="rounded-lg! border border-red-500! px-4 py-2 text-sm! font-medium text-red-600 hover:bg-red-50 transition-colors transition-all">
                                 Logout
                             </button>
                         </>

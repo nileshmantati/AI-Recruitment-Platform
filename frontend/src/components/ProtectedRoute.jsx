@@ -3,11 +3,11 @@ import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
     const { auth } = useAuth();
-    
+
     if (!auth.isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
-    
+
     return children;
 };
 

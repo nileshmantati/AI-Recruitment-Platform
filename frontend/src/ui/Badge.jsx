@@ -1,4 +1,3 @@
-import React from 'react'
 import { T } from '../Js/theme.js'
 
 const Badge = ({ children, color = T.primary, bg = null }) => {

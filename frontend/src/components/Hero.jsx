@@ -1,4 +1,3 @@
-import React from 'react'
 import PrimaryButton from './PrimaryButton'
 import { ArrowRight, Sparkles, BrainCircuit, FileText, CheckCircle, Zap } from 'lucide-react';
 import { T } from '../Js/theme.js';

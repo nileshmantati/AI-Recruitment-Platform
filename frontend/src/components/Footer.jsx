@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { FaTwitter, FaLinkedin, FaGithub, FaArrowRight } from "react-icons/fa";
 import { T } from "../Js/theme";
 
@@ -22,7 +22,7 @@ const Footer = () => {
                             Revolutionizing hiring with AI-powered intelligence. Find the perfect fit, faster and smarter.
                         </p>
 
-                        {/* Modern Newsletter Input */}
+
                         <form className="flex w-full max-w-sm items-center rounded-xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-md p-1.5 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all shadow-inner">
                             <input
                                 type="email"
@@ -40,7 +40,7 @@ const Footer = () => {
                         </form>
                     </div>
 
-                    {/* Links Sections */}
+
                     {[
                         { title: "Product", links: ["Features", "AI Matching", "Pricing", "API"] },
                         { title: "Company", links: ["About Us", "Careers", "Blog", "Contact"] },
@@ -66,7 +66,7 @@ const Footer = () => {
                         © {new Date().getFullYear()} AI Recruiter. All rights reserved.
                     </p>
 
-                    {/* Floating Social Icons */}
+
                     <div className="flex gap-4">
                         {[FaTwitter, FaLinkedin, FaGithub].map((Icon, i) => (
                             <a

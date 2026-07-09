@@ -11,7 +11,7 @@ const Dashboard = () => {
     const { auth } = useAuth();
     const isRecruiter = auth.role === 'RECRUITER';
 
-    // ── Recruiter state ──
+
     const [jobs, setJobs] = useState([]);
     const [selectedJob, setSelectedJob] = useState(null);
     const [applicants, setApplicants] = useState([]);
@@ -20,14 +20,14 @@ const Dashboard = () => {
     const [interviewQuestions, setInterviewQuestions] = useState({});
     const [statusLoading, setStatusLoading] = useState({});
 
-    // ── Candidate state ──
+
     const [myApplications, setMyApplications] = useState([]);
 
-    // ── Shared state ──
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // ── Interview Scheduling ──
+
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [selectedAppForSchedule, setSelectedAppForSchedule] = useState(null);
 
@@ -36,7 +36,7 @@ const Dashboard = () => {
         setShowScheduleModal(true);
     };
 
-    // ── Recruiter: Fetch only their own jobs ──
+
     const fetchJobs = async () => {
         setLoading(true);
         try {
@@ -55,7 +55,7 @@ const Dashboard = () => {
         }
     };
 
-    // ── Candidate: Fetch their actual applications ──
+
     const fetchMyApplications = async () => {
         setLoading(true);
         try {
@@ -70,6 +70,7 @@ const Dashboard = () => {
         }
     };
 
+    /* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
     useEffect(() => {
         if (isRecruiter) {
             fetchJobs();
@@ -77,6 +78,7 @@ const Dashboard = () => {
             fetchMyApplications();
         }
     }, [isRecruiter]);
+    /* eslint-enable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 
     async function handleJobClick(job) {
         setSelectedJob(job);
@@ -104,7 +106,7 @@ const Dashboard = () => {
         }
     };
 
-    // ── Recruiter: Update application status (Shortlist/Reject) ──
+
     const handleStatusUpdate = async (applicationId, newStatus) => {
         setStatusLoading(prev => ({ ...prev, [applicationId]: newStatus }));
         try {
@@ -145,7 +147,7 @@ const Dashboard = () => {
         return <Container className="text-center mt-5"><Spinner animation="border" variant="primary" /></Container>;
     }
 
-    // ── Candidate Dashboard ──
+
     if (!isRecruiter) {
         return (
             <Container className="py-4">
@@ -231,7 +233,7 @@ const Dashboard = () => {
         );
     }
 
-    // ── Recruiter Dashboard ──
+
     return (
         <Container fluid className="px-4 py-3">
 

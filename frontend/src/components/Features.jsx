@@ -70,7 +70,7 @@ const Features = () => {
                 <p className="mt-4 text-slate-600">One workspace for sourcing, screening, and closing—powered by AI at every step.</p>
             </div>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((f, i) => (
+                {items.map((f) => (
                     <FeatureCard key={f.title} f={f} />
                 ))}
             </div>

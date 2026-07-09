@@ -1,4 +1,3 @@
-import React from 'react'
 import { useState } from 'react';
 import { T } from '../Js/theme.js';
 import Badge from '../ui/Badge.jsx'
