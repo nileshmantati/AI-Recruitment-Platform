@@ -22,10 +22,9 @@ const CandidateSidebarItems = [
     { icon: Sparkles, label: "Resume AI" },
 ];
 
-const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive }) => {
+const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive, role }) => {
     const navigate = useNavigate();
-    const { auth, logout } = useAuth();
-    const isRecruiter = auth.role === 'RECRUITER';
+    const { logout } = useAuth();
 
     return (
         <aside className={`flex flex-col border-r border-slate-100 bg-white transition-all duration-300 ${collapsed ? "w-20" : "w-64"}`}>
@@ -39,7 +38,7 @@ const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive }) => {
             </div>
 
             <nav className="flex-1 overflow-y-auto px-3 py-4">
-                {isRecruiter ? RecruiterSidebarItems.map((item) => (
+                {role === 'recruiter' ? RecruiterSidebarItems.map((item) => (
                     <button
                         key={item.label}
                         onClick={() => setActive(item.label)}
