@@ -108,6 +108,16 @@ class MyApplicationsListView(generics.ListAPIView):
         ).order_by('-applied_at')
 
 
+class LatestApplicationsView(generics.ListAPIView):
+    """
+    GET: Recruiter views latest applicants.
+    """
+    serializer_class = ApplicationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Application.objects.filter(job__recruiter=self.request.user).order_by("-applied_at")[:5]
+
 class JobApplicantsListView(generics.ListAPIView):
     """
     GET: Recruiter views all applicants for a specific job.
@@ -115,7 +125,7 @@ class JobApplicantsListView(generics.ListAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
+    def get_queryset(self): 
         job_id = self.kwargs['job_id']
         # 1. Filter applications for this specific job
         # 2. Ensure the logged-in recruiter actually posted this job

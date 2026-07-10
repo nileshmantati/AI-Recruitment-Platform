@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal, Button, Form, Spinner, Alert } from 'react-bootstrap';
-import { scheduleInterview } from '../services/api';
+import { scheduleInterview } from '../../services/api';
 
 const ScheduleInterviewModal = ({ show, handleClose, application }) => {
     const [datetime, setDatetime] = useState('');

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Spinner, Alert, Button } from 'react-bootstrap';
 import api from '../services/api';
-import ApplyJobModal from '../components/ApplyJobModal';
+import ApplyJobModal from '../components/Modals/ApplyJobModal';
 
 const JobBoard = () => {
     const [jobs, setJobs] = useState([]);
@@ -32,73 +32,105 @@ const JobBoard = () => {
         setShowModal(true);
     };
 
-    if (loading) return <Container className="text-center mt-5"><Spinner animation="border" variant="primary" /></Container>;
+    if (loading) {
+        return (
+            <div className="flex h-96 items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+            </div>
+        );
+    }
 
     return (
-        <Container className="py-4">
-            <div className="text-center mb-5">
-                <h2 className="fw-bold text-dark">Find Your Next Great Role</h2>
-                <p className="text-muted">Browse open positions and let our AI match you to the perfect fit.</p>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            {/* Heading */}
+            <div className="mb-12 text-center">
+                <h2 className="text-3xl font-bold text-gray-900">
+                    Find Your Next Great Role
+                </h2>
+                <p className="mt-3 text-gray-500">
+                    Browse open positions and let our AI match you to the perfect fit.
+                </p>
             </div>
 
-            {error && <Alert variant="danger" className="rounded-3">{error}</Alert>}
+            {/* Error */}
+            {error && (
+                <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-600">
+                    {error}
+                </div>
+            )}
 
-            <Row>
+            {/* Job Cards */}
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 {jobs.map((job) => (
-                    <Col lg={4} md={6} key={job.id} className="mb-4">
-                        <Card className="h-100 shadow-sm border-0 rounded-4 transition-hover">
-                            <Card.Body className="p-4 d-flex flex-column">
-                                <div className="mb-3">
-                                    <Badge bg="primary" bg-opacity="10" className="text-primary rounded-pill px-3 py-2 border border-primary fw-normal">
-                                        {job.salary || 'Salary Undisclosed'}
-                                    </Badge>
-                                </div>
+                    <div
+                        key={job.id}
+                        className="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                    >
+                        {/* Salary */}
+                        <div className="mb-4">
+                            <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600">
+                                {job.salary || "Salary Undisclosed"}
+                            </span>
+                        </div>
 
-                                <Card.Title className="fw-bold fs-5 mb-1">{job.title}</Card.Title>
-                                <Card.Text className="text-muted small mb-3">
-                                    <i className="bi bi-building me-1"></i> Posted by {job.recruiter_name}
-                                </Card.Text>
+                        {/* Job Title */}
+                        <h3 className="text-xl font-semibold text-gray-900">
+                            {job.title}
+                        </h3>
 
-                                <Card.Text className="text-secondary small flex-grow-1">
-                                    {/* Truncate long descriptions */}
-                                    {job.description.length > 120 ? `${job.description.substring(0, 120)}...` : job.description}
-                                </Card.Text>
+                        {/* Recruiter */}
+                        <p className="mt-2 text-sm text-gray-500">
+                            <i className="bi bi-building mr-1"></i>
+                            Posted by {job.recruiter_name}
+                        </p>
 
-                                <div className="mt-3 mb-4 d-flex flex-wrap gap-1">
-                                    {job.required_skills?.map((skill, index) => (
-                                        <Badge bg="light" text="dark" className="border fw-normal" key={index}>
-                                            {skill}
-                                        </Badge>
-                                    ))}
-                                </div>
+                        {/* Description */}
+                        <p className="mt-4 flex-grow text-sm leading-6 text-gray-600">
+                            {job.description.length > 120
+                                ? `${job.description.substring(0, 120)}...`
+                                : job.description}
+                        </p>
 
-                                <Button
-                                    variant="outline-primary"
-                                    className="w-100 rounded-pill mt-auto fw-semibold"
-                                    onClick={() => handleApplyClick(job)}
+                        {/* Skills */}
+                        <div className="mt-6 mb-6 flex flex-wrap gap-2">
+                            {job.required_skills?.map((skill, index) => (
+                                <span
+                                    key={index}
+                                    className="rounded-full border border-gray-300 bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700"
                                 >
-                                    Apply Now
-                                </Button>
-                            </Card.Body>
-                        </Card>
-                    </Col>
+                                    {skill}
+                                </span>
+                            ))}
+                        </div>
+
+                        {/* Apply Button */}
+                        <button
+                            onClick={() => handleApplyClick(job)}
+                            className="mt-auto w-full rounded-xl border border-blue-600 py-3 font-semibold text-blue-600 transition-all duration-300 hover:bg-blue-600 hover:text-white"
+                        >
+                            Apply Now
+                        </button>
+                    </div>
                 ))}
+            </div>
 
-                {jobs.length === 0 && !error && (
-                    <Col className="text-center py-5">
-                        <i className="bi bi-search text-muted display-1"></i>
-                        <p className="text-muted mt-3">No jobs are currently available. Check back soon!</p>
-                    </Col>
-                )}
-            </Row>
+            {/* Empty State */}
+            {jobs.length === 0 && !error && (
+                <div className="py-20 text-center">
+                    <i className="bi bi-search text-6xl text-gray-400"></i>
+                    <p className="mt-4 text-gray-500">
+                        No jobs are currently available. Check back soon!
+                    </p>
+                </div>
+            )}
 
-            {/* Application Modal */}
+            {/* Modal */}
             <ApplyJobModal
                 show={showModal}
                 handleClose={() => setShowModal(false)}
                 job={selectedJob}
             />
-        </Container>
+        </div>
     );
 };
 

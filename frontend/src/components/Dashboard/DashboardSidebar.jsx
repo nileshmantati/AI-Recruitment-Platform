@@ -1,7 +1,7 @@
 import { Sparkles, LogOut, ChevronRight, ChevronLeft, LayoutDashboard, Briefcase, Users, Settings, FileText, BarChart3, Calendar, MessageSquare, Bell } from "lucide-react";
-import { T } from "../Js/theme.js";
+import { T } from "../../Js/theme.js";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 const RecruiterSidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard" },

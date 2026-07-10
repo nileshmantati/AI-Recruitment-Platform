@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal, Button, Form, Spinner, Alert } from 'react-bootstrap';
-import api from '../services/api';
+import api from '../../services/api';
 
 const ApplyJobModal = ({ show, handleClose, job }) => {
     const [resumeFile, setResumeFile] = useState(null);

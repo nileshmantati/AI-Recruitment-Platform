@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal, Button, Form, FloatingLabel, Spinner } from 'react-bootstrap';
-import api from '../services/api';
+import api from '../../services/api';
 
 const PostJobModal = ({ show, handleClose, onJobPosted }) => {
     const [formData, setFormData] = useState({

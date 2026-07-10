@@ -1,9 +1,11 @@
-import { T } from "../Js/theme.js";
-import { Search } from "lucide-react";
-import { useAuth } from '../context/AuthContext';
+import { T } from "../../Js/theme.js";
+import { Search, PlusCircle } from "lucide-react";
+import { useAuth } from '../../context/AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardTopbar = ({ role }) => {
     const { auth } = useAuth();
+    const navigate = useNavigate();
     const getInitials = (name = "") => {
         const words = name.trim().split(/\s+/);
 
@@ -25,6 +27,12 @@ const DashboardTopbar = ({ role }) => {
                     {darkMode ? <Sun size={17} /> : <Moon size={17} />}
                 </button> */}
                 <div className="flex items-center gap-2 pl-2">
+                    <button
+                        className="mb-1 me-3 flex items-center border border-slate-400 hover:border-slate-400! text-white gap-3 rounded-xl! px-4 py-2.5 text-sm font-medium transition-all shadow-md"
+                        style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
+                        onClick={() => navigate("/")}
+                    ><span>Home</span>
+                    </button>
                     <div className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: T.primary }}>{getInitials(auth.username)}</div>
                     <div className="hidden sm:block">
                         <div className="text-sm font-semibold text-slate-800 capitalize">{auth.username}</div>
@@ -32,7 +40,7 @@ const DashboardTopbar = ({ role }) => {
                     </div>
                 </div>
             </div>
-        </header>
+        </header >
     )
 }
 
