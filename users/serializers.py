@@ -8,6 +8,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'role', 'phone')
 
+class CandidateProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CandidateProfile
+        fields = ('id', 'skills', 'experience', 'portfolio_url', 'github_url', 'bio')
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True) # Ensures password isn't returned in JSON
 

@@ -3,8 +3,6 @@ import { T } from '../Js/theme';
 import { glassStyle, aiBorderGlow, ScoreRing, InsightBar, SkillPill } from '../ui/ResumeAnalyzerExternal';
 import PrimaryButton from '../components/PrimaryButton';
 
-
-
 const ResumeAnalyzer = () => {
   const [file, setFile] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);

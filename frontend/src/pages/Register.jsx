@@ -19,7 +19,6 @@ const Register = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    // Fix #6: Redirect if already logged in
     if (auth.isAuthenticated) {
         return <Navigate to="/dashboard" replace />;
     }
@@ -31,19 +30,18 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Send data to Django backend
+
             await api.post('users/register/', formData);
-            // If successful, redirect to login page
+
             navigate('/login');
         } catch (err) {
             console.error("Registration error:", err);
 
-            // If the backend sent error details, format them for display
             if (err.response && err.response.data) {
                 const backendErrors = Object.values(err.response.data).join(' | ');
                 setError(`Registration failed: ${backendErrors}`);
             } else {
-                // Network error or server is unreachable
+
                 setError('Registration failed. Network error or server is down.');
             }
         }

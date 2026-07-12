@@ -36,7 +36,7 @@ const Hero = () => {
                 </p>
                 <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
                     <PrimaryButton className="px-5! py-3! text-base! rounded-xl!" onClick={() => navigate("/login")}>
-                        Start Hiring <ArrowRight size={18} />
+                        Find Jobs <ArrowRight size={18} />
                     </PrimaryButton>
                 </div>
             </div>

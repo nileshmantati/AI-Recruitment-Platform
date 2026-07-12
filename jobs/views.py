@@ -4,6 +4,7 @@ from django.shortcuts import render
 # jobs/views.py
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
+from django.db.models import Count
 from .models import Job
 from .serializers import JobSerializer
 
@@ -12,7 +13,7 @@ class JobListCreateView(generics.ListCreateAPIView):
     GET: Lists all active jobs (Available to anyone, even unauthenticated users)
     POST: Creates a new job (Requires JWT Token + RECRUITER role)
     """
-    queryset = Job.objects.filter(is_active=True).order_by('-created_at')
+    queryset = Job.objects.filter(is_active=True).annotate(applicants=Count('applications')).order_by('-created_at')
     serializer_class = JobSerializer
     # Allow read-only for anyone, but require auth for POST
     permission_classes = [permissions.IsAuthenticatedOrReadOnly] 
@@ -31,7 +32,7 @@ class JobDetailView(generics.RetrieveUpdateDestroyAPIView):
     PUT/PATCH: Update job (Requires ownership)
     DELETE: Remove job (Requires ownership)
     """
-    queryset = Job.objects.all()
+    queryset = Job.objects.annotate(applicants=Count('applications'))
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -59,4 +60,4 @@ class MyJobsListView(generics.ListAPIView):
         return Job.objects.filter(
             recruiter=self.request.user,
             is_active=True
-        ).order_by('-created_at')
+        ).annotate(applicants=Count('applications')).order_by('-created_at')

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../services/api';
-import { Briefcase, Users, FileText } from 'lucide-react';
+import { Briefcase, Users, FileText, CheckCircle2 } from 'lucide-react';
 import { T } from '../../Js/theme.js';
+import { KpiCard } from '../../ui/DashboardUI.jsx';
 
 const AnalyticsOverview = () => {
     const [stats, setStats] = useState(null);
@@ -21,7 +22,7 @@ const AnalyticsOverview = () => {
             }
         };
         fetchAnalytics();
-    }, [stats]);
+    }, []);
 
     useEffect(() => {
         retrivelatesetApplications();
@@ -64,26 +65,13 @@ const AnalyticsOverview = () => {
 
     if (!stats) return null;
 
-    function KpiCard({ icon: Icon, label, value, delta, color }) {
-        return (
-            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div className="mb-4 flex items-center justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: `${color}18`, color }}>
-                        <Icon size={18} />
-                    </div>
-                </div>
-                <div className="text-2xl font-extrabold text-slate-900">{value}</div>
-                <div className="mt-1 text-xs font-medium text-slate-500">{label}</div>
-            </div>
-        );
-    }
-
     return (
         <>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                <KpiCard icon={Briefcase} label="Total Jobs" value={stats.total_jobs} color={T.primary} />
-                <KpiCard icon={FileText} label="Applications" value={stats.total_applications} color={T.secondary} />
-                <KpiCard icon={Users} label="Shortlisted" value={stats.shortlisted} color={T.accent} />
+                <KpiCard icon={Briefcase} label="Total Jobs" value={stats.total_jobs} color={T.primary} gradient />
+                <KpiCard icon={Users} label="Total Applications" value={stats.total_applications} color={T.secondary} gradient />
+                <KpiCard icon={CheckCircle2} label="Active Jobs" value={stats.is_active} color={T.success} />
+                <KpiCard icon={FileText} label="Shortlisted" value={stats.shortlisted} color={T.warning} />
                 {/* <KpiCard icon={Target} label="AI Match Rate" value={"92%"} color={T.warning} /> */}
                 {/* <KpiCard icon={Award} label="Hiring Success" value={"87%"} color={T.success} /> */}
             </div>

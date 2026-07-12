@@ -1,16 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 import DashboardSidebar from '../components/Dashboard/DashboardSidebar.jsx';
 import DashboardTopbar from '../components/Dashboard/DashboardTopbar.jsx';
 import RecruiterDashboard from '../components/Dashboard/RecruiterDashboard.jsx';
 import CandidateDashboard from '../components/Dashboard/CandidateDashboard.jsx';
+import RecruiterJobsPage from '../components/Dashboard/RecruiterJobsPage.jsx';
+import RecruiterApplicationsPage from '../components/Dashboard/RecruiterApplicationsPage.jsx';
+import RecruiterCandidatesPage from '../components/Dashboard/RecruiterCandidatesPage.jsx';
 import { T } from "../Js/theme.js";
 
 const Dashboard = () => {
     const { auth } = useAuth();
+    const location = useLocation();
+    const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
-    const [active, setActive] = useState("Dashboard");
-    const [role, setRole] = useState(auth.role.toLowerCase());
+    const [role] = useState(auth.role.toLowerCase());
+
+    const path = location.pathname;
+    let active = "Dashboard";
+    if (path.includes('/jobs')) active = "Jobs";
+    else if (path.includes('/applications')) active = "Applications";
+    else if (path.includes('/candidates')) active = "Candidates";
+    else if (path.includes('/resume-ai')) active = "Resume AI";
+    else if (path.includes('/analytics')) active = "Analytics";
+    else if (path.includes('/interview')) active = "Interview";
+    else if (path.includes('/messages')) active = "Messages";
+    else if (path.includes('/notifications')) active = "Notifications";
+    else if (path.includes('/settings')) active = "Settings";
+
+    const handleSetActive = (tab) => {
+        if (tab === "Dashboard") navigate('/dashboard');
+        else if (tab === "Resume AI") navigate('/dashboard/resume-ai');
+        else navigate(`/dashboard/${tab.toLowerCase().replace(" ", "-")}`);
+    };
 
     const getScoreColor = (score) => {
         if (score >= 85)
@@ -64,15 +87,30 @@ const Dashboard = () => {
         );
     };
 
+    const renderContent = () => {
+        if (active === "Jobs" && role === 'recruiter') {
+            return <RecruiterJobsPage />;
+        }
+        if (active === "Applications" && role === 'recruiter') {
+            return <RecruiterApplicationsPage />;
+        }
+        if (active === "Candidates" && role === 'recruiter') {
+            return <RecruiterCandidatesPage />;
+        }
+
+        if (role !== 'recruiter') {
+            return <CandidateDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;
+        }
+        return <RecruiterDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;
+    };
+
     return (
         <section className="flex h-screen w-full overflow-hidden" style={{ background: T.bg }}>
-            <DashboardSidebar collapsed={collapsed} setCollapsed={setCollapsed} active={active} setActive={setActive} role={role} />
+            <DashboardSidebar collapsed={collapsed} setCollapsed={setCollapsed} active={active} setActive={handleSetActive} role={role} />
 
             <div className="flex-1 overflow-y-auto">
                 <DashboardTopbar role={role} />
-                {role != 'recruiter' ?
-                    <CandidateDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />
-                    : <RecruiterDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />}
+                {renderContent()}
             </div>
         </section >
     );

@@ -7,10 +7,10 @@ import Home from './pages/Home';
 import Navigation from './components/Navigation';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import JobBoard from './pages/JobBoard';
 import ResumeAnalyzer from './pages/ResumeAnalyzer';
 import Footer from './components/Footer';
+import JobsPage from './pages/JobsPage';
+import Dashboard from './pages/Dashboard';
 
 const MainLayout = () => (
   <>
@@ -30,10 +30,10 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/jobs" element={<JobBoard />} />
+              <Route path="/findjobs" element={<JobsPage />} />
               <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
             </Route>
-            <Route path="/dashboard" element={
+            <Route path="/dashboard/*" element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>

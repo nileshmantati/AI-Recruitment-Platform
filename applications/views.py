@@ -118,6 +118,16 @@ class LatestApplicationsView(generics.ListAPIView):
     def get_queryset(self):
         return Application.objects.filter(job__recruiter=self.request.user).order_by("-applied_at")[:5]
 
+class AllRecruiterApplicationsView(generics.ListAPIView):
+    """
+    GET: Recruiter views all applicants across all their jobs.
+    """
+    serializer_class = ApplicationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Application.objects.filter(job__recruiter=self.request.user).order_by("-applied_at")
+
 class JobApplicantsListView(generics.ListAPIView):
     """
     GET: Recruiter views all applicants for a specific job.
