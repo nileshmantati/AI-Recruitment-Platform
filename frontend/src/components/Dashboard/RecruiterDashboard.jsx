@@ -126,13 +126,6 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
                             </h2>
                             <p className="text-slate-500 font-medium">Here's what's happening with your job postings today.</p>
                         </div>
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="group flex items-center gap-2 rounded-xl! px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
-                            style={{ backgroundColor: T.accent }}>
-                            <Plus size={18} className="transition-transform duration-300 group-hover:rotate-90" />
-                            Post New Job
-                        </button>
                     </div>
 
                     {jobs.length ? <AnalyticsOverview /> : null}

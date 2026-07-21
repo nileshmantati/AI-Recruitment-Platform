@@ -77,4 +77,18 @@ export const scheduleInterview = async (applicationId, scheduleData) => {
         throw error.response?.data || error.message;
     }
 };
+/**
+ * Uploads a resume file to the AI analysis endpoint.
+ * @param {File} file - The resume file (PDF / DOCX / TXT)
+ * @returns {Promise<Object>} AI analysis result
+ */
+export const analyzeResume = async (file) => {
+    const formData = new FormData();
+    formData.append('resume', file);
+    const response = await api.post('ai/analyze-resume/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};
+
 export default api;

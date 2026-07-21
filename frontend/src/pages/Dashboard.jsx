@@ -8,6 +8,7 @@ import CandidateDashboard from '../components/Dashboard/CandidateDashboard.jsx';
 import RecruiterJobsPage from '../components/Dashboard/RecruiterJobsPage.jsx';
 import RecruiterApplicationsPage from '../components/Dashboard/RecruiterApplicationsPage.jsx';
 import RecruiterCandidatesPage from '../components/Dashboard/RecruiterCandidatesPage.jsx';
+import RecruiterResumeAIPage from '../components/Dashboard/RecruiterResumeAIPage.jsx';
 import { T } from "../Js/theme.js";
 
 const Dashboard = () => {
@@ -96,6 +97,9 @@ const Dashboard = () => {
         }
         if (active === "Candidates" && role === 'recruiter') {
             return <RecruiterCandidatesPage />;
+        }
+        if (active === "Resume AI" && role === 'recruiter') {
+            return <RecruiterResumeAIPage />;
         }
 
         if (role !== 'recruiter') {
