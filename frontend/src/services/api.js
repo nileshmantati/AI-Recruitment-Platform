@@ -1,8 +1,14 @@
 // frontend/src/services/api.js
 import axios from 'axios';
 
+// Read from .env — must be prefixed VITE_ for Vite to expose it to client code
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+if (!API_BASE_URL) {
+    throw new Error('[api.js] VITE_API_BASE_URL is not set. Add it to frontend/.env');
+}
+
 const api = axios.create({
-    baseURL: 'http://localhost:8000/api/',
+    baseURL: API_BASE_URL,
 });
 
 // Intercept requests to add the Authorization header
@@ -33,7 +39,7 @@ api.interceptors.response.use(
             if (refreshToken) {
                 try {
                     // Use a plain axios call to avoid interceptor loops
-                    const res = await axios.post('http://localhost:8000/api/users/token/refresh/', {
+                    const res = await axios.post(`${API_BASE_URL}users/token/refresh/`, {
                         refresh: refreshToken,
                     });
 
