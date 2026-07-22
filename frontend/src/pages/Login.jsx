@@ -15,9 +15,9 @@ const Login = () => {
     const navigate = useNavigate();
     const { auth, login } = useAuth();
 
-    if (auth.isAuthenticated) {
-        return <Navigate to="/dashboard" replace />;
-    }
+    // if (auth.isAuthenticated) {
+    //     return <Navigate to="/dashboard" replace />;
+    // }
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,7 +36,7 @@ const Login = () => {
                 response.data.username,
                 response.data.role
             );
-            navigate('/dashboard');
+            navigate('/');
         } catch (err) {
             if (err.response && err.response.data && err.response.data.detail) {
                 setError(err.response.data.detail);

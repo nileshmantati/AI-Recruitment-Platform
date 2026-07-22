@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      # Expose Django port from the shared network namespace to the host
+      - "8000:8000"
+      # Expose Redis port (optional, useful for debugging)
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    # Share the redis container's network namespace so 'localhost:6379' works without code changes
+    network_mode: "service:redis"
+    volumes:
+      # Mount the backend directory to allow hot-reloading and accessing the sqlite db
+      - ./backend:/app
+    depends_on:
+      - redis
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A backend worker -l info
+    # Share the redis container's network namespace so 'localhost:6379' works without code changes
+    network_mode: "service:redis"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount the frontend directory to allow hot-reloading
+      - ./frontend:/app
+      # Exclude node_modules from being overwritten by the host directory
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api/
