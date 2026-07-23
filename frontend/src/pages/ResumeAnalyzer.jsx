@@ -4,8 +4,9 @@ import { ScoreRing, InsightBar, SkillPill } from '../ui/ResumeAnalyzerExternal';
 import PrimaryButton from '../components/PrimaryButton';
 import { analyzeResume } from '../services/api';
 import UploadZone from '../components/ResumeAnalyzer/UploadZone';
-import PageHeader, { AnalyzingSpinner, ErrorBanner } from '../components/ResumeAnalyzer/PageHeader';
+import PageHeader, { AnalyzingSpinner } from '../components/ResumeAnalyzer/PageHeader';
 import { glass, glowBorder } from '../components/ResumeAnalyzer/resumeStyles';
+import toast from 'react-hot-toast';
 
 /* ── sessionStorage key ── */
 const SS_KEY = 'ra_last_result';
@@ -19,7 +20,6 @@ export default function ResumeAnalyzer() {
   const [done, setDone] = useState(!!_saved);
   const [result, setResult] = useState(_saved?.result ?? null);
   const [savedFileName, setSavedFileName] = useState(_saved?.fileName ?? null);
-  const [error, setError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [txtContent, setTxtContent] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -41,7 +41,7 @@ export default function ResumeAnalyzer() {
   const prevent = useCallback(e => { e.preventDefault(); e.stopPropagation(); }, []);
 
   const handleFile = async f => {
-    setFile(f); setAnalyzing(true); setDone(false); setError(null); setResult(null);
+    setFile(f); setAnalyzing(true); setDone(false); setResult(null);
     try {
       const data = await analyzeResume(f);
       setResult(data); setDone(true);
@@ -49,13 +49,13 @@ export default function ResumeAnalyzer() {
       // persist so page refresh restores the results panel
       sessionStorage.setItem(SS_KEY, JSON.stringify({ result: data, fileName: f.name }));
     } catch (err) {
-      setError(err?.error || err?.detail || (typeof err === 'string' ? err : 'Analysis failed. Please try again.'));
+      toast.error(err?.error || err?.detail || (typeof err === 'string' ? err : 'Analysis failed. Please try again.'));
     } finally { setAnalyzing(false); }
   };
 
   const handleReset = () => {
     setFile(null); setDone(false); setAnalyzing(false);
-    setResult(null); setSavedFileName(null); setError(null); setPreviewUrl(null); setTxtContent(null);
+    setResult(null); setSavedFileName(null); setPreviewUrl(null); setTxtContent(null);
     sessionStorage.removeItem(SS_KEY); // clear persisted result
   };
 
@@ -165,11 +165,8 @@ export default function ResumeAnalyzer() {
         {/* ── Page header ── */}
         <PageHeader />
 
-        {/* ── Error banner ── */}
-        {error && <ErrorBanner error={error} />}
-
         {/* ── Upload zone ── */}
-        {!done && !analyzing && !error && (
+        {!done && !analyzing && (
           <UploadZone onFile={handleFile} />
         )}
 

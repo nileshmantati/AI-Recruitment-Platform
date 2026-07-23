@@ -5,6 +5,7 @@ import {
     Search, Filter, ChevronDown, Eye, FileText, User
 } from 'lucide-react';
 import ApplicationDetails from './ApplicationDetails.jsx';
+import toast from 'react-hot-toast';
 
 const STATUS_OPTIONS = ['All', 'PENDING', 'EVALUATED', 'SHORTLISTED', 'REJECTED', 'INTERVIEW_SCHEDULED'];
 
@@ -40,6 +41,7 @@ const RecruiterApplicationsPage = () => {
             setApplications(res.data);
         } catch (err) {
             console.error('Failed to load applications', err);
+            toast.error('Failed to load applications.');
         } finally {
             setLoading(false);
         }
@@ -53,10 +55,10 @@ const RecruiterApplicationsPage = () => {
             if (selectedApp?.id === appId) {
                 setSelectedApp(prev => ({ ...prev, status: res.data.status }));
             }
-            alert(`Application marked as ${newStatus}.`);
+            toast.success(`Application marked as ${newStatus}.`);
         } catch (err) {
             console.error('Failed to update status', err);
-            alert('Failed to update status.');
+            toast.error('Failed to update status.');
         } finally {
             setUpdatingStatus(false);
         }

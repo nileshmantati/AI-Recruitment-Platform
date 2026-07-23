@@ -1,33 +1,43 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { GlassCard, TextField } from '../ui/AuthUI';
 import { Building2, GraduationCap, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import PrimaryButton from '../components/PrimaryButton';
 import { T } from '../Js/theme';
+import toast from 'react-hot-toast';
+
+const schema = yup.object().shape({
+    username: yup.string().required("Username is required"),
+    password: yup.string().required("Password is required")
+});
 
 const Login = () => {
-    const [formData, setFormData] = useState({ username: '', password: '' });
-    const [error, setError] = useState('');
     const [showPass, setShowPass] = useState(false);
     const [role, setRole] = useState("recruiter");
     const navigate = useNavigate();
     const { auth, login } = useAuth();
 
+    const { register, handleSubmit, formState: { errors } } = useForm({
+        resolver: yupResolver(schema),
+        defaultValues: {
+            username: '',
+            password: ''
+        }
+    });
+
     // if (auth.isAuthenticated) {
     //     return <Navigate to="/dashboard" replace />;
     // }
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const onSubmit = async (data) => {
         try {
             const response = await api.post('users/login/', {
-                ...formData,
+                ...data,
                 role: role.toUpperCase()
             });
             login(
@@ -39,9 +49,9 @@ const Login = () => {
             navigate('/');
         } catch (err) {
             if (err.response && err.response.data && err.response.data.detail) {
-                setError(err.response.data.detail);
+                toast.error(err.response.data.detail);
             } else {
-                setError('Invalid username or password.');
+                toast.error('Invalid username or password.');
             }
             console.error(err);
         }
@@ -55,14 +65,7 @@ const Login = () => {
                     <h1 className="mb-2 text-3xl text-center font-extrabold text-slate-900">Welcome Back</h1>
                     <p className="mb-6 text-sm text-center text-slate-500">Enter your details to continue.</p>
 
-                    {error && (
-                        <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600 border border-red-100">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
                             {[{ id: "recruiter", label: "Recruiter", icon: Building2 }, { id: "candidate", label: "Candidate", icon: GraduationCap }].map((r) => (
                                 <button
@@ -79,21 +82,19 @@ const Login = () => {
                         <TextField
                             icon={Mail}
                             label="Username"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
                             placeholder="you@company.com"
+                            error={errors.username?.message}
+                            {...register("username")}
                         />
                         <TextField
                             icon={Lock}
                             label="Password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
                             type={showPass ? "text" : "password"}
                             placeholder="••••••••"
                             rightIcon={showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                             onRightClick={() => setShowPass(!showPass)}
+                            error={errors.password?.message}
+                            {...register("password")}
                         />
                         <div className="my-5! flex items-center justify-between text-sm">
                             <label className="flex! items-center justify-center gap-2 text-slate-600">
@@ -103,7 +104,7 @@ const Login = () => {
                             <a href="#" className="font-semibold text-decoration-none" style={{ color: T.primary }}>Forgot password?</a>
                         </div>
 
-                        <PrimaryButton type="submit" className="w-full! rounded-2xl! py-2.5!" >Log in</PrimaryButton>
+                        <PrimaryButton type="submit" className="w-full! rounded-2xl! py-2.5! hover:scale-95 transition-all duration-300" >Log in</PrimaryButton>
 
                         {/* <div className="my-6 flex items-center gap-3">
                             <div className="h-px flex-1 bg-slate-200" /><span className="text-xs font-medium text-slate-400">OR</span><div className="h-px flex-1 bg-slate-200" />

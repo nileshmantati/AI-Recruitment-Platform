@@ -5,6 +5,7 @@ import {
     Briefcase, Search, Filter, Clock, Users, IndianRupee, ChevronDown
 } from 'lucide-react';
 import ApplyJobModal from '../components/Modals/ApplyJobModal.jsx';
+import toast from 'react-hot-toast';
 
 const JOB_TYPES = ['All', 'Full-time', 'Part-time', 'Contract', 'Remote', 'Internship'];
 const SORT_OPTIONS = ['Newest First', 'Most Applicants', 'Salary (High)', 'Salary (Low)'];
@@ -23,7 +24,6 @@ const getTimeAgo = (date) => {
 const JobsPage = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error] = useState('');
 
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('All');
@@ -41,6 +41,7 @@ const JobsPage = () => {
             setJobs(response.data);
         } catch (err) {
             console.error('Failed to load jobs', err);
+            toast.error('Failed to load jobs.');
         } finally {
             setLoading(false);
         }
@@ -84,32 +85,36 @@ const JobsPage = () => {
 
         return (
             <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-slate-200">
-                {/* Gradient accent top */}
-                <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${T.primary}, ${T.accent})` }} />
-
+                {/* Decorative Background Blob */}
+                <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-400/20 to-purple-400/20 blur-3xl transition-transform duration-700 group-hover:scale-150" />
                 <div className="flex flex-1 flex-col p-4">
                     {/* Header */}
-                    <div className="mb-4 flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-md"
-                                style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
-                                <Briefcase size={18} />
-                            </div>
-                            <div className="min-w-0">
-                                <h3 className="truncate text-base font-bold capitalize text-slate-900 group-hover:text-indigo-600 transition-colors">
-                                    {job.title}
-                                </h3>
-                                {/* Recruiter */}
-                                <p className="mt-2 text-sm text-gray-500">
-                                    <i className="bi bi-building mr-1"></i>
-                                    Posted by {job.recruiter_name}
-                                </p>
-                                <p className="flex items-center gap-1 text-xs text-slate-400">
-                                    <Clock size={12} /> Posted {getTimeAgo(job.created_at)}
-                                </p>
-                            </div>
+                    <div className="mb-5 flex items-center gap-4">
+                        {/* Icon */}
+                        <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-xl text-white shadow-md transition-transform duration-300 group-hover:rotate-3 group-hover:scale-110"
+                            style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
+                            <Briefcase size={22} />
                         </div>
 
+                        {/* Title & Recruiter */}
+                        <div className="flex min-w-0 flex-1 flex-col justify-center">
+                            <div className="flex items-start justify-between gap-3">
+                                <h3 className="truncate text-base font-bold capitalize text-slate-900 transition-colors group-hover:text-indigo-600">
+                                    {job.title}
+                                </h3>
+                                {/* Time Badge */}
+                                <div className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50 px-2 py-1 text-[11px] font-bold text-slate-600">
+                                    <Clock size={12} className="text-slate-400" />
+                                    {getTimeAgo(job.created_at)}
+                                </div>
+                            </div>
+
+                            {/* Recruiter */}
+                            <p className="mb-1 text-sm text-gray-500">
+                                <i className="bi bi-building mr-1"></i>
+                                Posted by {job.recruiter_name}
+                            </p>
+                        </div>
                     </div>
 
                     {/* Description */}
@@ -141,14 +146,13 @@ const JobsPage = () => {
                     {/* Footer meta */}
                     <div className="flex items-center justify-between border-t border-slate-100 pt-4">
                         <div className="flex items-center gap-4">
-                            <span className="flex items-center gap-1 text-xs font-medium text-slate-500">
-                                <IndianRupee size={13} className="text-green-500" />
-                                {job.salary || 'N/A'}
+                            <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                                <IndianRupee size={13} /> {job.salary || 'N/A'}
                             </span>
-                            <span className="flex items-center gap-1 text-xs font-medium text-slate-500">
+                            <div className="flex items-center gap-1 text-xs font-bold text-slate-700 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
                                 <Users size={13} className="text-indigo-500" />
                                 {job.applicants ?? 0} applied
-                            </span>
+                            </div>
                         </div>
                         {job.type && (
                             <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
@@ -161,7 +165,7 @@ const JobsPage = () => {
                     <button
                         onClick={() => handleApplyClick(job)}
                         disabled={job.isApplied}
-                        className="mt-3 w-full rounded-lg! border-2 px-6 py-2.5 text-sm font-medium transition-all"
+                        className="mt-3 w-full rounded-lg! border-2 px-6 py-2.5 text-sm font-medium transition-all hover:scale-90"
                         style={{
                             borderColor: job.isApplied ? "#ccc" : T.primary,
                             color: job.isApplied ? "#ccc" : "white",
@@ -170,7 +174,7 @@ const JobsPage = () => {
                         {job.isApplied ? "Applied" : "Apply Now"}
                     </button>
                 </div>
-            </div>
+            </div >
         );
     };
 
@@ -180,19 +184,22 @@ const JobsPage = () => {
             : (job.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
 
         return (
-            <div className="group flex items-center gap-4 rounded-xl border border-slate-100 bg-white px-5 py-4 shadow-sm transition-all hover:shadow-md hover:border-slate-200">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
+            <div className="group flex items-center gap-4 rounded-xl border border-slate-100 bg-white px-4 py-4 shadow-sm transition-all hover:shadow-md hover:border-slate-200">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white transition-transform group-hover:scale-110"
                     style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
-                    <Briefcase size={16} />
+                    <Briefcase size={20} />
                 </div>
                 <div className="min-w-0 flex-1">
                     <h4 className="truncate text-sm font-bold capitalize text-slate-900">{job.title}</h4>
                     <div className="flex items-center gap-3 mt-0.5">
-                        <span className="flex items-center gap-1 text-xs text-slate-400">
-                            <Clock size={11} /> {getTimeAgo(job.created_at)}
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                            <Briefcase size={16} className="text-slate-400" /> {job.recruiter_name}
                         </span>
-                        <span className="flex items-center gap-1 text-xs text-slate-400">
-                            <IndianRupee size={11} /> {job.salary || 'N/A'}
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                            <Clock size={13} className="text-slate-400" /> {getTimeAgo(job.created_at)}
+                        </span>
+                        <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                            <IndianRupee size={12} /> {job.salary || 'N/A'}
                         </span>
                     </div>
                 </div>
@@ -202,13 +209,13 @@ const JobsPage = () => {
                             style={{ background: `${T.primary}10`, color: T.primary }}>{s}</span>
                     ))}
                 </div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-slate-600">
+                <div className="flex items-center gap-1.5 text-sm font-bold text-slate-700 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
                     <Users size={14} className="text-indigo-500" />
                     {job.applicants ?? 0}
                 </div>
                 <div className="flex items-center gap-1">
                     <button onClick={() => handleApplyClick(job)} disabled={job.isApplied}
-                        className="rounded-lg! px-4 py-1.5 text-xs font-bold text-white transition disabled:opacity-50"
+                        className="rounded-lg! px-4 py-1.5 text-xs font-medium text-white transition disabled:opacity-50 hover:scale-90"
                         style={{ background: job.isApplied ? '#ccc' : `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                         {job.isApplied ? 'Applied' : 'Apply'}
                     </button>
@@ -230,17 +237,19 @@ const JobsPage = () => {
 
     return (
         <>
-            <main className="flex-1 pb-12">
-                <div className="space-y-6 p-6 lg:p-8">
-                    {/* Error */}
-                    {error && (
-                        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-600">
-                            {error}
-                        </div>
-                    )}
+            <section className="pb-12 min-h-screen">
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 space-y-6">
+
+                    {/* Header Title Area (Optional visual boost) */}
+                    <div className="mb-8">
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                            Find Jobs <span className="text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(to right, ${T.primary}, ${T.accent})` }}>| AI Recruitment Platform</span>
+                        </h1>
+                        <p className="mt-2 text-slate-500 font-medium">Browse through our latest openings tailored for you.</p>
+                    </div>
 
                     {/* ─── Search / Filter Bar ──────────────────── */}
-                    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                    <div className="rounded-2xl border border-slate-100 bg-white px-4 pt-4 shadow-sm">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             {/* Search */}
                             <div className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200 focus-within:ring-2 focus-within:ring-indigo-400 transition-all sm:w-80">
@@ -254,21 +263,23 @@ const JobsPage = () => {
                                 />
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                                 {/* Filter Pills */}
-                                <div className="flex flex-wrap gap-1.5">
-                                    {JOB_TYPES.map((type) => (
-                                        <button
-                                            key={type}
-                                            onClick={() => setActiveFilter(type)}
-                                            className={`rounded-lg! px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${activeFilter === type
-                                                ? 'text-white shadow-md'
-                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                                }`}
-                                            style={activeFilter === type ? { background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` } : {}}>
-                                            {type}
-                                        </button>
-                                    ))}
+                                <div className="flex overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+                                    <div className="flex gap-1.5 whitespace-nowrap">
+                                        {JOB_TYPES.map((type) => (
+                                            <button
+                                                key={type}
+                                                onClick={() => setActiveFilter(type)}
+                                                className={`rounded-lg! px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${activeFilter === type
+                                                    ? 'text-white shadow-md'
+                                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:scale-90'
+                                                    }`}
+                                                style={activeFilter === type ? { background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` } : {}}>
+                                                {type}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* Sort Dropdown */}
@@ -295,7 +306,7 @@ const JobsPage = () => {
                                 </div>
 
                                 {/* View Toggle */}
-                                <div className="flex overflow-hidden rounded-lg border border-slate-200">
+                                <div className="flex max-w-min overflow-hidden rounded-lg border border-slate-200">
                                     <button onClick={() => setViewMode('grid')}
                                         className={`px-2.5 py-1.5 transition ${viewMode === 'grid' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-400 hover:bg-slate-50'}`}>
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1" /><rect x="9" y="1" width="6" height="6" rx="1" /><rect x="1" y="9" width="6" height="6" rx="1" /><rect x="9" y="9" width="6" height="6" rx="1" /></svg>
@@ -346,14 +357,14 @@ const JobsPage = () => {
                             </p>
                         </div>
                     )}
-                </div>
+                </main>
                 {/* Modal */}
                 <ApplyJobModal
                     show={showModal}
                     handleClose={() => setShowModal(false)}
                     job={selectedJob}
                 />
-            </main>
+            </section>
         </>
     );
 };

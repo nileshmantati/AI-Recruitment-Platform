@@ -7,6 +7,7 @@ import {
     ChevronDown, Eye, Edit3, Trash2
 } from 'lucide-react';
 import RecruiterEditJob from './RecruiterEditJob';
+import toast from 'react-hot-toast';
 
 const SORT_OPTIONS = ['Newest First', 'Most Applicants', 'Salary (High)', 'Salary (Low)'];
 
@@ -42,6 +43,7 @@ const RecruiterJobsPage = () => {
             setJobs(res.data);
         } catch (err) {
             console.error('Failed to load jobs', err);
+            toast.error('Failed to load jobs.');
         } finally {
             setLoading(false);
         }
@@ -76,7 +78,7 @@ const RecruiterJobsPage = () => {
             setEditingJob(null);
         } catch (err) {
             console.error('Failed to update', err);
-            alert('Could not save changes.');
+            toast.error('Could not save changes.');
         } finally {
             setSaving(false);
         }
@@ -91,7 +93,7 @@ const RecruiterJobsPage = () => {
             if (selectedJob?.id === jobId) setSelectedJob(null);
         } catch (err) {
             console.error('Failed to delete', err);
-            alert('Could not delete job.');
+            toast.error('Could not delete job.');
         } finally {
             setDeleting(null);
         }

@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Card, Row, Col, Badge, Alert, Spinner } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
     const { auth } = useAuth();
     const [myApplications, setMyApplications] = useState([]);
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
     const fetchMyApplications = async () => {
@@ -14,10 +14,9 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
         try {
             const response = await api.get('applications/my/');
             setMyApplications(response.data);
-            setError('');
         } catch (err) {
             console.error(err);
-            setError('Failed to load your applications.');
+            toast.error('Failed to load your applications.');
         } finally {
             setLoading(false);
         }
@@ -36,7 +35,6 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
             <main className="flex-1">
                 <div className="space-y-6 p-6">
                     <h3 className="fw-bold text-dark mb-4">My Dashboard</h3>
-                    {error && <Alert variant="danger" className="rounded-3">{error}</Alert>}
 
                     <Card className="border-0 shadow-sm rounded-4 p-4 mb-4">
                         <div className="d-flex align-items-center mb-3">
@@ -106,7 +104,7 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                                 </Card>
                             </Col>
                         ))}
-                        {myApplications.length === 0 && !error && (
+                        {myApplications.length === 0 && (
                             <Col className="text-center py-5">
                                 <i className="bi bi-briefcase text-muted display-1"></i>
                                 <p className="text-muted mt-3">You haven't applied to any jobs yet. Visit the <a href="/jobs">Job Board</a> to get started!</p>

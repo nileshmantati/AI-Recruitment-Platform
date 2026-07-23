@@ -6,6 +6,7 @@ import AnalyticsOverview from './AnalyticsOverview';
 import ScheduleInterviewModal from '../Modals/ScheduleInterviewModal';
 import { MapPin, Users, ChevronRight, Briefcase, Plus } from "lucide-react";
 import { T } from '../../Js/theme';
+import toast from 'react-hot-toast';
 
 const typeStyles = {
     'Full-time': 'bg-emerald-100 text-emerald-700 ring-emerald-500/20',
@@ -20,7 +21,6 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
     const [jobs, setJobs] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
 
     const [applicants, setApplicants] = useState([]);
     const [selectedJob, setSelectedJob] = useState(null);
@@ -47,7 +47,7 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
             }
         } catch (err) {
             console.error("Error updating status:", err);
-            alert("Failed to update application status.");
+            toast.error("Failed to update application status.");
         } finally {
             setStatusLoading(prev => ({ ...prev, [applicationId]: null }));
         }
@@ -66,7 +66,7 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
         } catch (err) {
             console.error("Error generating questions:", err);
             const errorMsg = err.response?.data?.error || "Failed to generate questions. Please try again.";
-            alert(errorMsg);
+            toast.error(errorMsg);
         } finally {
             setQuestionsLoading(prev => ({ ...prev, [applicationId]: false }));
         }
@@ -77,14 +77,13 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
         try {
             const response = await api.get('jobs/my/');
             setJobs(response.data);
-            setError('');
 
             if (response.data.length > 0 && !selectedJob) {
                 handleJobClick(response.data[0]);
             }
         } catch (err) {
             console.error(err);
-            setError('Failed to load jobs.');
+            toast.error('Failed to load jobs.');
         } finally {
             setLoading(false);
         }
@@ -98,7 +97,7 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
             setApplicants(response.data);
         } catch (err) {
             console.error(err);
-            setError('Could not fetch applicants.');
+            toast.error('Could not fetch applicants.');
         }
     }
 
@@ -217,12 +216,6 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
                                         : "Select a job to view candidates"}
                                 </h3>
 
-                                {error && (
-                                    <div className="bg-red-100 border border-red-300 text-red-700 rounded-xl p-4 mb-5">
-                                        {error}
-                                    </div>
-                                )}
-
                                 {selectedJob && (
                                     <div className="grid xl:grid-cols-2 gap-4">
                                         {applicants.map((app) => (
@@ -330,7 +323,7 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
                                             </div>
                                         ))}
 
-                                        {applicants.length === 0 && !error && (
+                                        {applicants.length === 0 && (
                                             <div className="col-span-full text-center py-16">
                                                 <i className="bi bi-inbox text-6xl text-gray-400"></i>
                                                 <p className="mt-4 text-gray-500">

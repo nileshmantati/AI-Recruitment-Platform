@@ -1,23 +1,22 @@
 import { useState } from 'react';
-import { Modal, Button, Form, Spinner, Alert } from 'react-bootstrap';
+import { Modal, Button, Form, Spinner } from 'react-bootstrap';
 import { scheduleInterview } from '../../services/api';
+import toast from 'react-hot-toast';
 
 const ScheduleInterviewModal = ({ show, handleClose, application }) => {
     const [datetime, setDatetime] = useState('');
     const [link, setLink] = useState('');
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!datetime || !link) {
-            setMessage({ type: 'danger', text: 'Please provide both date/time and a meeting link.' });
+            toast.error('Please provide both date/time and a meeting link.');
             return;
         }
 
         setLoading(true);
-        setMessage({ type: '', text: '' });
 
         try {
             await scheduleInterview(application.id, {
@@ -25,17 +24,16 @@ const ScheduleInterviewModal = ({ show, handleClose, application }) => {
                 meeting_link: link
             });
 
-            setMessage({ type: 'success', text: 'Interview scheduled and email sent!' });
+            toast.success('Interview scheduled and email sent!');
 
             setTimeout(() => {
                 handleClose();
                 setDatetime('');
                 setLink('');
-                setMessage({ type: '', text: '' });
             }, 2000);
 
         } catch (error) {
-            setMessage({ type: 'danger', text: error.error || 'Failed to schedule interview.' });
+            toast.error(error.error || 'Failed to schedule interview.');
         } finally {
             setLoading(false);
         }
@@ -54,8 +52,6 @@ const ScheduleInterviewModal = ({ show, handleClose, application }) => {
                 <p className="text-muted mb-4">
                     Set up an interview with <strong>{application.candidate_name || 'this candidate'}</strong>. An automated email invitation will be sent immediately.
                 </p>
-
-                {message.text && <Alert variant={message.type}>{message.text}</Alert>}
 
                 <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">

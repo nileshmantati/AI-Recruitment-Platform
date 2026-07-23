@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, Button, Form, FloatingLabel, Spinner } from 'react-bootstrap';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 const PostJobModal = ({ show, handleClose, onJobPosted }) => {
     const [formData, setFormData] = useState({
@@ -25,12 +26,13 @@ const PostJobModal = ({ show, handleClose, onJobPosted }) => {
             };
 
             await api.post('jobs/', formattedData);
+            toast.success("Job posted successfully!");
             onJobPosted();
             handleClose();
             setFormData({ title: '', description: '', required_skills: '', salary: '' });
         } catch (error) {
             console.error("Error posting job:", error);
-            alert("Failed to post job. Please try again.");
+            toast.error("Failed to post job. Please try again.");
         } finally {
             setIsLoading(false);
         }
