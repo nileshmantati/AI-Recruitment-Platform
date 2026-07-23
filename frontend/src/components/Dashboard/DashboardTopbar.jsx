@@ -1,5 +1,5 @@
 import { T } from "../../Js/theme.js";
-import { Search, PlusCircle } from "lucide-react";
+import { Search } from "lucide-react";
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 

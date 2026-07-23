@@ -3,7 +3,7 @@ import api from '../../services/api';
 import { T } from '../../Js/theme.js';
 import PostJobModal from '../Modals/PostJobModal';
 import {
-    Briefcase, Plus, Search, Filter, Clock, Users, IndianRupee,
+    Briefcase, Plus, Search, Filter, Users, IndianRupee,
     ChevronDown, Eye, Edit3, Trash2
 } from 'lucide-react';
 import RecruiterEditJob from './RecruiterEditJob';
@@ -37,7 +37,6 @@ const RecruiterJobsPage = () => {
     const [editForm, setEditForm] = useState({});
     const [saving, setSaving] = useState(false);
     const fetchJobs = async () => {
-        setLoading(true);
         try {
             const res = await api.get('jobs/my/');
             setJobs(res.data);
@@ -49,7 +48,10 @@ const RecruiterJobsPage = () => {
         }
     };
 
-    useEffect(() => { fetchJobs(); }, []);
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchJobs();
+    }, []);
 
     const startEditing = (job) => {
         setEditingJob(job.id);

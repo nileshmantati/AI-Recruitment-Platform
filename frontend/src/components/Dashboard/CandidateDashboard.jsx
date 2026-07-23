@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, Row, Col, Badge, Alert, Spinner } from "react-bootstrap";
+import { Card, Row, Col, Badge, Spinner } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -10,7 +10,6 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchMyApplications = async () => {
-        setLoading(true);
         try {
             const response = await api.get('applications/my/');
             setMyApplications(response.data);
@@ -23,6 +22,7 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchMyApplications();
     }, []);
 

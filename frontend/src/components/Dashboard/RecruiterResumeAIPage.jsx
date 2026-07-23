@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { T } from '../../Js/theme.js';
-import { Sparkles, UploadCloud, Search, CheckCircle, FileText, Bot, User, ArrowRight, X } from 'lucide-react';
+import { Sparkles, UploadCloud, CheckCircle, Bot, ArrowRight } from 'lucide-react';
 
 const mockCandidates = [
     {

@@ -5,7 +5,7 @@ import PostJobModal from '../Modals/PostJobModal';
 import AnalyticsOverview from './AnalyticsOverview';
 import ScheduleInterviewModal from '../Modals/ScheduleInterviewModal';
 import { MapPin, Users, ChevronRight, Briefcase, Plus } from "lucide-react";
-import { T } from '../../Js/theme';
+
 import toast from 'react-hot-toast';
 
 const typeStyles = {

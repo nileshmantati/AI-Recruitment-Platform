@@ -4,6 +4,19 @@ import api from '../../services/api';
 import { Briefcase, Users, FileText, CheckCircle2 } from 'lucide-react';
 import { T } from '../../Js/theme.js';
 import { KpiCard } from '../../ui/DashboardUI.jsx';
+import toast from 'react-hot-toast';
+
+const getTimeAgo = (date) => {
+    const diff = Date.now() - new Date(date).getTime();
+
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (minutes < 60) return `${minutes} min ago`;
+    if (hours < 24) return `${hours} hr${hours > 1 ? "s" : ""} ago`;
+    return `${days} day${days > 1 ? "s" : ""} ago`;
+};
 
 const AnalyticsOverview = () => {
     const [stats, setStats] = useState(null);
@@ -24,19 +37,22 @@ const AnalyticsOverview = () => {
         fetchAnalytics();
     }, []);
 
-    useEffect(() => {
-        retrivelatesetApplications();
-    }, [])
-
     const retrivelatesetApplications = async () => {
         try {
             const response = await api.get('applications/latest/');
             setRecentApplications(response.data);
         } catch (err) {
             console.error(err);
-            setError('Could not fetch recent applications.');
+            toast.error('Could not fetch recent applications.');
         }
     };
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        retrivelatesetApplications();
+    }, [])
+
+
 
     const statusStyles = {
         INTERVIEW_SCHEDULED: { bg: `${T.primary}1A`, color: T.primary, label: "Interview" },
@@ -44,18 +60,6 @@ const AnalyticsOverview = () => {
         PENDING: { bg: "#F1F5F9", color: "#475569", label: "Applied" },
         SHORTLISTED: { bg: `${T.success}1A`, color: "#15803D", label: "Shortlisted" },
         REJECTED: { bg: `${T.danger}1A`, color: "#B91C1C", label: "Rejected" },
-    };
-
-    const getTimeAgo = (date) => {
-        const diff = Date.now() - new Date(date).getTime();
-
-        const minutes = Math.floor(diff / (1000 * 60));
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-        if (minutes < 60) return `${minutes} min ago`;
-        if (hours < 24) return `${hours} hr${hours > 1 ? "s" : ""} ago`;
-        return `${days} day${days > 1 ? "s" : ""} ago`;
     };
 
     if (loading)

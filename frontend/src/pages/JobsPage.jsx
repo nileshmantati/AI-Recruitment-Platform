@@ -35,7 +35,6 @@ const JobsPage = () => {
     const [selectedJob, setSelectedJob] = useState(null);
 
     const fetchJobs = async () => {
-        setLoading(true);
         try {
             const response = await api.get('jobs/my/');
             setJobs(response.data);
@@ -48,6 +47,7 @@ const JobsPage = () => {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchJobs();
     }, []);
 

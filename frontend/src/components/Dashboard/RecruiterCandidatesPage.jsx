@@ -17,12 +17,7 @@ const RecruiterCandidatesPage = () => {
 
     const [selectedCandidate, setSelectedCandidate] = useState(null);
 
-    useEffect(() => {
-        fetchCandidates();
-    }, []);
-
-    async function fetchCandidates() {
-        setLoading(true);
+    const fetchCandidates = async () => {
         try {
             const res = await api.get('applications/all/');
             setApplications(res.data);
@@ -32,6 +27,11 @@ const RecruiterCandidatesPage = () => {
             setLoading(false);
         }
     }
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchCandidates();
+    }, []);
 
     const uniqueCandidates = useMemo(() => {
         const candidateMap = new Map();

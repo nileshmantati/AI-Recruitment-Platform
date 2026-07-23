@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import api from '../../services/api';
 import { T } from '../../Js/theme';
-import { X, UploadCloud, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { X, UploadCloud, FileText, CheckCircle, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const ApplyJobModal = ({ show, handleClose, job }) => {
@@ -10,14 +10,11 @@ const ApplyJobModal = ({ show, handleClose, job }) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
-    // Reset state when modal opens
-    useEffect(() => {
-        if (show) {
-            setResumeFile(null);
-            setIsLoading(false);
-        }
-    }, [show]);
-
+    const handleCloseModal = () => {
+        setResumeFile(null);
+        setIsLoading(false);
+        handleClose();
+    };
     if (!show || !job) return null;
 
     const handleFileChange = (e) => {
@@ -75,7 +72,7 @@ const ApplyJobModal = ({ show, handleClose, job }) => {
             toast.success('Application submitted! The AI is reviewing your resume.');
 
             setTimeout(() => {
-                handleClose();
+                handleCloseModal();
             }, 2000);
 
         } catch (error) {
@@ -119,7 +116,7 @@ const ApplyJobModal = ({ show, handleClose, job }) => {
                         Apply for <span className="text-primary text-capitalize">{job.title}</span>
                     </h3>
                     <button
-                        onClick={handleClose}
+                        onClick={handleCloseModal}
                         className="rounded-lg! cursor-pointer p-2 transition-colors hover:bg-slate-100 text-slate-600"
                     >
                         <X size={20} />
@@ -180,7 +177,7 @@ const ApplyJobModal = ({ show, handleClose, job }) => {
                     <div className="flex items-center justify-end gap-3 pt-2">
                         <button
                             type="button"
-                            onClick={handleClose}
+                            onClick={handleCloseModal}
                             className="rounded-lg! px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors bg-slate-100 hover:scale-95"
                         >
                             Cancel

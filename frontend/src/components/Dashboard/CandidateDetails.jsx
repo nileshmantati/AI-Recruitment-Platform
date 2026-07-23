@@ -1,7 +1,7 @@
 import { T } from "../../Js/theme";
 import { ArrowLeft, User, Link, Globe, FileText, Star, Briefcase } from "lucide-react";
 
-const CandidateDetails = ({ candidate, setSelectedCandidate, applications, getStatusStyle, formatStatus }) => {
+const CandidateDetails = ({ candidate, setSelectedCandidate, getStatusStyle, formatStatus }) => {
     const c = candidate;
     const details = c.details;
     return (

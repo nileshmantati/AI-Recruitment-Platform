@@ -30,12 +30,7 @@ const RecruiterApplicationsPage = () => {
     const [selectedApp, setSelectedApp] = useState(null);
     const [updatingStatus, setUpdatingStatus] = useState(false);
 
-    useEffect(() => {
-        fetchApplications();
-    }, []);
-
-    async function fetchApplications() {
-        setLoading(true);
+    const fetchApplications = async () => {
         try {
             const res = await api.get('applications/all/');
             setApplications(res.data);
@@ -46,6 +41,11 @@ const RecruiterApplicationsPage = () => {
             setLoading(false);
         }
     }
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchApplications();
+    }, []);
 
     const handleUpdateStatus = async (appId, newStatus) => {
         setUpdatingStatus(true);

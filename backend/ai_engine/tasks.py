@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .services import extract_text_from_pdf, evaluate_candidate_resume
 from applications.models import Application
-from jobs.models import Job
+
 
 @shared_task
 def process_resume_scoring(application_id):

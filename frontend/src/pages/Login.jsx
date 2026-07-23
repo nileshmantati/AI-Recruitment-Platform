@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -20,7 +20,7 @@ const Login = () => {
     const [showPass, setShowPass] = useState(false);
     const [role, setRole] = useState("recruiter");
     const navigate = useNavigate();
-    const { auth, login } = useAuth();
+    const { login } = useAuth();
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(schema),
