@@ -31,23 +31,6 @@ def process_resume_scoring(application_id):
     application.status = 'EVALUATED'
     application.save()
 
-    # 5. SEND EMAIL NOTIFICATION
-    # try:
-    #     send_mail(
-    #         subject=f"Application Update: {job.title} - {application.candidate.name}",
-    #         message=f"Hi {application.candidate.name},\n\n" 
-    #                 f"Your application for the position '{job.title}' has been processed by our AI engine.\n\n"
-    #                 f"Your Score: {ai_results.get('score', 0)}/100\n"
-    #                 f"Status: Evaluated\n\n"
-    #                 f"Best regards,\n{job.company.name} HR Team",
-    #         from_email=settings.EMAIL_HOST_USER,
-    #         recipient_list=[application.candidate.email],
-    #         fail_silently=True,
-    #     )
-    #     print(f"Email sent to {application.candidate.email}")
-    # except Exception as e:
-    #     print(f"Failed to send email: {e}")
-
     return f"Processed Application {application_id} with score {application.resume_score}"
 
 @shared_task

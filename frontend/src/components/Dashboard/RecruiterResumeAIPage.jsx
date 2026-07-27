@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { T } from '../../Js/theme.js';
 import {
-    Sparkles, UploadCloud, CheckCircle, Bot, ArrowRight, Search,
-    TrendingUp, Award, AlertCircle, Zap, RefreshCw, FileText, User, Filter, ChevronRight, X, Star,
-    ExternalLink, Check, Briefcase, MessageSquare, ShieldCheck, Copy, Clock, Calendar, Layers, ChevronDown
+    Sparkles, UploadCloud, Bot, Search,
+    TrendingUp, Award, AlertCircle, ChevronRight, X,
+    ExternalLink, ChevronDown
 } from 'lucide-react';
 import api, { analyzeResume } from '../../services/api';
 import toast from 'react-hot-toast';

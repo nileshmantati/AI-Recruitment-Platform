@@ -1,6 +1,4 @@
 
-
-# Create your views here.
 import logging
 # pyrefly: ignore [missing-import]
 from rest_framework import generics, permissions, status
@@ -191,7 +189,7 @@ class UpdateApplicationStatusView(APIView):
             return Response({"error": "Unauthorized action."}, status=status.HTTP_403_FORBIDDEN)
 
         new_status = request.data.get('status')
-        valid_statuses = ['SHORTLISTED', 'REJECTED']
+        valid_statuses = ['PENDING', 'EVALUATED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'REJECTED', 'ERROR']
 
         if new_status not in valid_statuses:
             return Response({"error": "Invalid status provided."}, status=status.HTTP_400_BAD_REQUEST)

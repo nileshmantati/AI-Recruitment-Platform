@@ -1,7 +1,4 @@
 
-
-# Create your views here.
-# jobs/views.py
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Count
