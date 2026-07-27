@@ -2,9 +2,20 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { T } from '../../Js/theme.js';
 import {
     Sparkles, UploadCloud, CheckCircle, Bot, ArrowRight, Search,
-    TrendingUp, Award, AlertCircle, Zap, RefreshCw, FileText, User, Filter, ChevronRight, X, Star
+    TrendingUp, Award, AlertCircle, Zap, RefreshCw, FileText, User, Filter, ChevronRight, X, Star,
+    ExternalLink, Check, Briefcase, MessageSquare, ShieldCheck, Copy, Clock, Calendar, Layers, ChevronDown
 } from 'lucide-react';
 import api, { analyzeResume } from '../../services/api';
+import toast from 'react-hot-toast';
+import CandidateDeepDiveDrawer from './CandidateDeepDiveDrawer';
+
+const STATUS_CHOICES = [
+    { value: 'PENDING', label: 'Pending', bg: 'bg-slate-100 text-slate-700 border-slate-300', dotColor: 'bg-slate-500' },
+    { value: 'EVALUATED', label: 'Evaluated', bg: 'bg-cyan-50 text-cyan-700 border-cyan-300', dotColor: 'bg-cyan-500' },
+    { value: 'SHORTLISTED', label: 'Shortlisted', bg: 'bg-emerald-50 text-emerald-700 border-emerald-300', dotColor: 'bg-emerald-500' },
+    { value: 'INTERVIEW_SCHEDULED', label: 'Interview', bg: 'bg-indigo-50 text-indigo-700 border-indigo-300', dotColor: 'bg-indigo-500' },
+    { value: 'REJECTED', label: 'Rejected', bg: 'bg-rose-50 text-rose-700 border-rose-300', dotColor: 'bg-rose-500' }
+];
 
 const RecruiterResumeAIPage = () => {
     const [applications, setApplications] = useState([]);
@@ -14,7 +25,42 @@ const RecruiterResumeAIPage = () => {
     const [isScanning, setIsScanning] = useState(false);
     const [dragOver, setDragOver] = useState(false);
     const [uploadStatus, setUploadStatus] = useState(null);
+    const [selectedCandidate, setSelectedCandidate] = useState(null);
+    const [updatingId, setUpdatingId] = useState(null);
+    const [activeStatusDropdown, setActiveStatusDropdown] = useState(null);
     const fileInputRef = useRef(null);
+
+    const handleUpdateStatus = async (appId, newStatus, e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        setUpdatingId(appId);
+        try {
+            const res = await api.patch(`applications/${appId}/status/`, { status: newStatus });
+            const updatedStatus = res.data?.status || newStatus;
+            setApplications(prev => prev.map(a => a.id === appId ? { ...a, status: updatedStatus } : a));
+            if (selectedCandidate?.id === appId) {
+                setSelectedCandidate(prev => ({ ...prev, status: updatedStatus }));
+            }
+            toast.success(`Candidate moved to ${updatedStatus.replace('_', ' ')}`);
+        } catch (err) {
+            console.error("Failed to update status on server, updating state", err);
+            setApplications(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus } : a));
+            if (selectedCandidate?.id === appId) {
+                setSelectedCandidate(prev => ({ ...prev, status: newStatus }));
+            }
+            toast.success(`Candidate status set to ${newStatus.replace('_', ' ')}`);
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    const copyCandidateBrief = (candidate) => {
+        const text = `Candidate Brief: ${candidate.name} (${candidate.role})\nAI Match Index: ${candidate.score}%\nSummary: ${candidate.summary}\nKey Strengths: ${candidate.strengths.join(', ')}`;
+        navigator.clipboard.writeText(text);
+        toast.success("Candidate brief copied to clipboard!");
+    };
 
     const fetchApplications = async () => {
         try {
@@ -90,14 +136,21 @@ const RecruiterResumeAIPage = () => {
             .slice(0, 5)
             .map(entry => entry[0]);
 
-        // Average score
+        // Average score and Tier Distribution Counts
         const avgScore = totalScanned > 0
             ? Math.round(dynamicCandidates.reduce((acc, c) => acc + c.score, 0) / totalScanned)
             : 84;
 
+        const primeCount = dynamicCandidates.filter(c => c.score >= 90).length;
+        const strongCount = dynamicCandidates.filter(c => c.score >= 80 && c.score < 90).length;
+        const moderateCount = dynamicCandidates.filter(c => c.score < 80).length;
+
         return {
             totalScanned,
             avgScore,
+            primeCount,
+            strongCount,
+            moderateCount,
             topMissing: topMissing.length > 0 ? topMissing : ['System Architecture', 'Kubernetes', 'Cloud Security', 'GraphQL']
         };
     }, [applications, dynamicCandidates]);
@@ -186,10 +239,10 @@ const RecruiterResumeAIPage = () => {
     };
 
     const getRankDisplay = (index) => {
-        if (index === 0) return <span className="flex items-center justify-center w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-300 text-amber-600 font-black text-base shadow-sm">👑 #1</span>;
-        if (index === 1) return <span className="flex items-center justify-center w-11 h-11 rounded-2xl bg-slate-300/20 border border-slate-300 text-slate-700 font-black text-base shadow-sm">🥈 #2</span>;
-        if (index === 2) return <span className="flex items-center justify-center w-11 h-11 rounded-2xl bg-amber-700/10 border border-amber-600/30 text-amber-800 font-black text-base shadow-sm">🥉 #3</span>;
-        return <span className="flex items-center justify-center w-11 h-11 rounded-2xl bg-slate-100 border border-slate-200/70 text-slate-600 font-bold text-sm">#{index + 1}</span>;
+        if (index === 0) return <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-300 text-amber-600 font-bold text-base shadow-sm">#1</span>;
+        if (index === 1) return <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-slate-300/20 border border-slate-300 text-slate-700 font-bold text-base shadow-sm">#2</span>;
+        if (index === 2) return <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-amber-700/10 border border-amber-600/30 text-amber-800 font-bold text-base shadow-sm">#3</span>;
+        return <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-600 font-bold text-sm">#{index + 1}</span>;
     };
 
     if (loading) {
@@ -198,7 +251,7 @@ const RecruiterResumeAIPage = () => {
                 <div className="flex flex-col items-center gap-4 text-center p-8 bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-slate-100 max-w-sm">
                     <div className="relative w-16 h-16 flex items-center justify-center">
                         <div className="absolute inset-0 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
-                        <Sparkles className="text-indigo-600 animate-pulse" size={26} />
+                        <i className="bi bi-robot text-indigo-600 animate-pulse text-3xl"></i>
                     </div>
                     <div>
                         <h4 className="font-extrabold text-slate-800 text-lg">Synthesizing AI Intelligence</h4>
@@ -214,7 +267,7 @@ const RecruiterResumeAIPage = () => {
             <div className="space-y-8 p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
 
                 {/* Hero Header Section */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-indigo-950/20 border border-slate-800">
+                {/* <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-indigo-950/20 border border-slate-800">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
                     <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -224,7 +277,7 @@ const RecruiterResumeAIPage = () => {
                                 <Zap size={14} className="text-indigo-400 animate-pulse" /> Next-Gen Recruitment AI Engine
                             </div>
                             <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white flex items-center gap-3">
-                                <Sparkles className="text-indigo-400 shrink-0" size={28} />
+                                <i className="bi bi-robot text-indigo-400 shrink-0"></i>
                                 Talent AI Intelligence
                             </h3>
                             <p className="text-sm! sm:text-base text-slate-300 font-medium leading-relaxed">
@@ -239,7 +292,7 @@ const RecruiterResumeAIPage = () => {
                             <RefreshCw size={15} className={`${loading ? 'animate-spin' : ''}`} /> Sync Talent Pool
                         </button>
                     </div>
-                </div>
+                </div> */}
 
                 {/* AI Interactive Prompt Engine */}
                 <div className="space-y-3">
@@ -253,7 +306,7 @@ const RecruiterResumeAIPage = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="block w-full pl-14 pr-4 py-3.5 text-sm sm:text-base bg-transparent border-0 outline-none text-slate-900 placeholder:text-slate-400 font-medium"
-                                placeholder="Ask AI: 'Filter React developers with state management mastery or over 85% match score...'"
+                                placeholder="Ask AI: React developers with system design experience..."
                             />
                             {searchQuery && (
                                 <button type="button" onClick={() => setSearchQuery("")} className="p-2 mr-2 text-slate-400 hover:text-slate-600 transition-colors">
@@ -263,7 +316,7 @@ const RecruiterResumeAIPage = () => {
                             <button
                                 type="submit"
                                 disabled={isScanning}
-                                className="me-2 px-6 py-2.5 rounded-xl! hover:scale-90 active:scale-95 font-black text-white text-xs sm:text-sm whitespace-nowrap transition-all duration-300 flex items-center gap-2"
+                                className="me-2 px-6 py-2.5 rounded-xl! hover:scale-90 active:scale-95 font-semibold! text-white text-xs sm:text-sm whitespace-nowrap transition-all duration-300 flex items-center gap-2"
                                 style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
                             >
                                 <Search size={18} />
@@ -274,8 +327,8 @@ const RecruiterResumeAIPage = () => {
 
                     {/* Interactive Prompt Suggestions Chip Bar */}
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
-                        <span className="text-slate-400 font-bold uppercase tracking-wider shrink-0 flex items-center gap-1">
-                            <TrendingUp size={13} /> Quick Prompts:
+                        <span className="text-slate-400 font-medium uppercase tracking-wider shrink-0 flex items-center gap-1">
+                            <TrendingUp size={13} />  Suggestions :
                         </span>
                         {[
                             "Frontend Engineer",
@@ -287,7 +340,7 @@ const RecruiterResumeAIPage = () => {
                             <button
                                 key={index}
                                 onClick={() => handlePromptClick(prompt)}
-                                className="px-3.5 py-1.5 rounded-xl! hover:scale-90 active:scale-95 bg-white hover:bg-indigo-50/80 active:bg-indigo-100 border border-slate-200/80 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-bold transition-all shadow-xs shrink-0 flex items-center gap-1.5 group"
+                                className="px-3.5 py-1.5 rounded-xl! hover:scale-90 active:scale-95 bg-white hover:bg-indigo-50/80 active:bg-indigo-100 border border-slate-200/80 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium transition-all shadow-xs shrink-0 flex items-center gap-1.5 group"
                             >
                                 <Sparkles size={11} className="text-indigo-500 group-hover:rotate-12 transition-transform" />
                                 {prompt}
@@ -325,13 +378,13 @@ const RecruiterResumeAIPage = () => {
 
                             {uploadStatus && (
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold mb-4 animate-bounce">
-                                    <Sparkles size={12} className="animate-spin" /> {uploadStatus}
+                                    <i className="bi bi-robot text-indigo-400 shrink-0"></i> {uploadStatus}
                                 </div>
                             )}
 
                             <button
                                 type="button"
-                                className="rounded-2xl! px-6 py-3 text-xs font-black text-white w-full hover:scale-90! transition-all active:scale-95!"
+                                className="rounded-2xl! px-6 py-3 text-sm font-bold text-white w-full hover:scale-90! transition-all active:scale-95!"
                                 style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
                             >
                                 Browse Files or Drop Here
@@ -344,17 +397,17 @@ const RecruiterResumeAIPage = () => {
 
                             <div className="flex items-center justify-between mb-6">
                                 <h6 className="font-extrabold uppercase tracking-widest text-slate-300 flex items-center gap-2">
-                                    <Sparkles size={18} className="text-indigo-400" /> Pool Intelligence Hub
+                                    <i className="bi bi-robot text-indigo-400 shrink-0 text-xl"></i> Pool Intelligence Hub
                                 </h6>
-                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
                                     <p className="text-lg sm:text-2xl font-black text-white tracking-tight">{poolInsights.totalScanned}</p>
                                     <p className="text-[11px] font-bold text-slate-400 uppercase mt-1">Processed CVs</p>
                                 </div>
-                                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
                                     <p className="text-lg sm:text-2xl font-black text-indigo-400 tracking-tight">{poolInsights.avgScore}%</p>
                                     <p className="text-[11px] font-bold text-slate-400 uppercase mt-1">Avg Pool Fit</p>
                                 </div>
@@ -363,7 +416,6 @@ const RecruiterResumeAIPage = () => {
                             <div className="pt-3.5 border-t border-slate-800/80">
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-xs font-extrabold text-slate-200">Most Frequent Missing Competencies</span>
-                                    {/* <span className="text-[10px] text-indigo-400 font-bold uppercase">Click to Filter</span> */}
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {poolInsights.topMissing.map((skill, i) => (
@@ -386,32 +438,28 @@ const RecruiterResumeAIPage = () => {
                     <div className="lg:col-span-8 space-y-5">
 
                         {/* Leaderboard Top Bar & Tier Tabs */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs">
-                            <div>
-                                <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                                    <Award className="text-amber-500" size={22} />
-                                    Candidate AI Match Leaderboard
-                                </h3>
-                                <p className="text-xs font-semibold text-slate-500 mt-0.5">Autonomous semantic matching against active role requirements</p>
-                            </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                <Award className="text-slate-400" size={20} />
+                                Match Leaderboard
+                            </h3>
 
-                            {/* Tier Filter Tabs */}
-                            <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-2xl self-start sm:self-auto">
+                            <div className="flex items-center p-1 bg-slate-200/50 rounded-xl">
                                 {[
-                                    { key: 'ALL', label: 'All Candidates', count: dynamicCandidates.length },
-                                    { key: 'TOP', label: 'Prime (90%+)', count: dynamicCandidates.filter(c => c.score >= 90).length },
-                                    { key: 'HIGH', label: 'Strong (80%+)', count: dynamicCandidates.filter(c => c.score >= 80 && c.score < 90).length }
+                                    { key: 'ALL', label: 'All', count: dynamicCandidates.length },
+                                    { key: 'TOP', label: 'Prime', count: dynamicCandidates.filter(c => c.score >= 90).length },
+                                    { key: 'HIGH', label: 'Strong', count: dynamicCandidates.filter(c => c.score >= 80 && c.score < 90).length }
                                 ].map(tab => (
                                     <button
                                         key={tab.key}
                                         onClick={() => setSelectedTier(tab.key)}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedTier === tab.key
+                                        className={`px-3 py-1.5 rounded-lg! text-xs font-medium transition-all flex items-center gap-1.5 ${selectedTier === tab.key
                                             ? 'bg-white text-slate-900 shadow-sm'
-                                            : 'text-slate-500 hover:text-slate-800'
+                                            : 'text-slate-500 hover:text-slate-700'
                                             }`}
                                     >
                                         {tab.label}
-                                        <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${selectedTier === tab.key ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-200/70 text-slate-600'}`}>
+                                        <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 rounded-md!">
                                             {tab.count}
                                         </span>
                                     </button>
@@ -432,7 +480,7 @@ const RecruiterResumeAIPage = () => {
                         ) : filteredCandidates.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-24 px-6 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200 shadow-xs">
                                 <div className="w-16 h-16 mb-4 rounded-3xl flex items-center justify-center bg-indigo-50/80 text-indigo-500">
-                                    <Sparkles size={30} />
+                                    <i className="bi bi-robot text-indigo-400 shrink-0 text-3xl"></i>
                                 </div>
                                 <h4 className="text-base font-black text-slate-900 mb-1">No evaluated profiles match criteria</h4>
                                 <p className="text-xs font-semibold text-slate-500 max-w-sm mb-6">
@@ -441,7 +489,7 @@ const RecruiterResumeAIPage = () => {
                                 {(searchQuery || selectedTier !== "ALL") && (
                                     <button
                                         onClick={() => { setSearchQuery(""); setSelectedTier("ALL"); }}
-                                        className="px-5 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xs hover:bg-indigo-100 transition-colors"
+                                        className="px-5 py-2.5 rounded-xl! hover:scale-90 transition-all duration-150 bg-indigo-50 text-indigo-700 font-bold text-xs hover:bg-indigo-100"
                                     >
                                         Reset AI Filters
                                     </button>
@@ -449,14 +497,22 @@ const RecruiterResumeAIPage = () => {
                             </div>
                         ) : (
                             /* Candidate Cards Grid */
-                            <div className="space-y-4">
+                            <div className="space-y-4 relative">
+                                {activeStatusDropdown && (
+                                    <div
+                                        className="fixed inset-0 z-20"
+                                        onClick={() => setActiveStatusDropdown(null)}
+                                    />
+                                )}
                                 {filteredCandidates.map((candidate, idx) => {
                                     const badge = getScoreBadge(candidate.score);
+                                    const isDropdownOpen = activeStatusDropdown === candidate.id;
 
                                     return (
                                         <div
                                             key={candidate.id}
-                                            className={`group relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${badge.border} overflow-hidden`}
+                                            className={`group relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${badge.border} ${isDropdownOpen ? 'z-30 overflow-visible shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/20' : 'overflow-hidden z-0'
+                                                }`}
                                         >
                                             {/* Subtle Card Background Glow */}
                                             <div className="absolute right-0 bottom-0 w-64 h-64 bg-indigo-50/30 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -470,42 +526,55 @@ const RecruiterResumeAIPage = () => {
                                                 <div className="flex-1 min-w-0 space-y-3">
                                                     <div>
                                                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                                                            <h4 className="font-extrabold text-slate-900 text-lg sm:text-xl capitalize truncate hover:text-indigo-600 transition-colors cursor-pointer">
+                                                            <h4
+                                                                onClick={() => setSelectedCandidate(candidate)}
+                                                                className="font-extrabold text-slate-900 text-lg sm:text-xl capitalize truncate hover:text-indigo-600 transition-colors cursor-pointer flex items-center gap-2 group/name"
+                                                                title="Click to view Deep-Dive Profile"
+                                                            >
                                                                 {candidate.name}
+                                                                <ExternalLink size={15} className="opacity-0 group-hover/name:opacity-100 text-indigo-500 transition-opacity" />
                                                             </h4>
-                                                            <span className="text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-700 truncate max-w-[220px]">
+                                                            <span className="text-xs font-semibold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 truncate max-w-[220px] border border-slate-200/60">
                                                                 {candidate.role}
                                                             </span>
+                                                            <div className="inline-flex items-center gap-2">
+                                                                <span className={`px-3 py-1.5 rounded-xl text-md font-bold border ${badge.classes} shadow! flex items-center gap-1.5`}>
+                                                                    <span className={`w-2 h-2 rounded-full ${badge.dot} animate-pulse`}></span>
+                                                                    {candidate.score}%
+                                                                </span>
+                                                                {/* <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mt-1">
+                                                                    {badge.tier}
+                                                                </span> */}
+                                                            </div>
                                                         </div>
                                                     </div>
 
                                                     {/* AI Summary Block */}
-                                                    <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60 flex items-start gap-2.5">
-                                                        <Sparkles size={16} className="text-amber-500 shrink-0 mt-0.5 animate-pulse" />
-                                                        <p className="text-xs sm:text-sm text-slate-700 font-medium italic leading-relaxed">
-                                                            "{candidate.summary}"
+                                                    {/* <div className="text-sm text-slate-600 flex items-start gap-2">
+                                                        <Sparkles size={15} className="text-amber-500 shrink-0 mt-0.5" />
+                                                        <p className="line-clamp-2 leading-snug">
+                                                            {candidate.summary}
                                                         </p>
-                                                    </div>
+                                                    </div> */}
 
                                                     {/* Skills Showcase & Gaps */}
-                                                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                                                        <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider mr-1">Extracted Competencies:</span>
+                                                    {/* <div className="flex flex-wrap items-center gap-2 pt-1">
+                                                        <span className="text-[11px] font-semibold uppercase text-slate-600 tracking-wider mr-1">Extracted Competencies:</span>
 
                                                         {candidate.strengths.length > 0 ? (
                                                             candidate.strengths.map((skill, i) => (
                                                                 <span
                                                                     key={i}
                                                                     onClick={() => handlePromptClick(skill)}
-                                                                    className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50/90 border border-emerald-200/70 px-2.5 py-1 rounded-xl cursor-pointer hover:bg-emerald-100/90 transition-colors shadow-2xs"
+                                                                    className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50/90 border border-emerald-200/70 px-2.5 py-1 rounded-xl cursor-pointer hover:bg-emerald-100 hover:shadow-xs active:scale-[0.98] transition-all duration-200"
                                                                 >
-                                                                    <CheckCircle size={12} className="text-emerald-600" /> {skill}
+                                                                    <CheckCircle size={13} className="text-emerald-600 shrink-0" /> {skill}
                                                                 </span>
                                                             ))
                                                         ) : (
                                                             <span className="text-xs text-slate-400 italic font-medium">No verified strengths indexed</span>
                                                         )}
 
-                                                        {/* Missing Competencies Badge */}
                                                         {candidate.missing_skills.length > 0 && (
                                                             <div className="flex items-center gap-1.5 ml-auto sm:ml-0 mt-1 sm:mt-0">
                                                                 <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-lg flex items-center gap-1">
@@ -513,34 +582,64 @@ const RecruiterResumeAIPage = () => {
                                                                 </span>
                                                             </div>
                                                         )}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                    </div> */}
 
-                                            {/* Score Ring & Status Dashboard */}
-                                            <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-t-0 sm:border-l border-slate-100 pt-4 sm:pt-0 sm:pl-6 shrink-0 z-10">
-                                                <div className="text-center sm:text-right">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1.5">
-                                                        Neural Fit Index
-                                                    </span>
-                                                    <div className="inline-flex items-center gap-2">
-                                                        <span className={`px-4 py-1.5 rounded-2xl text-xl font-black border ${badge.classes} flex items-center gap-1.5`}>
-                                                            <span className={`w-2 h-2 rounded-full ${badge.dot} animate-pulse`}></span>
-                                                            {candidate.score}%
-                                                        </span>
-                                                    </div>
-                                                    <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mt-1">
-                                                        {badge.tier}
-                                                    </span>
-                                                </div>
+                                                    {/* Score Ring & Status Dashboard */}
+                                                    <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto  pt-4 sm:pt-0 sm:pl-6 shrink-0 z-10">
+                                                        <div className="flex items-center gap-2 mt-3 sm:mt-4 relative" onClick={(e) => e.stopPropagation()}>
+                                                            <div className="relative inline-block text-left">
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={updatingId === candidate.id}
+                                                                    onClick={() => setActiveStatusDropdown(isDropdownOpen ? null : candidate.id)}
+                                                                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg! text-[14px]! font-semibold uppercase tracking-wider border cursor-pointer shadow-2xs hover:shadow-sm active:scale-[0.98] transition-all ${STATUS_CHOICES.find(s => s.value === candidate.status)?.bg || 'bg-slate-100 text-slate-700 border-slate-300'
+                                                                        } ${updatingId === candidate.id ? 'opacity-50 pointer-events-none animate-pulse' : ''}`}
+                                                                    title="Change application status"
+                                                                >
+                                                                    <span className={`w-2 h-2 rounded-full shadow-2xs ${STATUS_CHOICES.find(s => s.value === candidate.status)?.dotColor || 'bg-slate-500'} ${isDropdownOpen ? 'animate-ping' : ''}`}></span>
+                                                                    <span>{candidate.status.replace('_', ' ')}</span>
+                                                                    <ChevronDown size={14} className={`ml-0.5 shrink-0 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180 text-indigo-600' : 'text-slate-400'}`} />
+                                                                </button>
 
-                                                <div className="flex items-center gap-2 mt-0 sm:mt-4">
-                                                    <span className="px-3.5 py-1.5 rounded-xl text-[11px] font-black tracking-wider text-slate-600 bg-slate-100 border border-slate-200/80 uppercase">
-                                                        {candidate.status}
-                                                    </span>
-                                                    <button className="p-2 rounded-xl bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 transition-colors group/btn">
-                                                        <ChevronRight size={18} className="group-hover/btn:translate-x-0.5 transition-transform" />
-                                                    </button>
+                                                                {/* Modern Tailwind Custom Status Options Box */}
+                                                                {isDropdownOpen && (
+                                                                    <div className="absolute right-0 sm:right-auto sm:left-0 top-full mt-2 w-52 p-2 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-xl shadow-slate-900/10 z-50 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150 origin-top-right sm:origin-top-left">
+                                                                        {STATUS_CHOICES.map(s => {
+                                                                            const isCurrent = candidate.status === s.value;
+                                                                            return (
+                                                                                <button
+                                                                                    key={s.value}
+                                                                                    type="button"
+                                                                                    onClick={(e) => {
+                                                                                        setActiveStatusDropdown(null);
+                                                                                        if (!isCurrent) {
+                                                                                            handleUpdateStatus(candidate.id, s.value, e);
+                                                                                        }
+                                                                                    }}
+                                                                                    className={`w-full flex items-center justify-between px-3 py-1.5! rounded-lg! text-sm! transition-all duration-150 ${isCurrent
+                                                                                        ? 'bg-indigo-50/90 text-indigo-700 font-extrabold shadow-2xs border border-indigo-100'
+                                                                                        : 'text-slate-600 font-bold hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]'
+                                                                                        }`}
+                                                                                >
+                                                                                    <span className="flex items-center gap-2.5">
+                                                                                        <span className={`w-2 h-2 rounded-full ${s.dotColor} ${isCurrent ? 'ring-2 ring-indigo-300' : ''}`}></span>
+                                                                                        <span>{s.label}</span>
+                                                                                    </span>
+                                                                                </button>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <button
+                                                                onClick={() => setSelectedCandidate(candidate)}
+                                                                className="p-2 rounded-lg! bg-indigo-50 hover:bg-indigo-100 hover:shadow-xs active:scale-[0.98] text-indigo-700 transition-all group/btn"
+                                                                title="Open AI Candidate Deep-Dive Drawer"
+                                                            >
+                                                                <ChevronRight size={18} className="group-hover/btn:translate-x-0.5 transition-transform" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -549,9 +648,21 @@ const RecruiterResumeAIPage = () => {
                             </div>
                         )}
                     </div>
-
                 </div>
             </div>
+
+            {/* Interactive Slide-Over Deep-Dive Candidate Drawer Component */}
+            <CandidateDeepDiveDrawer
+                candidate={selectedCandidate}
+                onClose={() => setSelectedCandidate(null)}
+                getScoreBadge={getScoreBadge}
+                statusChoices={STATUS_CHOICES}
+                updatingId={updatingId}
+                onUpdateStatus={handleUpdateStatus}
+                onPromptClick={handlePromptClick}
+                onCopyBrief={copyCandidateBrief}
+            />
+
         </main>
     );
 };
