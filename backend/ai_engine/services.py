@@ -1,8 +1,11 @@
 import os
 import json
+import warnings
 import pdfplumber
 # python-docx (optional) is imported lazily inside extract_text_from_docx to prevent startup failures
-import google.generativeai as genai
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=FutureWarning)
+    import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -3,8 +3,7 @@ import tempfile
 
 from django.http import JsonResponse
 
-from rest_framework.decorators import api_view, permission_classes, parser_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 
 from .services import extract_text_from_file, analyze_resume_standalone
@@ -12,7 +11,6 @@ from .models import ResumeAnalysis
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
 def analyze_resume(request):
     """
