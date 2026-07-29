@@ -20,7 +20,11 @@ const Login = () => {
     const [showPass, setShowPass] = useState(false);
     const [role, setRole] = useState("recruiter");
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, auth } = useAuth();
+
+    if (auth.isAuthenticated) {
+        navigate('/dashboard')
+    }
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(schema),

@@ -1,18 +1,17 @@
-import { Sparkles, LogOut, ChevronRight, ChevronLeft, LayoutDashboard, Briefcase, Users, Settings, FileText, BarChart3, Calendar, MessageSquare, Bell } from "lucide-react";
+import { Sparkles, LogOut, ChevronRight, ChevronLeft, LayoutDashboard, Briefcase, Users, Settings, FileText, BarChart3, Calendar, Building2 } from "lucide-react";
 import { T } from "../../Js/theme.js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext.jsx';
 
 const RecruiterSidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard" },
+    { icon: Building2, label: "Company Profile" },
     { icon: Briefcase, label: "Jobs" },
     { icon: FileText, label: "Applications" },
     { icon: Users, label: "Candidates" },
     { icon: Sparkles, label: "Resume AI" },
     { icon: BarChart3, label: "Analytics" },
     { icon: Calendar, label: "Interview" },
-    { icon: MessageSquare, label: "Messages" },
-    { icon: Bell, label: "Notifications" },
     { icon: Settings, label: "Settings" },
 ];
 const CandidateSidebarItems = [

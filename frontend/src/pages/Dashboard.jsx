@@ -9,6 +9,8 @@ import RecruiterJobsPage from '../components/Dashboard/RecruiterJobsPage.jsx';
 import RecruiterApplicationsPage from '../components/Dashboard/RecruiterApplicationsPage.jsx';
 import RecruiterCandidatesPage from '../components/Dashboard/RecruiterCandidatesPage.jsx';
 import RecruiterResumeAIPage from '../components/Dashboard/RecruiterResumeAIPage.jsx';
+import RecruiterAnalyticsPage from '../components/Dashboard/RecruiterAnalyticsPage.jsx';
+import RecruiterInterviewsPage from '../components/Dashboard/RecruiterInterviewsPage.jsx';
 import { T } from "../Js/theme.js";
 
 const Dashboard = () => {
@@ -20,14 +22,13 @@ const Dashboard = () => {
 
     const path = location.pathname;
     let active = "Dashboard";
-    if (path.includes('/jobs')) active = "Jobs";
+    if (path.includes('/company-profile')) active = "Company Profile";
+    else if (path.includes('/jobs')) active = "Jobs";
     else if (path.includes('/applications')) active = "Applications";
     else if (path.includes('/candidates')) active = "Candidates";
     else if (path.includes('/resume-ai')) active = "Resume AI";
     else if (path.includes('/analytics')) active = "Analytics";
     else if (path.includes('/interview')) active = "Interview";
-    else if (path.includes('/messages')) active = "Messages";
-    else if (path.includes('/notifications')) active = "Notifications";
     else if (path.includes('/settings')) active = "Settings";
 
     const handleSetActive = (tab) => {
@@ -101,7 +102,12 @@ const Dashboard = () => {
         if (active === "Resume AI" && role === 'recruiter') {
             return <RecruiterResumeAIPage />;
         }
-
+        if (active === "Analytics" && role === 'recruiter') {
+            return <RecruiterAnalyticsPage />;
+        }
+        if (active === "Interview" && role === 'recruiter') {
+            return <RecruiterInterviewsPage />;
+        }
         if (role !== 'recruiter') {
             return <CandidateDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;
         }

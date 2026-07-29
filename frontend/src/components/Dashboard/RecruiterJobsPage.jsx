@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
 import { T } from '../../Js/theme.js';
 import PostJobModal from '../Modals/PostJobModal';
@@ -10,6 +11,19 @@ import RecruiterEditJob from './RecruiterEditJob';
 import toast from 'react-hot-toast';
 
 const SORT_OPTIONS = ['Newest First', 'Most Applicants', 'Salary (High)', 'Salary (Low)'];
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 const getTimeAgo = (date) => {
     if (!date) return 'Recently';
@@ -157,11 +171,16 @@ const RecruiterJobsPage = () => {
 
     return (
         <>
-            <main className="flex-1 pb-12">
+            <motion.main
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="flex-1 pb-12"
+            >
                 <div className="space-y-6 p-6 lg:p-8">
 
                     {/* Header */}
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <motion.div variants={itemVariants} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-slate-900">
                                 <Briefcase className="text-indigo-500" size={24} />
@@ -169,10 +188,10 @@ const RecruiterJobsPage = () => {
                             </h2>
                             <p className="mt-1 text-sm text-slate-500">Manage and track all posted jobs.</p>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Search / Sort bar */}
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <motion.div variants={itemVariants} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200 focus-within:ring-2 focus-within:ring-indigo-400 transition-all sm:w-80 shadow-sm w-full">
                             <Search size={16} className="text-slate-400 shrink-0" />
                             <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
@@ -204,18 +223,18 @@ const RecruiterJobsPage = () => {
                                 <span className="whitespace-nowrap">Post Job</span>
                             </button>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Results count */}
-                    <p className="text-xs font-medium text-slate-400">
+                    <motion.p variants={itemVariants} className="text-xs font-medium text-slate-400">
                         Showing <span className="text-slate-700">{filteredJobs.length}</span> of <span className="text-slate-700">{jobs.length}</span> jobs
-                    </p>
+                    </motion.p>
 
                     {/* Jobs List */}
                     {filteredJobs.length > 0 ? (
                         <>
                             {/* Mobile Card View (visible only < md) */}
-                            <div className="grid grid-cols-1 gap-4 md:hidden">
+                            <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 md:hidden">
                                 {filteredJobs.map((job) => {
                                     const skills = getSkills(job);
                                     return (
@@ -275,10 +294,10 @@ const RecruiterJobsPage = () => {
                                         </div>
                                     );
                                 })}
-                            </div>
+                            </motion.div>
 
                             {/* Desktop Table View (visible md+) */}
-                            <div className="hidden md:block overflow-auto rounded-2xl border border-slate-100 bg-white shadow-sm">
+                            <motion.div variants={itemVariants} className="hidden md:block overflow-auto rounded-2xl border border-slate-100 bg-white shadow-sm">
                                 <table className="w-full text-left text-sm">
                                     <thead>
                                         <tr className="border-b border-slate-100 bg-slate-50/80">
@@ -350,10 +369,10 @@ const RecruiterJobsPage = () => {
                                         })}
                                     </tbody>
                                 </table>
-                            </div>
+                            </motion.div>
                         </>
                     ) : (
-                        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-20 px-6 text-center">
+                        <motion.div variants={itemVariants} className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-20 px-6 text-center">
                             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: `${T.primary}10` }}>
                                 <Briefcase size={28} style={{ color: T.primary }} />
                             </div>
@@ -370,10 +389,10 @@ const RecruiterJobsPage = () => {
                                     <Plus size={16} /> Post Your First Job
                                 </button>
                             )}
-                        </div>
+                        </motion.div>
                     )}
                 </div>
-            </main>
+            </motion.main>
 
             <PostJobModal show={showPostModal} handleClose={() => setShowPostModal(false)} onJobPosted={fetchJobs} />
         </>

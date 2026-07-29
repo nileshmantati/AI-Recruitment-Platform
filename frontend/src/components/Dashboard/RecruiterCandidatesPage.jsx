@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
 import { T } from '../../Js/theme.js';
 import {
@@ -7,6 +8,19 @@ import {
 import CandidateDetails from './CandidateDetails.jsx';
 
 const STATUS_OPTIONS = ['All', 'PENDING', 'EVALUATED', 'SHORTLISTED', 'REJECTED', 'INTERVIEW_SCHEDULED'];
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 const RecruiterCandidatesPage = () => {
     const [applications, setApplications] = useState([]);
@@ -104,11 +118,16 @@ const RecruiterCandidatesPage = () => {
     }
 
     return (
-        <main className="flex-1 pb-12">
+        <motion.main
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="flex-1 pb-12"
+        >
             <div className="space-y-6 p-6 lg:p-8">
 
                 {/* Header */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <motion.div variants={itemVariants} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-slate-900">
                             <User className="text-indigo-500" size={24} />
@@ -116,10 +135,10 @@ const RecruiterCandidatesPage = () => {
                         </h2>
                         <p className="mt-1 text-sm text-slate-500">View and explore candidates who applied to your open roles.</p>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Filter Bar */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <motion.div variants={itemVariants} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200 focus-within:ring-2 focus-within:ring-indigo-400 transition-all sm:w-80 shadow-sm w-full">
                         <Search size={16} className="text-slate-400 shrink-0" />
                         <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
@@ -145,14 +164,14 @@ const RecruiterCandidatesPage = () => {
                             )}
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
-                <p className="text-xs font-medium text-slate-400">
+                <motion.p variants={itemVariants} className="text-xs font-medium text-slate-400">
                     Showing <span className="text-slate-700">{filteredCandidates.length}</span> candidates
-                </p>
+                </motion.p>
 
                 {filteredCandidates.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredCandidates.map((candidate) => (
                             <div key={candidate.id} onClick={() => setSelectedCandidate(candidate)}
                                 className="group flex flex-col rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer">
@@ -201,9 +220,9 @@ const RecruiterCandidatesPage = () => {
                                 </div>
                             </div>
                         ))}
-                    </div>
+                    </motion.div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white py-24 px-6 text-center">
+                    <motion.div variants={itemVariants} className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white py-24 px-6 text-center">
                         <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full" style={{ background: `${T.primary}10` }}>
                             <User size={32} style={{ color: T.primary }} />
                         </div>
@@ -213,10 +232,10 @@ const RecruiterCandidatesPage = () => {
                         <p className="mt-2 max-w-sm text-sm text-slate-500">
                             {searchQuery || statusFilter !== 'All' ? 'Try adjusting your search criteria.' : 'As candidates apply to your jobs, their profiles will appear here.'}
                         </p>
-                    </div>
+                    </motion.div>
                 )}
             </div>
-        </main>
+        </motion.main>
     );
 };
 

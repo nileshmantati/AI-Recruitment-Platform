@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../services/api';
 import { Briefcase, Users, FileText, CheckCircle2 } from 'lucide-react';
@@ -16,6 +17,19 @@ const getTimeAgo = (date) => {
     if (minutes < 60) return `${minutes} min ago`;
     if (hours < 24) return `${hours} hr${hours > 1 ? "s" : ""} ago`;
     return `${days} day${days > 1 ? "s" : ""} ago`;
+};
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
 
 const AnalyticsOverview = () => {
@@ -70,16 +84,20 @@ const AnalyticsOverview = () => {
     if (!stats) return null;
 
     return (
-        <>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="space-y-6"
+        >
+            <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <KpiCard icon={Briefcase} label="Total Jobs" value={stats.total_jobs} color={T.primary} gradient />
                 <KpiCard icon={Users} label="Total Applications" value={stats.total_applications} color={T.secondary} gradient />
                 <KpiCard icon={CheckCircle2} label="Active Jobs" value={stats.is_active} color={T.success} />
                 <KpiCard icon={FileText} label="Shortlisted" value={stats.shortlisted} color={T.warning} />
-                {/* <KpiCard icon={Target} label="AI Match Rate" value={"92%"} color={T.warning} /> */}
-                {/* <KpiCard icon={Award} label="Hiring Success" value={"87%"} color={T.success} /> */}
-            </div>
-            <div>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
                 {stats.total_jobs > 0 && (
                     <div className="rounded-2xl bg-white p-6 shadow-sm">
                         <h6 className="mb-6 text-lg font-semibold text-gray-900">
@@ -127,8 +145,9 @@ const AnalyticsOverview = () => {
                         </div>
                     </div>
                 )}
-            </div>
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 xl:grid-cols-3">
                 <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm xl:col-span-2">
                     <div className="mb-4 flex items-center justify-between">
                         <h3 className="text-lg! font-bold mb-0 text-slate-900">Recent applications</h3>
@@ -149,10 +168,10 @@ const AnalyticsOverview = () => {
                                 {recentApplications.map((a) => {
                                     const style = statusStyles[a.status] || { bg: "#F1F5F9", color: "#475569", label: a.status };
                                     return (
-                                        <tr key={a.id} className="border-t border-slate-50 text-center">
+                                        <tr key={a.id} className="border-t border-slate-50 text-center hover:bg-slate-50 transition-colors">
                                             <td className="py-3">
                                                 <div className="flex items-center gap-2.5">
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: T.accent }}>
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm" style={{ background: T.accent }}>
                                                         {a.candidate_name ? a.candidate_name.substring(0, 2).toUpperCase() : '??'}
                                                     </div>
                                                     <span className="font-semibold text-slate-800">{a.candidate_name}</span>
@@ -161,7 +180,7 @@ const AnalyticsOverview = () => {
                                             <td className="py-3 text-slate-500 capitalize">{a.job_details?.title || 'Unknown Role'}</td>
                                             <td className="py-3 font-semibold text-slate-800">{a.resume_score}%</td>
                                             <td className="py-3">
-                                                <span className="rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: style.bg, color: style.color }}>
+                                                <span className="rounded-full px-2.5 py-1 text-xs font-semibold border border-slate-100" style={{ background: style.bg, color: style.color }}>
                                                     {style.label}
                                                 </span>
                                             </td>
@@ -173,8 +192,8 @@ const AnalyticsOverview = () => {
                         </table>
                     </div>
                 </div>
-            </div>
-        </>
+            </motion.div>
+        </motion.div>
     );
 };
 

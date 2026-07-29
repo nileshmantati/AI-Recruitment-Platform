@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { T } from '../../Js/theme.js';
 import {
     Sparkles, UploadCloud, Bot, Search,
-    TrendingUp, Award, AlertCircle, ChevronRight, X,
+    TrendingUp, Award, AlertCircle, X,
     ExternalLink, ChevronDown
 } from 'lucide-react';
 import api, { analyzeResume } from '../../services/api';
@@ -16,6 +17,19 @@ const STATUS_CHOICES = [
     { value: 'INTERVIEW_SCHEDULED', label: 'Interview', bg: 'bg-indigo-50 text-indigo-700 border-indigo-300', dotColor: 'bg-indigo-500' },
     { value: 'REJECTED', label: 'Rejected', bg: 'bg-rose-50 text-rose-700 border-rose-300', dotColor: 'bg-rose-500' }
 ];
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 const RecruiterResumeAIPage = () => {
     const [applications, setApplications] = useState([]);
@@ -263,7 +277,12 @@ const RecruiterResumeAIPage = () => {
     }
 
     return (
-        <main className="flex-1 pb-16 bg-slate-50/50 min-h-screen">
+        <motion.main
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="flex-1 pb-16 bg-slate-50/50 min-h-screen"
+        >
             <div className="space-y-8 p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
 
                 {/* Hero Header Section */}
@@ -295,7 +314,7 @@ const RecruiterResumeAIPage = () => {
                 </div> */}
 
                 {/* AI Interactive Prompt Engine */}
-                <div className="space-y-3">
+                <motion.div variants={itemVariants} className="space-y-3">
                     <div className="relative rounded-xl bg-white shadow-xl shadow-indigo-500/5 border border-slate-200/80 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-indigo-500/10 focus-within:border-indigo-400">
                         <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                             <Bot className={`w-6 h-6 transition-colors ${isScanning ? 'text-indigo-600 animate-bounce' : 'text-slate-400'}`} />
@@ -347,12 +366,12 @@ const RecruiterResumeAIPage = () => {
                             </button>
                         ))}
                     </div>
-                </div>
+                </motion.div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                     {/* Left Column: Interactive Parser & Analytics Hub (4 Cols) */}
-                    <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8">
+                    <motion.div variants={itemVariants} className="lg:col-span-4 space-y-6 lg:sticky lg:top-8">
 
                         {/* Futuristic Bulk Parser Dropzone */}
                         <div
@@ -432,10 +451,10 @@ const RecruiterResumeAIPage = () => {
                             </div>
                         </div>
 
-                    </div>
+                    </motion.div>
 
                     {/* Right Column: AI Leaderboard & Match Score Cards (8 Cols) */}
-                    <div className="lg:col-span-8 space-y-5">
+                    <motion.div variants={itemVariants} className="lg:col-span-8 space-y-5">
 
                         {/* Leaderboard Top Bar & Tier Tabs */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -511,143 +530,101 @@ const RecruiterResumeAIPage = () => {
                                     return (
                                         <div
                                             key={candidate.id}
-                                            className={`group relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${badge.border} ${isDropdownOpen ? 'z-30 overflow-visible shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/20' : 'overflow-hidden z-0'
+                                            className={`group relative flex flex-col py-3.5! px-5! rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 border-l-4 ${badge.border} ${isDropdownOpen ? 'z-30 overflow-visible shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/20' : 'overflow-hidden z-0'
                                                 }`}
                                         >
                                             {/* Subtle Card Background Glow */}
                                             <div className="absolute right-0 bottom-0 w-64 h-64 bg-indigo-50/30 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-                                            {/* Candidate Main Info */}
-                                            <div className="flex items-start gap-4 flex-1 min-w-0 z-10">
-                                                <div className="shrink-0 pt-1">
-                                                    {getRankDisplay(idx)}
+                                            {/* Row: Minimal Information */}
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full z-10 cursor-pointer" onClick={() => setSelectedCandidate(candidate)}>
+                                                <div className="flex items-center sm:items-center gap-4 flex-1 min-w-0">
+                                                    <div className="shrink-0 pt-1 sm:pt-0">
+                                                        {getRankDisplay(idx)}
+                                                    </div>
+
+                                                    <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-0">
+                                                        <h4
+                                                            className="font-extrabold mb-0 text-slate-900 text-lg sm:text-xl capitalize truncate hover:text-indigo-600 transition-colors cursor-pointer flex items-center gap-2 group/name"
+                                                            title="Click to view Deep-Dive Profile"
+                                                        >
+                                                            {candidate.name}
+                                                            <ExternalLink size={15} className="opacity-0 group-hover/name:opacity-100 text-indigo-500 transition-opacity shrink-0" />
+                                                        </h4>
+                                                        <span className="text-xs font-semibold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 truncate max-w-[220px] border border-slate-200/60">
+                                                            {candidate.role}
+                                                        </span>
+                                                    </div>
                                                 </div>
 
-                                                <div className="flex-1 min-w-0 space-y-3">
-                                                    <div>
-                                                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                                                            <h4
-                                                                onClick={() => setSelectedCandidate(candidate)}
-                                                                className="font-extrabold text-slate-900 text-lg sm:text-xl capitalize truncate hover:text-indigo-600 transition-colors cursor-pointer flex items-center gap-2 group/name"
-                                                                title="Click to view Deep-Dive Profile"
-                                                            >
-                                                                {candidate.name}
-                                                                <ExternalLink size={15} className="opacity-0 group-hover/name:opacity-100 text-indigo-500 transition-opacity" />
-                                                            </h4>
-                                                            <span className="text-xs font-semibold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 truncate max-w-[220px] border border-slate-200/60">
-                                                                {candidate.role}
+                                                {/* Right Actions: Status Dropdown & Expand Arrow */}
+                                                <div className="flex items-center justify-end gap-2 w-full sm:w-auto mt-2 border-t sm:border-t-0 border-slate-100 shrink-0 z-10">
+                                                    <div className="relative flex gap-2 items-center justify-between text-left" onClick={(e) => e.stopPropagation()}>
+                                                        <div className="inline-flex items-center gap-2">
+                                                            <span className={`px-3 py-1.5 rounded-xl text-md font-bold border ${badge.classes} shadow! flex items-center gap-1.5`}>
+                                                                <span className={`w-2 h-2 rounded-full ${badge.dot} animate-pulse`}></span>
+                                                                {candidate.score}%
                                                             </span>
-                                                            <div className="inline-flex items-center gap-2">
-                                                                <span className={`px-3 py-1.5 rounded-xl text-md font-bold border ${badge.classes} shadow! flex items-center gap-1.5`}>
-                                                                    <span className={`w-2 h-2 rounded-full ${badge.dot} animate-pulse`}></span>
-                                                                    {candidate.score}%
-                                                                </span>
-                                                                {/* <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mt-1">
-                                                                    {badge.tier}
-                                                                </span> */}
-                                                            </div>
                                                         </div>
-                                                    </div>
+                                                        <button
+                                                            type="button"
+                                                            disabled={updatingId === candidate.id}
+                                                            onClick={() => setActiveStatusDropdown(isDropdownOpen ? null : candidate.id)}
+                                                            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg! text-[14px]! font-semibold uppercase tracking-wider border cursor-pointer shadow-2xs hover:shadow-sm active:scale-[0.98] transition-all ${STATUS_CHOICES.find(s => s.value === candidate.status)?.bg || 'bg-slate-100 text-slate-700 border-slate-300'
+                                                                } ${updatingId === candidate.id ? 'opacity-50 pointer-events-none animate-pulse' : ''}`}
+                                                            title="Change application status"
+                                                        >
+                                                            <span className={`w-2 h-2 rounded-full shadow-2xs ${STATUS_CHOICES.find(s => s.value === candidate.status)?.dotColor || 'bg-slate-500'} ${isDropdownOpen ? 'animate-ping' : ''}`}></span>
+                                                            <span>{candidate.status.replace('_', ' ')}</span>
+                                                            <ChevronDown size={14} className={`ml-0.5 shrink-0 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180 text-indigo-600' : 'text-slate-400'}`} />
+                                                        </button>
 
-                                                    {/* AI Summary Block */}
-                                                    {/* <div className="text-sm text-slate-600 flex items-start gap-2">
-                                                        <Sparkles size={15} className="text-amber-500 shrink-0 mt-0.5" />
-                                                        <p className="line-clamp-2 leading-snug">
-                                                            {candidate.summary}
-                                                        </p>
-                                                    </div> */}
-
-                                                    {/* Skills Showcase & Gaps */}
-                                                    {/* <div className="flex flex-wrap items-center gap-2 pt-1">
-                                                        <span className="text-[11px] font-semibold uppercase text-slate-600 tracking-wider mr-1">Extracted Competencies:</span>
-
-                                                        {candidate.strengths.length > 0 ? (
-                                                            candidate.strengths.map((skill, i) => (
-                                                                <span
-                                                                    key={i}
-                                                                    onClick={() => handlePromptClick(skill)}
-                                                                    className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50/90 border border-emerald-200/70 px-2.5 py-1 rounded-xl cursor-pointer hover:bg-emerald-100 hover:shadow-xs active:scale-[0.98] transition-all duration-200"
-                                                                >
-                                                                    <CheckCircle size={13} className="text-emerald-600 shrink-0" /> {skill}
-                                                                </span>
-                                                            ))
-                                                        ) : (
-                                                            <span className="text-xs text-slate-400 italic font-medium">No verified strengths indexed</span>
-                                                        )}
-
-                                                        {candidate.missing_skills.length > 0 && (
-                                                            <div className="flex items-center gap-1.5 ml-auto sm:ml-0 mt-1 sm:mt-0">
-                                                                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-lg flex items-center gap-1">
-                                                                    <AlertCircle size={10} /> Missing: {candidate.missing_skills.join(", ")}
-                                                                </span>
+                                                        {/* Modern Tailwind Custom Status Options Box */}
+                                                        {isDropdownOpen && (
+                                                            <div className="absolute right-0 sm:left-auto sm:right-0! top-full mt-2 w-52 p-2 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-xl shadow-slate-900/10 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150 origin-top-right sm:origin-top-left" style={{ zIndex: 100 }}>
+                                                                {STATUS_CHOICES.map(s => {
+                                                                    const isCurrent = candidate.status === s.value;
+                                                                    return (
+                                                                        <button
+                                                                            key={s.value}
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                setActiveStatusDropdown(null);
+                                                                                if (!isCurrent) {
+                                                                                    handleUpdateStatus(candidate.id, s.value, e);
+                                                                                }
+                                                                            }}
+                                                                            className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg! text-sm! transition-all duration-150 ${isCurrent
+                                                                                ? 'bg-indigo-50/90 text-indigo-700 font-extrabold shadow-2xs border border-indigo-100'
+                                                                                : 'text-slate-600 font-bold hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]'
+                                                                                }`}
+                                                                        >
+                                                                            <span className="flex items-center gap-2.5">
+                                                                                <span className={`w-2 h-2 rounded-full ${s.dotColor} ${isCurrent ? 'ring-2 ring-indigo-300' : ''}`}></span>
+                                                                                <span>{s.label}</span>
+                                                                            </span>
+                                                                        </button>
+                                                                    );
+                                                                })}
                                                             </div>
                                                         )}
-                                                    </div> */}
-
-                                                    {/* Score Ring & Status Dashboard */}
-                                                    <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto  pt-4 sm:pt-0 sm:pl-6 shrink-0 z-10">
-                                                        <div className="flex items-center gap-2 mt-3 sm:mt-4 relative" onClick={(e) => e.stopPropagation()}>
-                                                            <div className="relative inline-block text-left">
-                                                                <button
-                                                                    type="button"
-                                                                    disabled={updatingId === candidate.id}
-                                                                    onClick={() => setActiveStatusDropdown(isDropdownOpen ? null : candidate.id)}
-                                                                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg! text-[14px]! font-semibold uppercase tracking-wider border cursor-pointer shadow-2xs hover:shadow-sm active:scale-[0.98] transition-all ${STATUS_CHOICES.find(s => s.value === candidate.status)?.bg || 'bg-slate-100 text-slate-700 border-slate-300'
-                                                                        } ${updatingId === candidate.id ? 'opacity-50 pointer-events-none animate-pulse' : ''}`}
-                                                                    title="Change application status"
-                                                                >
-                                                                    <span className={`w-2 h-2 rounded-full shadow-2xs ${STATUS_CHOICES.find(s => s.value === candidate.status)?.dotColor || 'bg-slate-500'} ${isDropdownOpen ? 'animate-ping' : ''}`}></span>
-                                                                    <span>{candidate.status.replace('_', ' ')}</span>
-                                                                    <ChevronDown size={14} className={`ml-0.5 shrink-0 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180 text-indigo-600' : 'text-slate-400'}`} />
-                                                                </button>
-
-                                                                {/* Modern Tailwind Custom Status Options Box */}
-                                                                {isDropdownOpen && (
-                                                                    <div className="absolute right-0 sm:right-auto sm:left-0 top-full mt-2 w-52 p-2 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-xl shadow-slate-900/10 z-50 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150 origin-top-right sm:origin-top-left">
-                                                                        {STATUS_CHOICES.map(s => {
-                                                                            const isCurrent = candidate.status === s.value;
-                                                                            return (
-                                                                                <button
-                                                                                    key={s.value}
-                                                                                    type="button"
-                                                                                    onClick={(e) => {
-                                                                                        setActiveStatusDropdown(null);
-                                                                                        if (!isCurrent) {
-                                                                                            handleUpdateStatus(candidate.id, s.value, e);
-                                                                                        }
-                                                                                    }}
-                                                                                    className={`w-full flex items-center justify-between px-3 py-1.5! rounded-lg! text-sm! transition-all duration-150 ${isCurrent
-                                                                                        ? 'bg-indigo-50/90 text-indigo-700 font-extrabold shadow-2xs border border-indigo-100'
-                                                                                        : 'text-slate-600 font-bold hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]'
-                                                                                        }`}
-                                                                                >
-                                                                                    <span className="flex items-center gap-2.5">
-                                                                                        <span className={`w-2 h-2 rounded-full ${s.dotColor} ${isCurrent ? 'ring-2 ring-indigo-300' : ''}`}></span>
-                                                                                        <span>{s.label}</span>
-                                                                                    </span>
-                                                                                </button>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <button
-                                                                onClick={() => setSelectedCandidate(candidate)}
-                                                                className="p-2 rounded-lg! bg-indigo-50 hover:bg-indigo-100 hover:shadow-xs active:scale-[0.98] text-indigo-700 transition-all group/btn"
-                                                                title="Open AI Candidate Deep-Dive Drawer"
-                                                            >
-                                                                <ChevronRight size={18} className="group-hover/btn:translate-x-0.5 transition-transform" />
-                                                            </button>
-                                                        </div>
                                                     </div>
+
+                                                    {/* <button
+                                                        onClick={() => setSelectedCandidate(candidate)}
+                                                        className="p-2 rounded-lg! bg-indigo-50 hover:bg-indigo-100 hover:shadow-xs active:scale-[0.98] text-indigo-700 transition-all group/btn"
+                                                        title="Open AI Candidate Deep-Dive Drawer"
+                                                    >
+                                                        <ChevronRight size={18} className="group-hover/btn:translate-x-0.5 transition-transform" />
+                                                    </button> */}
                                                 </div>
                                             </div>
                                         </div>
                                     );
                                 })}
-                            </div>
+                            </div >
                         )}
-                    </div>
+                    </motion.div>
                 </div>
             </div>
 
@@ -663,7 +640,7 @@ const RecruiterResumeAIPage = () => {
                 onCopyBrief={copyCandidateBrief}
             />
 
-        </main>
+        </motion.main>
     );
 };
 

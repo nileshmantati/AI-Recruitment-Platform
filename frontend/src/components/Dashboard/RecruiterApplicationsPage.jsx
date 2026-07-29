@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
 import { T } from '../../Js/theme.js';
 import {
@@ -8,6 +9,19 @@ import ApplicationDetails from './ApplicationDetails.jsx';
 import toast from 'react-hot-toast';
 
 const STATUS_OPTIONS = ['All', 'PENDING', 'EVALUATED', 'SHORTLISTED', 'REJECTED', 'INTERVIEW_SCHEDULED'];
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 const getTimeAgo = (date) => {
     if (!date) return 'Recently';
@@ -130,11 +144,16 @@ const RecruiterApplicationsPage = () => {
     }
 
     return (
-        <main className="flex-1 pb-12">
+        <motion.main
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="flex-1 pb-12"
+        >
             <div className="space-y-6 p-6 lg:p-8">
 
                 {/* Header */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <motion.div variants={itemVariants} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-slate-900">
                             <FileText className="text-indigo-500" size={24} />
@@ -142,10 +161,10 @@ const RecruiterApplicationsPage = () => {
                         </h2>
                         <p className="mt-1 text-sm text-slate-500">Review candidates who applied to your jobs.</p>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Filter Bar */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <motion.div variants={itemVariants} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200 focus-within:ring-2 focus-within:ring-indigo-400 transition-all sm:w-80 shadow-sm w-full">
                         <Search size={16} className="text-slate-400 shrink-0" />
                         <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
@@ -171,16 +190,16 @@ const RecruiterApplicationsPage = () => {
                             )}
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
-                <p className="text-xs font-medium text-slate-400">
+                <motion.p variants={itemVariants} className="text-xs font-medium text-slate-400">
                     Showing <span className="text-slate-700">{filteredApplications.length}</span> of <span className="text-slate-700">{applications.length}</span> applications
-                </p>
+                </motion.p>
 
                 {filteredApplications.length > 0 ? (
                     <>
                         {/* Mobile View (< md) */}
-                        <div className="grid grid-cols-1 gap-4 md:hidden">
+                        <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 md:hidden">
                             {filteredApplications.map((app) => (
                                 <div key={app.id} className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:shadow-md">
                                     <div className="flex items-start justify-between gap-3">
@@ -218,10 +237,10 @@ const RecruiterApplicationsPage = () => {
                                     </div>
                                 </div>
                             ))}
-                        </div>
+                        </motion.div>
 
                         {/* Desktop View (md+) */}
-                        <div className="hidden md:block overflow-auto rounded-2xl border border-slate-100 bg-white shadow-sm">
+                        <motion.div variants={itemVariants} className="hidden md:block overflow-auto rounded-2xl border border-slate-100 bg-white shadow-sm">
                             <table className="w-full text-left text-sm">
                                 <thead>
                                     <tr className="border-b border-slate-100 bg-slate-50/80">
@@ -271,10 +290,10 @@ const RecruiterApplicationsPage = () => {
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
+                        </motion.div>
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-20 px-6 text-center">
+                    <motion.div variants={itemVariants} className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-20 px-6 text-center">
                         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: `${T.primary}10` }}>
                             <FileText size={28} style={{ color: T.primary }} />
                         </div>
@@ -284,10 +303,10 @@ const RecruiterApplicationsPage = () => {
                         <p className="mt-2 max-w-sm text-sm text-slate-500">
                             {searchQuery || statusFilter !== 'All' ? 'Try adjusting your search or filters.' : 'When candidates apply to your jobs, they will appear here.'}
                         </p>
-                    </div>
+                    </motion.div>
                 )}
             </div>
-        </main>
+        </motion.main>
     );
 };
 

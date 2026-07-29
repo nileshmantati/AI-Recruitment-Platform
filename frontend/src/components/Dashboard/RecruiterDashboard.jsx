@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import api, { updateApplicationStatus } from '../../services/api';
 import PostJobModal from '../Modals/PostJobModal';
@@ -14,6 +15,19 @@ const typeStyles = {
     'Contract': 'bg-purple-100 text-purple-700 ring-purple-500/20',
     'Remote': 'bg-sky-100 text-sky-700 ring-sky-500/20',
     'Internship': 'bg-pink-100 text-pink-700 ring-pink-500/20',
+};
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
 
 const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
@@ -114,10 +128,15 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
 
     return (
         <>
-            <main className="flex-1 pb-12">
+            <motion.main
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="flex-1 pb-12"
+            >
                 <div className="space-y-8 p-6 lg:p-8">
                     {/* Dashboard Header */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight mb-1 flex items-center gap-2">
                                 Good morning, {auth.username}
@@ -125,14 +144,14 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
                             </h2>
                             <p className="text-slate-500 font-medium">Here's what's happening with your job postings today.</p>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {jobs.length ? <AnalyticsOverview /> : null}
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                         {/* LEFT SIDEBAR */}
-                        <div className="lg:col-span-3">
+                        <motion.div variants={itemVariants} className="lg:col-span-3">
                             <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200/70 p-6 h-full flex flex-col">
                                 <div className="flex items-center justify-between mb-2">
                                     <div>
@@ -205,10 +224,10 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
                                     )}
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* RIGHT CONTENT */}
-                        <div className="lg:col-span-9">
+                        <motion.div variants={itemVariants} className="lg:col-span-9">
                             <div className="bg-white rounded-2xl shadow p-6 h-full">
                                 <h3 className="text-lg! font-bold mb-0 text-slate-900 mb-4">
                                     {selectedJob
@@ -334,10 +353,10 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
-            </main>
+            </motion.main>
 
             {/* Mount the Modal Component */}
             <PostJobModal

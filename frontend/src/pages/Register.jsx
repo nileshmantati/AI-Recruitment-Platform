@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -36,7 +36,7 @@ const Register = () => {
     const navigate = useNavigate();
 
     if (auth.isAuthenticated) {
-        return <Navigate to="/dashboard" replace />;
+        navigate('/dashboard')
     }
 
     const onSubmit = async (data) => {
