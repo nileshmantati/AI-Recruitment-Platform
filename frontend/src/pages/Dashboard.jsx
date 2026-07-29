@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DashboardSidebar from '../components/Dashboard/DashboardSidebar.jsx';
@@ -11,6 +11,7 @@ import RecruiterCandidatesPage from '../components/Dashboard/RecruiterCandidates
 import RecruiterResumeAIPage from '../components/Dashboard/RecruiterResumeAIPage.jsx';
 import RecruiterAnalyticsPage from '../components/Dashboard/RecruiterAnalyticsPage.jsx';
 import RecruiterInterviewsPage from '../components/Dashboard/RecruiterInterviewsPage.jsx';
+import RecruiterCompanyProfilePage from '../components/Dashboard/RecruiterCompanyProfilePage.jsx';
 import { T } from "../Js/theme.js";
 
 const Dashboard = () => {
@@ -19,6 +20,11 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
     const [role] = useState(auth.role.toLowerCase());
+
+    // Onboarding state for recruiters
+    const [isProfileCompleted, setIsProfileCompleted] = useState(() => {
+        return localStorage.getItem('profile_completed') === 'true';
+    });
 
     const path = location.pathname;
     let active = "Dashboard";
@@ -31,7 +37,16 @@ const Dashboard = () => {
     else if (path.includes('/interview')) active = "Interview";
     else if (path.includes('/settings')) active = "Settings";
 
+    useEffect(() => {
+        if (role === 'recruiter' && !isProfileCompleted && !path.includes('/company-profile')) {
+            navigate('/dashboard/company-profile', { replace: true });
+        }
+    }, [role, isProfileCompleted, path, navigate]);
+
     const handleSetActive = (tab) => {
+        if (role === 'recruiter' && !isProfileCompleted) {
+            return; // Prevent navigation away from onboarding
+        }
         if (tab === "Dashboard") navigate('/dashboard');
         else if (tab === "Resume AI") navigate('/dashboard/resume-ai');
         else navigate(`/dashboard/${tab.toLowerCase().replace(" ", "-")}`);
@@ -90,6 +105,12 @@ const Dashboard = () => {
     };
 
     const renderContent = () => {
+        if (active === "Company Profile" && role === 'recruiter') {
+            return <RecruiterCompanyProfilePage
+                isProfileCompleted={isProfileCompleted}
+                setIsProfileCompleted={setIsProfileCompleted}
+            />;
+        }
         if (active === "Jobs" && role === 'recruiter') {
             return <RecruiterJobsPage />;
         }
