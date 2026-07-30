@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Modal, Button, Form, Spinner } from 'react-bootstrap';
 import { scheduleInterview } from '../../services/api';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, X, Calendar } from 'lucide-react';
 
 const ScheduleInterviewModal = ({ show, handleClose, application }) => {
     const [datetime, setDatetime] = useState('');
@@ -42,50 +43,82 @@ const ScheduleInterviewModal = ({ show, handleClose, application }) => {
     if (!application) return null;
 
     return (
-        <Modal show={show} onHide={handleClose} centered>
-            <Modal.Header closeButton className="border-0 pb-0 mt-3 mx-3">
-                <Modal.Title className="fw-bold text-primary">
-                    <i className="bi bi-calendar-event me-2"></i>Schedule Interview
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="px-4 pb-4">
-                <p className="text-muted mb-4">
-                    Set up an interview with <strong>{application.candidate_name || 'this candidate'}</strong>. An automated email invitation will be sent immediately.
-                </p>
+        <AnimatePresence>
+            {show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-y-auto">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden relative my-auto"
+                    >
+                        {/* Header */}
+                        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <Calendar className="text-blue-600" size={24} />
+                                Schedule Interview
+                            </h2>
+                            <button
+                                onClick={handleClose}
+                                className="p-2 rounded-full hover:bg-slate-100 transition-colors"
+                            >
+                                <X size={20} className="text-slate-500" />
+                            </button>
+                        </div>
 
-                <Form onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3">
-                        <Form.Label className="fw-semibold">Date & Time</Form.Label>
-                        <Form.Control
-                            type="datetime-local"
-                            value={datetime}
-                            onChange={(e) => setDatetime(e.target.value)}
-                            className="bg-light"
-                        />
-                    </Form.Group>
+                        {/* Body */}
+                        <div className="px-6 py-6">
+                            <p className="text-slate-500 text-sm mb-6">
+                                Set up an interview with <strong className="text-slate-700">{application.candidate_name || 'this candidate'}</strong>. An automated email invitation will be sent immediately.
+                            </p>
 
-                    <Form.Group className="mb-4">
-                        <Form.Label className="fw-semibold">Meeting Link (G-Meet / Zoom)</Form.Label>
-                        <Form.Control
-                            type="url"
-                            placeholder="https://meet.google.com/xyz-abcd-efg"
-                            value={link}
-                            onChange={(e) => setLink(e.target.value)}
-                            className="bg-light"
-                        />
-                    </Form.Group>
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Date & Time</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={datetime}
+                                        onChange={(e) => setDatetime(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                                    />
+                                </div>
 
-                    <div className="d-flex justify-content-end">
-                        <Button variant="light" onClick={handleClose} className="me-2 rounded-pill px-4">
-                            Cancel
-                        </Button>
-                        <Button variant="primary" type="submit" disabled={loading} className="rounded-pill px-4">
-                            {loading ? <><Spinner as="span" animation="border" size="sm" className="me-2" /> Sending...</> : 'Send Invite'}
-                        </Button>
-                    </div>
-                </Form>
-            </Modal.Body>
-        </Modal>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Meeting Link (G-Meet / Zoom)</label>
+                                    <input
+                                        type="url"
+                                        placeholder="https://meet.google.com/xyz-abcd-efg"
+                                        value={link}
+                                        onChange={(e) => setLink(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                                    />
+                                </div>
+
+                                {/* Footer buttons */}
+                                <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                                    <button
+                                        type="button"
+                                        onClick={handleClose}
+                                        className="px-6 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="px-6 py-2.5 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-70 flex items-center gap-2 transition-colors shadow-sm"
+                                    >
+                                        {loading && <Loader2 size={16} className="animate-spin" />}
+                                        {loading ? 'Sending...' : 'Send Invite'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
     );
 };
 

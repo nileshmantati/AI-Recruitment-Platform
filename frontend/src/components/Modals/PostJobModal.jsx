@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Modal, Button, Form, FloatingLabel, Spinner } from 'react-bootstrap';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, X, Briefcase } from 'lucide-react';
 
 const PostJobModal = ({ show, handleClose, onJobPosted }) => {
     const [formData, setFormData] = useState({
@@ -39,59 +40,116 @@ const PostJobModal = ({ show, handleClose, onJobPosted }) => {
     };
 
     return (
-        <Modal show={show} onHide={handleClose} centered size="lg">
-            <Modal.Header closeButton className="border-0 pb-0 mt-3 mx-3">
-                <Modal.Title className="fw-bold text-primary">
-                    <i className="bi bi-briefcase me-2"></i>Post a New Job
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="px-4 pb-4">
-                <p className="text-muted mb-4">Fill out the details below. Our AI will use this description to rank candidates.</p>
-                <Form onSubmit={handleSubmit}>
+        <AnimatePresence>
+            {show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-y-auto">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden relative my-auto"
+                    >
+                        {/* Header */}
+                        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <Briefcase className="text-blue-600" size={24} />
+                                Post a New Job
+                            </h2>
+                            <button
+                                onClick={handleClose}
+                                className="p-2 rounded-full hover:bg-slate-100 transition-colors"
+                            >
+                                <X size={20} className="text-slate-500" />
+                            </button>
+                        </div>
 
-                    <FloatingLabel controlId="title" label="Job Title (e.g., Senior Django Developer)" className="mb-3">
-                        <Form.Control
-                            type="text" name="title" placeholder="Job Title"
-                            value={formData.title} onChange={handleChange} required
-                            className="rounded-3"
-                        />
-                    </FloatingLabel>
+                        {/* Body */}
+                        <div className="px-6 py-6">
+                            <p className="text-slate-500 text-sm mb-6">
+                                Fill out the details below. Our AI will use this description to rank candidates.
+                            </p>
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5" htmlFor="title">Job Title</label>
+                                    <input
+                                        type="text"
+                                        id="title"
+                                        name="title"
+                                        placeholder="e.g., Senior Django Developer"
+                                        value={formData.title}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                                    />
+                                </div>
 
-                    <FloatingLabel controlId="salary" label="Salary Range (e.g., $100k - $120k)" className="mb-3">
-                        <Form.Control
-                            type="text" name="salary" placeholder="Salary Range"
-                            value={formData.salary} onChange={handleChange} required
-                            className="rounded-3"
-                        />
-                    </FloatingLabel>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5" htmlFor="salary">Salary Range</label>
+                                    <input
+                                        type="text"
+                                        id="salary"
+                                        name="salary"
+                                        placeholder="e.g., $100k - $120k"
+                                        value={formData.salary}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                                    />
+                                </div>
 
-                    <FloatingLabel controlId="skills" label="Required Skills (comma separated)" className="mb-3">
-                        <Form.Control
-                            type="text" name="required_skills" placeholder="Python, Django, React"
-                            value={formData.required_skills} onChange={handleChange} required
-                            className="rounded-3"
-                        />
-                    </FloatingLabel>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5" htmlFor="required_skills">Required Skills (comma separated)</label>
+                                    <input
+                                        type="text"
+                                        id="required_skills"
+                                        name="required_skills"
+                                        placeholder="Python, Django, React"
+                                        value={formData.required_skills}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                                    />
+                                </div>
 
-                    <FloatingLabel controlId="description" label="Detailed Job Description" className="mb-4">
-                        <Form.Control
-                            as="textarea" name="description" placeholder="Description"
-                            style={{ height: '150px' }} value={formData.description}
-                            onChange={handleChange} required className="rounded-3"
-                        />
-                    </FloatingLabel>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5" htmlFor="description">Detailed Job Description</label>
+                                    <textarea
+                                        id="description"
+                                        name="description"
+                                        placeholder="Enter job description..."
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        required
+                                        rows="5"
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-y"
+                                    />
+                                </div>
 
-                    <div className="d-flex justify-content-end mt-4">
-                        <Button variant="light" onClick={handleClose} className="me-2 rounded-pill px-4">
-                            Cancel
-                        </Button>
-                        <Button variant="primary" type="submit" disabled={isLoading} className="rounded-pill px-4 shadow-sm">
-                            {isLoading ? <><Spinner as="span" animation="border" size="sm" className="me-2" /> Posting...</> : 'Publish Job'}
-                        </Button>
-                    </div>
-                </Form>
-            </Modal.Body>
-        </Modal>
+                                {/* Footer buttons */}
+                                <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                                    <button
+                                        type="button"
+                                        onClick={handleClose}
+                                        className="px-6 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className="px-6 py-2.5 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-70 flex items-center gap-2 transition-colors shadow-sm"
+                                    >
+                                        {isLoading && <Loader2 size={16} className="animate-spin" />}
+                                        {isLoading ? 'Posting...' : 'Publish Job'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
     );
 };
 

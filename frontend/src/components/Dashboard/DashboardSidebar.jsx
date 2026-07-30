@@ -29,7 +29,7 @@ const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive, role }) 
         <aside className={`flex flex-col border-r border-slate-100 bg-white transition-all duration-300 ${collapsed ? "w-20" : "w-64"}`}>
             <div className="flex items-center gap-2.5 border-b border-slate-100 ps-3 pe-2 py-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
-                    <i className="bi bi-robot text-white" style={{ color: T.primary }}></i>
+                    <i className="bi bi-robot text-white"></i>
                 </div>
                 {!collapsed && <span className="truncate text-xl font-bold text-slate-900"><span className="text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                     AI
