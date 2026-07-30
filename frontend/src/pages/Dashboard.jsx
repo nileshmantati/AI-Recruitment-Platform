@@ -28,7 +28,7 @@ const Dashboard = () => {
 
     const path = location.pathname;
     let active = "Dashboard";
-    if (path.includes('/company-profile')) active = "Company Profile";
+    if (path.includes('/company')) active = "Company";
     else if (path.includes('/jobs')) active = "Jobs";
     else if (path.includes('/applications')) active = "Applications";
     else if (path.includes('/candidates')) active = "Candidates";
@@ -38,8 +38,8 @@ const Dashboard = () => {
     else if (path.includes('/settings')) active = "Settings";
 
     useEffect(() => {
-        if (role === 'recruiter' && !isProfileCompleted && !path.includes('/company-profile')) {
-            navigate('/dashboard/company-profile', { replace: true });
+        if (role === 'recruiter' && !isProfileCompleted && !path.includes('/company')) {
+            navigate('/dashboard/company', { replace: true });
         }
     }, [role, isProfileCompleted, path, navigate]);
 
@@ -105,7 +105,7 @@ const Dashboard = () => {
     };
 
     const renderContent = () => {
-        if (active === "Company Profile" && role === 'recruiter') {
+        if (active === "Company" && role === 'recruiter') {
             return <RecruiterCompanyProfilePage
                 isProfileCompleted={isProfileCompleted}
                 setIsProfileCompleted={setIsProfileCompleted}

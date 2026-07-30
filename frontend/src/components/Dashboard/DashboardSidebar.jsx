@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 
 const RecruiterSidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard" },
-    { icon: Building2, label: "Company Profile" },
+    { icon: Building2, label: "Company" },
     { icon: Briefcase, label: "Jobs" },
     { icon: FileText, label: "Applications" },
     { icon: Users, label: "Candidates" },

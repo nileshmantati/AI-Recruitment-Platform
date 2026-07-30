@@ -113,6 +113,22 @@ const RecruiterInterviewsPage = () => {
         return status.replace('_', ' ');
     };
 
+    if (loading) {
+        return (
+            <div className="flex h-[85vh] w-full items-center justify-center bg-slate-50/50">
+                <div className="flex flex-col items-center gap-4 text-center p-8 max-w-sm">
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
+                        <i className="bi bi-robot text-indigo-600 text-3xl"></i>
+                    </div>
+                    <div>
+                        <h4 className="font-extrabold text-slate-800 text-lg">Loading your interviews...</h4>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <motion.main
             variants={containerVariants}
