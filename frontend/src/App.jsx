@@ -31,7 +31,32 @@ function App() {
           position="top-right"
           toastOptions={{
             duration: 3000,
-            // pauseOnHover is true by default in react-hot-toast
+            success: {
+              style: {
+                background: '#10B981', // Emerald green
+                color: 'white',
+                fontWeight: '500',
+              },
+              iconTheme: {
+                primary: 'white',
+                secondary: '#10B981',
+              },
+            },
+            error: {
+              style: {
+                background: '#EF4444', // Red
+                color: 'white',
+                fontWeight: '500',
+              },
+              iconTheme: {
+                primary: 'white',
+                secondary: '#EF4444',
+              },
+            },
+            style: {
+              background: '#334155', // Default dark slate
+              color: 'white',
+            }
           }}
         >
           {(t) => (
@@ -43,10 +68,10 @@ function App() {
                   {t.type !== 'loading' && (
                     <button
                       onClick={() => toast.dismiss(t.id)}
-                      className="ml-2 rounded p-1 hover:bg-slate-100 transition-colors"
+                      className="ml-2 rounded p-1 hover:bg-black/10 transition-colors"
                       aria-label="Close"
                     >
-                      <X size={16} className="text-slate-500" />
+                      <X size={16} className="text-current opacity-70" />
                     </button>
                   )}
                 </>

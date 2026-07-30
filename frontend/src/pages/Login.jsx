@@ -10,6 +10,7 @@ import { Building2, GraduationCap, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import PrimaryButton from '../components/PrimaryButton';
 import { T } from '../Js/theme';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 
 const schema = yup.object().shape({
     username: yup.string().required("Username is required"),
@@ -34,9 +35,20 @@ const Login = () => {
         }
     });
 
-    // if (auth.isAuthenticated) {
-    //     return <Navigate to="/dashboard" replace />;
-    // }
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 30 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+    };
 
     const onSubmit = async (data) => {
         try {
@@ -50,6 +62,7 @@ const Login = () => {
                 response.data.username,
                 response.data.role
             );
+            toast.success('Login successful');
             navigate('/');
         } catch (err) {
             if (err.response && err.response.data && err.response.data.detail) {
@@ -62,55 +75,61 @@ const Login = () => {
     };
 
     return (
-        <div className="py-10 flex items-center justify-center relative overflow-hidden"
+        <motion.div className="py-10 flex items-center justify-center relative overflow-hidden"
             style={{ background: `radial-gradient(1200px 600px at 50% -10%, ${T.primary}14, transparent), radial-gradient(800px 500px at 90% 10%, ${T.secondary}14, transparent)` }}>
-            <div className="relative z-10 w-full max-w-md px-6">
-                <GlassCard className="px-8 py-4">
-                    <h1 className="mb-2 text-3xl text-center font-extrabold text-slate-900">Welcome Back</h1>
-                    <p className="mb-6 text-sm text-center text-slate-500">Enter your details to continue.</p>
+            <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="relative z-10 w-full max-w-md px-6">
+                <motion.div
+                    variants={itemVariants}>
+                    <GlassCard className="px-8 py-4">
+                        <h1 className="mb-2 text-3xl text-center font-extrabold text-slate-900">Welcome Back</h1>
+                        <p className="mb-6 text-sm text-center text-slate-500">Enter your details to continue.</p>
 
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
-                            {[{ id: "recruiter", label: "Recruiter", icon: Building2 }, { id: "candidate", label: "Candidate", icon: GraduationCap }].map((r) => (
-                                <button
-                                    key={r.id}
-                                    type="button"
-                                    onClick={() => setRole(r.id)}
-                                    className={`flex items-center justify-center gap-2 rounded-xl! py-2.5 text-sm font-semibold transition-all ${role === r.id ? "bg-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
-                                    style={role === r.id ? { color: T.primary } : {}}
-                                >
-                                    <r.icon size={16} /> {r.label}
-                                </button>
-                            ))}
-                        </div>
-                        <TextField
-                            icon={Mail}
-                            label="Username"
-                            placeholder="you@company.com"
-                            error={errors.username?.message}
-                            {...register("username")}
-                        />
-                        <TextField
-                            icon={Lock}
-                            label="Password"
-                            type={showPass ? "text" : "password"}
-                            placeholder="••••••••"
-                            rightIcon={showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                            onRightClick={() => setShowPass(!showPass)}
-                            error={errors.password?.message}
-                            {...register("password")}
-                        />
-                        <div className="my-5! flex items-center justify-between text-sm">
-                            <label className="flex! items-center justify-center gap-2 text-slate-600">
-                                <input type="checkbox" className="h-4! w-4! rounded! border-slate-300" style={{ accentColor: T.primary }} />
-                                <span className="text-slate-600 text-sm">Remember me</span>
-                            </label>
-                            <a href="#" className="font-semibold text-decoration-none" style={{ color: T.primary }}>Forgot password?</a>
-                        </div>
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+                                {[{ id: "recruiter", label: "Recruiter", icon: Building2 }, { id: "candidate", label: "Candidate", icon: GraduationCap }].map((r) => (
+                                    <button
+                                        key={r.id}
+                                        type="button"
+                                        onClick={() => setRole(r.id)}
+                                        className={`flex items-center justify-center gap-2 rounded-xl! py-2.5 text-sm font-semibold transition-all ${role === r.id ? "bg-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                                        style={role === r.id ? { color: T.primary } : {}}
+                                    >
+                                        <r.icon size={16} /> {r.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <TextField
+                                icon={Mail}
+                                label="Username"
+                                placeholder="you@company.com"
+                                error={errors.username?.message}
+                                {...register("username")}
+                            />
+                            <TextField
+                                icon={Lock}
+                                label="Password"
+                                type={showPass ? "text" : "password"}
+                                placeholder="••••••••"
+                                rightIcon={showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                                onRightClick={() => setShowPass(!showPass)}
+                                error={errors.password?.message}
+                                {...register("password")}
+                            />
+                            <div className="my-5! flex items-center justify-between text-sm">
+                                <label className="flex! items-center justify-center gap-2 text-slate-600">
+                                    <input type="checkbox" className="h-4! w-4! rounded! border-slate-300" style={{ accentColor: T.primary }} />
+                                    <span className="text-slate-600 text-sm">Remember me</span>
+                                </label>
+                                <a href="#" className="font-semibold text-decoration-none" style={{ color: T.primary }}>Forgot password?</a>
+                            </div>
 
-                        <PrimaryButton type="submit" className="w-full! rounded-2xl! py-2.5! hover:scale-95 transition-all duration-300" >Log in</PrimaryButton>
+                            <PrimaryButton type="submit" className="w-full! rounded-2xl! py-2.5! hover:scale-95 transition-all duration-300" >Log in</PrimaryButton>
 
-                        {/* <div className="my-6 flex items-center gap-3">
+                            {/* <div className="my-6 flex items-center gap-3">
                             <div className="h-px flex-1 bg-slate-200" /><span className="text-xs font-medium text-slate-400">OR</span><div className="h-px flex-1 bg-slate-200" />
                         </div>
 
@@ -119,13 +138,14 @@ const Login = () => {
                             Continue with Google
                         </GhostButton> */}
 
-                        <p className="mt-4! text-center text-sm text-slate-500">
-                            Don't have an account? <button type="button" onClick={() => navigate("/register")} className="font-semibold transition-opacity hover:opacity-80" style={{ color: T.primary }}>Sign up</button>
-                        </p>
-                    </form>
-                </GlassCard>
-            </div>
-        </div>
+                            <p className="mt-4! text-center text-sm text-slate-500">
+                                Don't have an account? <button type="button" onClick={() => navigate("/register")} className="font-semibold transition-opacity hover:opacity-80" style={{ color: T.primary }}>Sign up</button>
+                            </p>
+                        </form>
+                    </GlassCard>
+                </motion.div>
+            </motion.div>
+        </motion.div >
     );
 };
 

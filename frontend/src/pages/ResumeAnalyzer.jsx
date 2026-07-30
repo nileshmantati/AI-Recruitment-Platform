@@ -7,6 +7,7 @@ import UploadZone from '../components/ResumeAnalyzer/UploadZone';
 import PageHeader, { AnalyzingSpinner } from '../components/ResumeAnalyzer/PageHeader';
 import { glass, glowBorder } from '../components/ResumeAnalyzer/resumeStyles';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ── sessionStorage key ── */
 const SS_KEY = 'ra_last_result';
@@ -159,216 +160,224 @@ export default function ResumeAnalyzer() {
         {/* ── Page header ── */}
         <PageHeader />
 
-        {/* ── Upload zone ── */}
-        {!done && !analyzing && (
-          <UploadZone onFile={handleFile} />
-        )}
+        <AnimatePresence mode="wait">
+          {/* ── Upload zone ── */}
+          {!done && !analyzing && (
+            <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.4 }}>
+              <UploadZone onFile={handleFile} />
+            </motion.div>
+          )}
 
-        {/* ── Analyzing state ── */}
-        {analyzing && <AnalyzingSpinner fileName={file?.name ?? ''} />}
+          {/* ── Analyzing state ── */}
+          {analyzing && (
+            <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <AnalyzingSpinner fileName={file?.name ?? ''} />
+            </motion.div>
+          )}
 
-        {/* ══════════ RESULTS ══════════ */}
-        {done && result && (
-          <div className="space-y-5">
+          {/* ══════════ RESULTS ══════════ */}
+          {done && result && (
+            <motion.div key="results" className="space-y-5" initial={{ opacity: 0, scale: 0.98, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.5, ease: "easeOut" }}>
 
-            {/* success badge */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                style={{ background: 'rgba(16,185,129,0.14)', color: '#10B981', border: '1px solid rgba(16,185,129,0.28)' }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-                {(file?.name ?? savedFileName ?? 'resume.pdf')} — Analysis Complete
-              </span>
-              <button onClick={handleReset}
-                className="flex-1 sm:flex-none py-2 px-6 rounded-lg! font-semibold text-sm flex items-center justify-center gap-2 hover:bg-black! hover:text-white! transition-all duration-400"
-                style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0)', color: T.onSurfaceVariant }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-                </svg>
-                New Analysis
-              </button>
-            </div>
-
-            {/* ── TOP ROW: 4 stat cards ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {/* AI Score */}
-              <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 hover:scale-105 transition-all duration-200" style={glowBorder(T.primary, T.secondary)}>
-                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>AI Score</span>
-                <ScoreRing score={result.ai_score} size={72} />
+              {/* success badge */}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ background: 'rgba(16,185,129,0.14)', color: '#10B981', border: '1px solid rgba(16,185,129,0.28)' }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                  {(file?.name ?? savedFileName ?? 'resume.pdf')} — Analysis Complete
+                </span>
+                <button onClick={handleReset}
+                  className="flex-1 sm:flex-none py-2 px-6 rounded-lg! font-semibold text-sm flex items-center justify-center gap-2 hover:bg-black! hover:text-white! transition-all duration-400"
+                  style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0)', color: T.onSurfaceVariant }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                  </svg>
+                  New Analysis
+                </button>
               </div>
-              {/* Match % */}
-              <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-all duration-200" style={glass}>
-                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>Match %</span>
-                <span className="text-3xl sm:text-4xl font-bold" style={{ color: T.secondary }}>{result.match_percentage}%</span>
-                <span className="text-[10px] text-center leading-tight" style={{ color: T.onSurfaceVariant }}>{result.job_role}</span>
-              </div>
-              {/* Experience */}
-              <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-all duration-200" style={glass}>
-                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>Experience</span>
-                <span className="text-3xl sm:text-4xl font-bold" style={{ color: T.primary }}>{result.experience_relevancy}%</span>
-                <span className="text-[10px]" style={{ color: T.onSurfaceVariant }}>{relevTag(result.experience_relevancy)}</span>
-              </div>
-              {/* Skills owned */}
-              <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-all duration-200" style={glass}>
-                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>Skills Found</span>
-                <span className="text-3xl sm:text-4xl font-bold" style={{ color: T.onSurface }}>{result.owned_skills?.length ?? 0}</span>
-                <span className="text-[10px]" style={{ color: T.onSurfaceVariant }}>{result.missing_skills?.length ?? 0} gaps</span>
-              </div>
-            </div>
 
-            {/* ── MAIN 2-col layout (stack on mobile) ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-
-              {/* LEFT column — 3/5 */}
-              <div className="lg:col-span-3 space-y-5">
-
-                {/* AI Insights */}
-                <div className="rounded-2xl p-5 sm:p-6 space-y-4" style={glass}>
-                  <div className="flex items-center gap-2">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill={T.primary} stroke="none">
-                      <path d="M12 2l2.09 6.26L20.18 9l-5 3.64L16.82 19 12 15.77 7.18 19l1.64-6.36-5-3.64 6.09-.74z" />
-                    </svg>
-                    <h2 className="text-base sm:text-lg font-bold" style={{ color: T.onSurface }}>AI Insights</h2>
-                  </div>
-                  <InsightBar label="Experience Relevancy" pct={result.experience_relevancy} tag={relevTag(result.experience_relevancy)} />
-
-                  {/* Strengths */}
-                  {result.strengths?.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: T.secondary }}>Strengths</p>
-                      {result.strengths.slice(0, 2).map((s, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl" style={{ background: `${T.secondary}14`, border: `1px solid ${T.secondary}2a` }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.secondary} strokeWidth="2" className="shrink-0 mt-0.5">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
-                          </svg>
-                          <p className="text-sm leading-snug" style={{ color: T.onSurfaceVariant }}>{s}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Weaknesses */}
-                  {result.weaknesses?.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: T.error }}>Areas to Improve</p>
-                      {result.weaknesses.slice(0, 2).map((w, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl" style={{ background: `${T.error}0e`, border: `1px solid ${T.error}2a` }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.error} strokeWidth="2" className="shrink-0 mt-0.5">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
-                          </svg>
-                          <p className="text-sm leading-snug" style={{ color: T.onSurfaceVariant }}>{w}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+              {/* ── TOP ROW: 4 stat cards ── */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* AI Score */}
+                <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 hover:scale-105 transition-all duration-200" style={glowBorder(T.primary, T.secondary)}>
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>AI Score</span>
+                  <ScoreRing score={result.ai_score} size={72} />
                 </div>
-
-                {/* Skills Gap */}
-                <div className="rounded-2xl p-5 sm:p-6 space-y-4" style={glass}>
-                  <h2 className="text-base sm:text-lg font-bold" style={{ color: T.onSurface }}>Skills Gap</h2>
-                  <div className="flex flex-wrap gap-2">
-                    {result.owned_skills?.map(s => <SkillPill key={s} name={s} owned />)}
-                    {result.missing_skills?.map(s => <SkillPill key={s} name={s} owned={false} />)}
-                  </div>
-                  {result.missing_skills?.length > 0 && (
-                    <p className="text-xs italic" style={{ color: T.onSurfaceVariant }}>
-                      💡 Acquiring <strong>{result.missing_skills[0]}</strong> could significantly boost your score.
-                    </p>
-                  )}
+                {/* Match % */}
+                <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-all duration-200" style={glass}>
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>Match %</span>
+                  <span className="text-3xl sm:text-4xl font-bold" style={{ color: T.secondary }}>{result.match_percentage}%</span>
+                  <span className="text-[10px] text-center leading-tight" style={{ color: T.onSurfaceVariant }}>{result.job_role}</span>
                 </div>
+                {/* Experience */}
+                <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-all duration-200" style={glass}>
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>Experience</span>
+                  <span className="text-3xl sm:text-4xl font-bold" style={{ color: T.primary }}>{result.experience_relevancy}%</span>
+                  <span className="text-[10px]" style={{ color: T.onSurfaceVariant }}>{relevTag(result.experience_relevancy)}</span>
+                </div>
+                {/* Skills owned */}
+                <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-all duration-200" style={glass}>
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>Skills Found</span>
+                  <span className="text-3xl sm:text-4xl font-bold" style={{ color: T.onSurface }}>{result.owned_skills?.length ?? 0}</span>
+                  <span className="text-[10px]" style={{ color: T.onSurfaceVariant }}>{result.missing_skills?.length ?? 0} gaps</span>
+                </div>
+              </div>
 
-                {/* AI Strategy */}
-                <div className="rounded-2xl p-5 sm:p-6 space-y-4" style={{ background: T.primary, boxShadow: `0 16px 48px -8px ${T.primary}66` }}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)' }}>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="white" stroke="none">
-                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z" />
+              {/* ── MAIN 2-col layout (stack on mobile) ── */}
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+                {/* LEFT column — 3/5 */}
+                <div className="lg:col-span-3 space-y-5">
+
+                  {/* AI Insights */}
+                  <div className="rounded-2xl p-5 sm:p-6 space-y-4" style={glass}>
+                    <div className="flex items-center gap-2">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill={T.primary} stroke="none">
+                        <path d="M12 2l2.09 6.26L20.18 9l-5 3.64L16.82 19 12 15.77 7.18 19l1.64-6.36-5-3.64 6.09-.74z" />
                       </svg>
+                      <h2 className="text-base sm:text-lg font-bold" style={{ color: T.onSurface }}>AI Insights</h2>
                     </div>
-                    <h2 className="text-base sm:text-lg font-bold text-white">AI Strategy</h2>
-                  </div>
-                  <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.88)' }}>{result.ai_strategy}</p>
-                  <button
-                    onClick={() => { setCheckedItems({}); setShowSuggestions(true); }}
-                    className="w-full py-3 sm:py-3.5 rounded-xl! font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95"
-                    style={{ background: '#fff', color: T.primary, boxShadow: '0 8px 24px rgba(0,0,0,0.18)' }}
-                  >
-                    Apply AI Suggestions
-                  </button>
-                </div>
-              </div>
+                    <InsightBar label="Experience Relevancy" pct={result.experience_relevancy} tag={relevTag(result.experience_relevancy)} />
 
-              {/* RIGHT column — 2/5 */}
-              <div className="lg:col-span-2 space-y-5">
+                    {/* Strengths */}
+                    {result.strengths?.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-wider" style={{ color: T.secondary }}>Strengths</p>
+                        {result.strengths.slice(0, 2).map((s, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 rounded-xl" style={{ background: `${T.secondary}14`, border: `1px solid ${T.secondary}2a` }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.secondary} strokeWidth="2" className="shrink-0 mt-0.5">
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+                            </svg>
+                            <p className="text-sm leading-snug" style={{ color: T.onSurfaceVariant }}>{s}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-                {/* Resume Preview */}
-                <div className="rounded-2xl p-5 space-y-3" style={glass}>
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-base font-bold" style={{ color: T.onSurface }}>Resume Preview</h2>
-                    {previewUrl && (
-                      <a href={previewUrl} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs font-semibold hover:opacity-70 transition-opacity" style={{ color: T.primary }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
-                        </svg>
-                        Open full
-                      </a>
+                    {/* Weaknesses */}
+                    {result.weaknesses?.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-wider" style={{ color: T.error }}>Areas to Improve</p>
+                        {result.weaknesses.slice(0, 2).map((w, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 rounded-xl" style={{ background: `${T.error}0e`, border: `1px solid ${T.error}2a` }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.error} strokeWidth="2" className="shrink-0 mt-0.5">
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                            </svg>
+                            <p className="text-sm leading-snug" style={{ color: T.onSurfaceVariant }}>{w}</p>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
 
-                  {/* PDF iframe */}
-                  {previewUrl && isPdf && (
-                    <div className="rounded-xl overflow-hidden" style={{ height: '420px', border: '1px solid rgba(0,0,0,0.07)' }}>
-                      <iframe src={previewUrl} title="Resume PDF Preview" className="w-full h-full" style={{ border: 'none', background: '#fff' }} />
+                  {/* Skills Gap */}
+                  <div className="rounded-2xl p-5 sm:p-6 space-y-4" style={glass}>
+                    <h2 className="text-base sm:text-lg font-bold" style={{ color: T.onSurface }}>Skills Gap</h2>
+                    <div className="flex flex-wrap gap-2">
+                      {result.owned_skills?.map(s => <SkillPill key={s} name={s} owned />)}
+                      {result.missing_skills?.map(s => <SkillPill key={s} name={s} owned={false} />)}
                     </div>
-                  )}
+                    {result.missing_skills?.length > 0 && (
+                      <p className="text-xs italic" style={{ color: T.onSurfaceVariant }}>
+                        💡 Acquiring <strong>{result.missing_skills[0]}</strong> could significantly boost your score.
+                      </p>
+                    )}
+                  </div>
 
-                  {/* TXT text */}
-                  {txtContent && (
-                    <div className="rounded-xl p-3 overflow-y-auto text-xs font-mono leading-relaxed whitespace-pre-wrap"
-                      style={{ height: '420px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', color: T.onSurfaceVariant }}>
-                      {txtContent}
-                    </div>
-                  )}
-
-                  {/* DOCX fallback */}
-                  {previewUrl && !isPdf && !txtContent && (
-                    <div className="rounded-xl flex flex-col items-center justify-center gap-4 py-12"
-                      style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)' }}>
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${T.primary}1a` }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={T.primary} strokeWidth="1.8">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
-                          <line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
+                  {/* AI Strategy */}
+                  <div className="rounded-2xl p-5 sm:p-6 space-y-4" style={{ background: T.primary, boxShadow: `0 16px 48px -8px ${T.primary}66` }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)' }}>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="white" stroke="none">
+                          <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z" />
                         </svg>
                       </div>
-                      <div className="text-center px-3 space-y-1">
-                        <p className="text-sm font-semibold break-all" style={{ color: T.onSurface }}>{file?.name}</p>
-                        <p className="text-xs" style={{ color: T.onSurfaceVariant }}>DOCX can't be previewed in the browser.</p>
-                      </div>
-                      <a href={previewUrl} download={file?.name}
-                        className="px-4 py-2 rounded-full text-xs font-bold transition-opacity hover:opacity-80"
-                        style={{ background: `${T.primary}1a`, color: T.primary, border: `1px solid ${T.primary}33` }}>
-                        Download to view
-                      </a>
+                      <h2 className="text-base sm:text-lg font-bold text-white">AI Strategy</h2>
                     </div>
-                  )}
+                    <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.88)' }}>{result.ai_strategy}</p>
+                    <button
+                      onClick={() => { setCheckedItems({}); setShowSuggestions(true); }}
+                      className="w-full py-3 sm:py-3.5 rounded-xl! font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95"
+                      style={{ background: '#fff', color: T.primary, boxShadow: '0 8px 24px rgba(0,0,0,0.18)' }}
+                    >
+                      Apply AI Suggestions
+                    </button>
+                  </div>
                 </div>
 
-                {/* Action buttons */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <PrimaryButton
-                    onClick={handleDownloadReport}
-                    className="flex-1 py-3! rounded-xl! font-bold! text-sm! text-white! flex items-center justify-center gap-2"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    Download Report
-                  </PrimaryButton>
+                {/* RIGHT column — 2/5 */}
+                <div className="lg:col-span-2 space-y-5">
+
+                  {/* Resume Preview */}
+                  <div className="rounded-2xl p-5 space-y-3" style={glass}>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-base font-bold" style={{ color: T.onSurface }}>Resume Preview</h2>
+                      {previewUrl && (
+                        <a href={previewUrl} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-xs font-semibold hover:opacity-70 transition-opacity" style={{ color: T.primary }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                          Open full
+                        </a>
+                      )}
+                    </div>
+
+                    {/* PDF iframe */}
+                    {previewUrl && isPdf && (
+                      <div className="rounded-xl overflow-hidden" style={{ height: '420px', border: '1px solid rgba(0,0,0,0.07)' }}>
+                        <iframe src={previewUrl} title="Resume PDF Preview" className="w-full h-full" style={{ border: 'none', background: '#fff' }} />
+                      </div>
+                    )}
+
+                    {/* TXT text */}
+                    {txtContent && (
+                      <div className="rounded-xl p-3 overflow-y-auto text-xs font-mono leading-relaxed whitespace-pre-wrap"
+                        style={{ height: '420px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', color: T.onSurfaceVariant }}>
+                        {txtContent}
+                      </div>
+                    )}
+
+                    {/* DOCX fallback */}
+                    {previewUrl && !isPdf && !txtContent && (
+                      <div className="rounded-xl flex flex-col items-center justify-center gap-4 py-12"
+                        style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)' }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${T.primary}1a` }}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={T.primary} strokeWidth="1.8">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
+                          </svg>
+                        </div>
+                        <div className="text-center px-3 space-y-1">
+                          <p className="text-sm font-semibold break-all" style={{ color: T.onSurface }}>{file?.name}</p>
+                          <p className="text-xs" style={{ color: T.onSurfaceVariant }}>DOCX can't be previewed in the browser.</p>
+                        </div>
+                        <a href={previewUrl} download={file?.name}
+                          className="px-4 py-2 rounded-full text-xs font-bold transition-opacity hover:opacity-80"
+                          style={{ background: `${T.primary}1a`, color: T.primary, border: `1px solid ${T.primary}33` }}>
+                          Download to view
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <PrimaryButton
+                      onClick={handleDownloadReport}
+                      className="flex-1 py-3! rounded-xl! font-bold! text-sm! text-white! flex items-center justify-center gap-2"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                      Download Report
+                    </PrimaryButton>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
       {/* ══ AI Suggestions Modal ══ */}
       {showSuggestions && result && (() => {

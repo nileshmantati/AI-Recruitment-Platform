@@ -10,6 +10,22 @@ import { GraduationCap, Building2, Users, Mail, Lock, Eye, EyeOff } from "lucide
 import PrimaryButton from '../components/PrimaryButton';
 import { T } from '../Js/theme';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.2
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
 
 const schema = yup.object().shape({
     username: yup.string().required("Username is required").min(3, "Username must be at least 3 characters"),
@@ -57,8 +73,10 @@ const Register = () => {
     };
 
     return (
-        <div className="py-10! flex items-center justify-center relative overflow-hidden" style={{ background: `radial-gradient(1200px 600px at 50% -10%, ${T.primary}14, transparent), radial-gradient(800px 500px at 90% 10%, ${T.secondary}14, transparent)` }}>
-            <div className="relative z-10 w-full max-w-md px-6">
+        <motion.div variants={containerVariants}
+            initial="hidden"
+            animate="show" className="py-10! flex items-center justify-center relative overflow-hidden" style={{ background: `radial-gradient(1200px 600px at 50% -10%, ${T.primary}14, transparent), radial-gradient(800px 500px at 90% 10%, ${T.secondary}14, transparent)` }}>
+            <motion.div variants={itemVariants} className="relative z-10 w-full max-w-md px-6">
                 <GlassCard className="px-8 py-4">
                     <h1 className="mb-2 text-3xl text-center font-extrabold text-slate-900">Create Account</h1>
 
@@ -109,8 +127,8 @@ const Register = () => {
                         </p>
                     </form>
                 </GlassCard>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

@@ -4,8 +4,6 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      # Expose Django port from the shared network namespace to the host
-      - "8000:8000"
       # Expose Redis port (optional, useful for debugging)
       - "6379:6379"
 
@@ -14,8 +12,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
-    # Share the redis container's network namespace so 'localhost:6379' works without code changes
-    network_mode: "service:redis"
+    ports:
+      # Expose Django port to the host
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
     volumes:
       # Mount the backend directory to allow hot-reloading and accessing the sqlite db
       - ./backend:/app
@@ -27,8 +28,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     command: celery -A backend worker -l info
-    # Share the redis container's network namespace so 'localhost:6379' works without code changes
-    network_mode: "service:redis"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
     volumes:
       - ./backend:/app
     depends_on:

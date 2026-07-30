@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import ApplyJobModal from '../components/Modals/ApplyJobModal.jsx';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 
 const JOB_TYPES = ['All', 'Full-time', 'Part-time', 'Contract', 'Remote', 'Internship'];
 const SORT_OPTIONS = ['Newest First', 'Most Applicants', 'Salary (High)', 'Salary (Low)'];
@@ -238,7 +239,12 @@ const JobsPage = () => {
     return (
         <>
             <section className="pb-12 min-h-screen">
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 space-y-6">
+                <motion.main
+                    className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 space-y-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
 
                     {/* Header Title Area (Optional visual boost) */}
                     <div className="mb-8">
@@ -328,17 +334,35 @@ const JobsPage = () => {
                     {/* ─── Jobs Grid / List ─────────────────────── */}
                     {filteredJobs.length > 0 ? (
                         viewMode === 'grid' ? (
-                            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                            <motion.div
+                                className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
+                                initial="hidden" animate="show"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+                                }}
+                            >
                                 {filteredJobs.map((job) => (
-                                    <JobCard key={job.id} job={job} />
+                                    <motion.div key={job.id} variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+                                        <JobCard job={job} />
+                                    </motion.div>
                                 ))}
-                            </div>
+                            </motion.div>
                         ) : (
-                            <div className="space-y-3">
+                            <motion.div
+                                className="space-y-3"
+                                initial="hidden" animate="show"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+                                }}
+                            >
                                 {filteredJobs.map((job) => (
-                                    <JobRow key={job.id} job={job} />
+                                    <motion.div key={job.id} variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}>
+                                        <JobRow job={job} />
+                                    </motion.div>
                                 ))}
-                            </div>
+                            </motion.div>
                         )
                     ) : (
                         /* Empty State */
@@ -357,7 +381,7 @@ const JobsPage = () => {
                             </p>
                         </div>
                     )}
-                </main>
+                </motion.main>
                 {/* Modal */}
                 <ApplyJobModal
                     show={showModal}
