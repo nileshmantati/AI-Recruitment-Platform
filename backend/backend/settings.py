@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'applications',
     'ai_engine',
     'analytics',
+    'companies',
     'corsheaders',
 ]
 
