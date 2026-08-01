@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -23,9 +23,11 @@ const Login = () => {
     const navigate = useNavigate();
     const { login, auth } = useAuth();
 
-    if (auth.isAuthenticated) {
-        navigate('/dashboard')
-    }
+    useEffect(() => {
+        if (auth.isAuthenticated) {
+            navigate('/dashboard');
+        }
+    }, [auth.isAuthenticated, navigate]);
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(schema),

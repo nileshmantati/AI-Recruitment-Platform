@@ -207,7 +207,7 @@ const RecruiterJobsPage = () => {
                             <div className="relative flex-1 sm:flex-none">
                                 <button onClick={() => setShowSortDropdown(!showSortDropdown)}
                                     className="flex w-full items-center justify-center gap-1.5 rounded-lg! border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm sm:w-auto sm:py-2">
-                                    <Filter size={13} /> <span className="truncate max-w-[80px] sm:max-w-none">{sortBy}</span>
+                                    <Filter size={13} /> <span className="truncate text-sm max-w-[80px] sm:max-w-none">{sortBy}</span>
                                     <ChevronDown size={13} className={`transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
                                 </button>
                                 {showSortDropdown && (
@@ -231,7 +231,7 @@ const RecruiterJobsPage = () => {
                     </motion.div>
 
                     {/* Results count */}
-                    <motion.p variants={itemVariants} className="text-xs font-medium text-slate-400">
+                    <motion.p variants={itemVariants} className="text-sm font-medium text-slate-400">
                         Showing <span className="text-slate-700">{filteredJobs.length}</span> of <span className="text-slate-700">{jobs.length}</span> jobs
                     </motion.p>
 

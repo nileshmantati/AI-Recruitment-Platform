@@ -125,7 +125,7 @@ const RecruiterApplicationsPage = () => {
                         <i className="bi bi-robot text-indigo-600 text-3xl"></i>
                     </div>
                     <div>
-                        <h4 className="font-extrabold text-slate-800 text-lg">Loading your applications...</h4>
+                        <h4 className="font-extrabold text-slate-800 text-lg">Loading applications...</h4>
                     </div>
                 </div>
             </div>
@@ -187,7 +187,7 @@ const RecruiterApplicationsPage = () => {
                                 <div className="absolute left-0 sm:right-0 sm:left-auto top-12 z-20 w-48 overflow-hidden rounded-xl border border-slate-100 bg-white py-1 shadow-xl">
                                     {STATUS_OPTIONS.map(opt => (
                                         <button key={opt} onClick={() => { setStatusFilter(opt); setShowStatusDropdown(false); }}
-                                            className={`w-full px-4 py-2 text-left text-sm! transition ${statusFilter === opt ? 'bg-indigo-50 font-bold text-indigo-600' : 'text-slate-600 hover:bg-slate-50 font-medium'}`}>
+                                            className={`w-full px-4 py-2 text-left text-sm transition ${statusFilter === opt ? 'bg-indigo-50 font-bold text-indigo-600' : 'text-slate-600 hover:bg-slate-50 font-medium'}`}>
                                             {opt === 'All' ? 'All Status' : formatStatus(opt)}
                                         </button>
                                     ))}
@@ -197,7 +197,7 @@ const RecruiterApplicationsPage = () => {
                     </div>
                 </motion.div>
 
-                <motion.p variants={itemVariants} className="text-xs font-medium text-slate-400">
+                <motion.p variants={itemVariants} className="text-sm font-medium text-slate-400">
                     Showing <span className="text-slate-700">{filteredApplications.length}</span> of <span className="text-slate-700">{applications.length}</span> applications
                 </motion.p>
 

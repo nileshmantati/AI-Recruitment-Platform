@@ -11,7 +11,7 @@ const Footer = () => {
 
                     <div className="md:col-span-2">
                         <div className="mb-4 flex items-center gap-2">
-                            <span className="text-2xl font-bold text-white tracking-tight">
+                            <span className="text-3xl font-bold text-white tracking-tight">
                                 <i className="bi bi-robot me-2" style={{ color: T.primary }}></i>
                                 <span className="text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                                     AI

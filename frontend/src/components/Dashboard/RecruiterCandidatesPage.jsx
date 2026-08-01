@@ -171,7 +171,7 @@ const RecruiterCandidatesPage = () => {
                     </div>
                 </motion.div>
 
-                <motion.p variants={itemVariants} className="text-xs font-medium text-slate-400">
+                <motion.p variants={itemVariants} className="text-sm font-medium text-slate-400">
                     Showing <span className="text-slate-700">{filteredCandidates.length}</span> candidates
                 </motion.p>
 

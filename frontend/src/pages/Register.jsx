@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -51,9 +51,11 @@ const Register = () => {
     const currentRole = watch("role");
     const navigate = useNavigate();
 
-    if (auth.isAuthenticated) {
-        navigate('/dashboard')
-    }
+    useEffect(() => {
+        if (auth.isAuthenticated) {
+            navigate('/dashboard');
+        }
+    }, [auth.isAuthenticated, navigate]);
 
     const onSubmit = async (data) => {
         try {

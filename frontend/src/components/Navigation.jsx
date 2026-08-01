@@ -28,14 +28,14 @@ const Navigation = () => {
         >
             <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
                 <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-black tracking-tight">
+                    <span className="text-3xl font-bold text-black tracking-tight">
                         <i className="bi bi-robot me-2" style={{ color: T.primary }}></i>
                         <span className="text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                             AI
                         </span> Recruiter
                     </span>
                 </div>
-                <div className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
+                <div className="hidden items-center gap-8 text-md font-medium text-slate-600 md:flex">
                     <Link to="/" className="text-black! hover:text-primary! text-decoration-none">Home</Link>
                     <Link to="/resume-analyzer" className="text-black! hover:text-primary! text-decoration-none">Resume Analyzer</Link>
                     <Link to="/" className="text-black! hover:text-primary! text-decoration-none">Features</Link>
@@ -45,19 +45,19 @@ const Navigation = () => {
                 <div className="flex items-center gap-4">
                     {auth.isAuthenticated ? (
                         <>
-                            <Link to="/findjobs" className="text-sm text-decoration-none font-semibold text-indigo-500! hover:text-slate-900!">
+                            <Link to="/findjobs" className="text-md text-decoration-none font-semibold text-indigo-500! hover:text-slate-900!">
                                 Jobs
                             </Link>
-                            <Link to="/dashboard" className="text-sm text-decoration-none  font-semibold text-indigo-500! hover:text-slate-900!">
+                            <Link to="/dashboard" className="text-md text-decoration-none  font-semibold text-indigo-500! hover:text-slate-900!">
                                 Dashboard
                             </Link>
                             <div className="hidden sm:flex items-center gap-2 rounded-full bg-white px-3 py-1.5 shadow-sm border border-slate-200">
                                 <User size={18} className="text-indigo-600" />
-                                <span className="text-sm font-bold text-slate-800">
+                                <span className="text-md font-bold text-slate-800">
                                     {auth.username}
                                 </span>
                             </div>
-                            <button onClick={handleLogout} className="rounded-lg! border border-red-500! px-4 py-2 text-sm! font-medium text-red-600 hover:bg-red-50 transition-colors transition-all">
+                            <button onClick={handleLogout} className="rounded-lg! border border-red-500! px-4 py-2 text-md! font-medium text-red-600 hover:bg-red-50 transition-colors transition-all">
                                 Logout
                             </button>
                         </>

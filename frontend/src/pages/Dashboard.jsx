@@ -12,7 +12,10 @@ import RecruiterResumeAIPage from '../components/Dashboard/RecruiterResumeAIPage
 import RecruiterAnalyticsPage from '../components/Dashboard/RecruiterAnalyticsPage.jsx';
 import RecruiterInterviewsPage from '../components/Dashboard/RecruiterInterviewsPage.jsx';
 import RecruiterCompanyProfilePage from '../components/Dashboard/RecruiterCompanyProfilePage.jsx';
+import RecruiterSettingsPage from '../pages/RecruiterSettingsPage.jsx';
+import AccountSettings from '../components/Dashboard/AccountSettings.jsx';
 import { T } from "../Js/theme.js";
+import NotFoundPage from './NotFoundPage.jsx';
 
 const Dashboard = () => {
     const { auth } = useAuth();
@@ -27,24 +30,27 @@ const Dashboard = () => {
     });
 
     const path = location.pathname;
+    const normalizedPath = path.replace(/\/$/, '');
     let active = "Dashboard";
-    if (path.includes('/company')) active = "Company";
-    else if (path.includes('/jobs')) active = "Jobs";
-    else if (path.includes('/applications')) active = "Applications";
-    else if (path.includes('/candidates')) active = "Candidates";
-    else if (path.includes('/resume-ai')) active = "Resume AI";
-    else if (path.includes('/analytics')) active = "Analytics";
-    else if (path.includes('/interview')) active = "Interview";
-    else if (path.includes('/settings')) active = "Settings";
+    if (normalizedPath === '/dashboard/company') active = "Company";
+    else if (normalizedPath === '/dashboard/jobs') active = "Jobs";
+    else if (normalizedPath === '/dashboard/applications') active = "Applications";
+    else if (normalizedPath === '/dashboard/candidates') active = "Candidates";
+    else if (normalizedPath === '/dashboard/resume-ai') active = "Resume AI";
+    else if (normalizedPath === '/dashboard/analytics') active = "Analytics";
+    else if (normalizedPath === '/dashboard/interview') active = "Interview";
+    else if (normalizedPath === '/dashboard/account') active = "Account";
+    else if (normalizedPath === '/dashboard/settings') active = "Settings";
+    else if (normalizedPath !== '/dashboard') active = "NotFound";
 
     useEffect(() => {
-        if (role === 'recruiter' && !isProfileCompleted && !path.includes('/company')) {
+        if (role === 'recruiter' && !isProfileCompleted && normalizedPath !== '/dashboard/company') {
             navigate('/dashboard/company', { replace: true });
         }
-    }, [role, isProfileCompleted, path, navigate]);
+    }, [role, isProfileCompleted, normalizedPath, navigate]);
 
     const handleSetActive = (tab) => {
-        if (role === 'recruiter' && !isProfileCompleted) {
+        if (role === 'recruiter' && !isProfileCompleted && tab !== 'Company' && tab !== 'Settings' && tab !== 'Account') {
             return; // Prevent navigation away from onboarding
         }
         if (tab === "Dashboard") navigate('/dashboard');
@@ -128,6 +134,21 @@ const Dashboard = () => {
         }
         if (active === "Interview" && role === 'recruiter') {
             return <RecruiterInterviewsPage />;
+        }
+        if (active === "Account" && role === 'recruiter') {
+            return (
+                <div className="p-8">
+                    <AccountSettings />
+                </div>
+            );
+        }
+        if (active === "Settings" && role === 'recruiter') {
+            return <RecruiterSettingsPage />;
+        }
+        if (active === "NotFound") {
+            return (
+                <NotFoundPage />
+            );
         }
         if (role !== 'recruiter') {
             return <CandidateDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;

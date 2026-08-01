@@ -38,7 +38,7 @@ def send_status_update_email(application_id, new_status):
     try:
         application = Application.objects.get(id=application_id)
         candidate_email = application.candidate.user.email
-        candidate_name = application.candidate.user.first_name or application.candidate.user.username or "Candidate"
+        candidate_name = application.candidate.first_name or application.candidate.user.username or "Candidate"
         job_title = application.job.title
         
         if new_status == 'SHORTLISTED':
@@ -71,7 +71,7 @@ def send_interview_invitation(application_id, interview_datetime, meeting_link):
         application = Application.objects.get(id=application_id)
         candidate_email = application.candidate.user.email
         job_title = application.job.title
-        candidate_name = application.candidate.user.first_name or application.candidate.user.username or "Candidate"
+        candidate_name = application.candidate.first_name or application.candidate.user.username or "Candidate"
 
         subject = f"Interview Invitation: {job_title} at AI Recruitment Platform"
         

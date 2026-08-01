@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/analytics/', include('analytics.urls')),  # Include analytics-related URLs
     path('api/company/', include('companies.urls')),    # Include company-related URLs
     path('api/ai/', include('ai_engine.urls')),          # Include AI engine URLs
+    path('api/settings/', include('recruiter_settings.urls')),  # Include settings URLs
 ]
 
 # Required to serve uploaded resume PDFs during development

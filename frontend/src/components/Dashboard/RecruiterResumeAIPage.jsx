@@ -359,7 +359,7 @@ const RecruiterResumeAIPage = () => {
                             <button
                                 key={index}
                                 onClick={() => handlePromptClick(prompt)}
-                                className="px-3.5 py-1.5 rounded-xl! hover:scale-90 active:scale-95 bg-white hover:bg-indigo-50/80 active:bg-indigo-100 border border-slate-200/80 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium transition-all shadow-xs shrink-0 flex items-center gap-1.5 group"
+                                className="px-3.5 py-1.5 rounded-xl! hover:scale-90 text-sm active:scale-95 bg-white hover:bg-indigo-50/80 active:bg-indigo-100 border border-slate-200/80 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium transition-all shadow-xs shrink-0 flex items-center gap-1.5 group"
                             >
                                 <Sparkles size={11} className="text-indigo-500 group-hover:rotate-12 transition-transform" />
                                 {prompt}

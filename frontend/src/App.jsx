@@ -14,6 +14,7 @@ import ResumeAnalyzer from './pages/ResumeAnalyzer';
 import Footer from './components/Footer';
 import JobsPage from './pages/JobsPage';
 import Dashboard from './pages/Dashboard';
+import NotFoundPage from './pages/NotFoundPage';
 
 const MainLayout = () => (
   <>
@@ -93,6 +94,9 @@ function App() {
                 <Dashboard />
               </ProtectedRoute>
             } />
+            <Route element={<MainLayout />}>
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
           </Routes>
         </div>
       </Router>
