@@ -13,21 +13,21 @@ const FAQ = () => {
         { q: "Do you offer a free trial?", a: "Every plan includes a 14-day free trial with full feature access." },
     ];
     return (
-        <section className="mx-auto max-w-3xl px-6 py-10">
-            <div className="mb-12 text-center">
+        <section className="mx-auto max-w-3xl px-4 sm:px-6 py-12 sm:py-16 md:py-20 lg:py-28">
+            <div className="mb-8 sm:mb-12 text-center">
                 <Badge color={T.secondary}>FAQ</Badge>
-                <h2 className="mt-4 text-4xl! font-extrabold! text-slate-900">Frequently asked questions</h2>
+                <h2 className="mt-4 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900">Frequently asked questions</h2>
             </div>
             <div className="space-y-3">
                 {faqs.map((f, i) => (
                     <div key={f.q} className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
-                        <button onClick={() => setOpen(open === i ? -1 : i)} className="flex w-full items-center justify-between px-6 py-3.5 text-left">
-                            <span className="text-sm font-semibold text-slate-900">{f.q}</span>
+                        <button onClick={() => setOpen(open === i ? -1 : i)} className="flex w-full items-center justify-between px-4 sm:px-6 py-3.5 text-left gap-3">
+                            <span className="text-sm sm:text-base font-semibold text-slate-900">{f.q}</span>
                             <ChevronDown size={18} className={`shrink-0 text-slate-400 transition-transform duration-300 ${open === i ? "rotate-180" : ""}`} />
                         </button>
                         <div className={`grid transition-all duration-300 ${open === i ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`} style={{ display: "grid" }}>
                             <div className="overflow-hidden">
-                                <p className="px-6 text-start text-sm leading-relaxed text-slate-600">{f.a}</p>
+                                <p className="px-4 sm:px-6 pb-4 text-start text-sm sm:text-base leading-relaxed text-slate-600">{f.a}</p>
                             </div>
                         </div>
                     </div>

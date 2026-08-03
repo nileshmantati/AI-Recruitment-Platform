@@ -46,8 +46,8 @@ const FeatureCard = ({ f }) => {
                 <f.icon size={26} />
             </div>
             <div className="relative z-10 flex flex-col items-start justify-start">
-                <h3 className="mb-2 text-xl! font-bold! text-slate-900 group-hover:text-indigo-600 transition-colors">{f.title}</h3>
-                <p className="text-sm! text-start text-slate-600 leading-relaxed">{f.desc}</p>
+                <h3 className="mb-2 text-lg sm:text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{f.title}</h3>
+                <p className="text-sm text-start text-slate-600 leading-relaxed">{f.desc}</p>
             </div>
         </div>
     );
@@ -63,13 +63,13 @@ const Features = () => {
         { icon: Zap, title: "Smart Matching", desc: "Match rate scoring powered by role-specific embeddings." },
     ];
     return (
-        <section className="mx-auto max-w-7xl px-6 py-5!">
-            <div className="mx-auto mb-16 max-w-2xl text-center">
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-16 md:py-20 lg:py-28">
+            <div className="mx-auto mb-10 sm:mb-16 max-w-2xl text-center">
                 <Badge>Features</Badge>
-                <h2 className="mt-4 text-4xl! font-extrabold! text-slate-900">Everything a modern hiring team needs</h2>
-                <p className="mt-4 text-slate-600">One workspace for sourcing, screening, and closing—powered by AI at every step.</p>
+                <h2 className="mt-4 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900">Everything a modern hiring team needs</h2>
+                <p className="mt-4 text-sm sm:text-base text-slate-600">One workspace for sourcing, screening, and closing—powered by AI at every step.</p>
             </div>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((f) => (
                     <FeatureCard key={f.title} f={f} />
                 ))}
