@@ -16,6 +16,14 @@ import RecruiterSettingsPage from '../pages/RecruiterSettingsPage.jsx';
 import AccountSettings from '../components/Dashboard/AccountSettings.jsx';
 import { T } from "../Js/theme.js";
 import NotFoundPage from './NotFoundPage.jsx';
+import CandidateProfilePage from '../components/Dashboard/CandidateProfilePage.jsx';
+import CandidateApplicationsPage from '../components/Dashboard/CandidateApplicationsPage.jsx';
+import CandidateSavedJobsPage from '../components/Dashboard/CandidateSavedJobsPage.jsx';
+import CandidateResumeAIPage from '../components/Dashboard/CandidateResumeAIPage.jsx';
+import CandidateActivityPage from '../components/Dashboard/CandidateActivityPage.jsx';
+import CandidateInterviewsPage from '../components/Dashboard/CandidateInterviewsPage.jsx';
+import CandidateSettingsPage from '../components/Dashboard/CandidateSettingsPage.jsx';
+import JobsPage from './JobsPage.jsx';
 
 const Dashboard = () => {
     const { auth } = useAuth();
@@ -39,7 +47,11 @@ const Dashboard = () => {
     else if (normalizedPath === '/dashboard/resume-ai') active = "Resume AI";
     else if (normalizedPath === '/dashboard/analytics') active = "Analytics";
     else if (normalizedPath === '/dashboard/interview') active = "Interview";
+    else if (normalizedPath === '/dashboard/interviews') active = "Interviews";
     else if (normalizedPath === '/dashboard/account') active = "Account";
+    else if (normalizedPath === '/dashboard/profile') active = "Profile";
+    else if (normalizedPath === '/dashboard/saved-jobs') active = "Saved Jobs";
+    else if (normalizedPath === '/dashboard/activity') active = "Activity";
     else if (normalizedPath === '/dashboard/settings') active = "Settings";
     else if (normalizedPath !== '/dashboard') active = "NotFound";
 
@@ -55,6 +67,10 @@ const Dashboard = () => {
         }
         if (tab === "Dashboard") navigate('/dashboard');
         else if (tab === "Resume AI") navigate('/dashboard/resume-ai');
+        else if (tab === "Saved Jobs") navigate('/dashboard/saved-jobs');
+        else if (tab === "Interviews") navigate('/dashboard/interviews');
+        else if (tab === "Activity") navigate('/dashboard/activity');
+        else if (tab === "Profile") navigate('/dashboard/profile');
         else navigate(`/dashboard/${tab.toLowerCase().replace(" ", "-")}`);
     };
 
@@ -111,49 +127,34 @@ const Dashboard = () => {
     };
 
     const renderContent = () => {
-        if (active === "Company" && role === 'recruiter') {
-            return <RecruiterCompanyProfilePage
-                isProfileCompleted={isProfileCompleted}
-                setIsProfileCompleted={setIsProfileCompleted}
-            />;
-        }
-        if (active === "Jobs" && role === 'recruiter') {
-            return <RecruiterJobsPage />;
-        }
-        if (active === "Applications" && role === 'recruiter') {
-            return <RecruiterApplicationsPage />;
-        }
-        if (active === "Candidates" && role === 'recruiter') {
-            return <RecruiterCandidatesPage />;
-        }
-        if (active === "Resume AI" && role === 'recruiter') {
-            return <RecruiterResumeAIPage />;
-        }
-        if (active === "Analytics" && role === 'recruiter') {
-            return <RecruiterAnalyticsPage />;
-        }
-        if (active === "Interview" && role === 'recruiter') {
-            return <RecruiterInterviewsPage />;
-        }
-        if (active === "Account" && role === 'recruiter') {
-            return (
-                <div className="p-8">
-                    <AccountSettings />
-                </div>
-            );
-        }
-        if (active === "Settings" && role === 'recruiter') {
-            return <RecruiterSettingsPage />;
-        }
         if (active === "NotFound") {
-            return (
-                <NotFoundPage />
-            );
+            return <NotFoundPage />;
         }
-        if (role !== 'recruiter') {
-            return <CandidateDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;
+
+        if (role === 'recruiter') {
+            if (active === "Company") return <RecruiterCompanyProfilePage isProfileCompleted={isProfileCompleted} setIsProfileCompleted={setIsProfileCompleted} />;
+            if (active === "Jobs") return <RecruiterJobsPage />;
+            if (active === "Applications") return <RecruiterApplicationsPage />;
+            if (active === "Candidates") return <RecruiterCandidatesPage />;
+            if (active === "Resume AI") return <RecruiterResumeAIPage />;
+            if (active === "Analytics") return <RecruiterAnalyticsPage />;
+            if (active === "Interview" || active === "Interviews") return <RecruiterInterviewsPage />;
+            if (active === "Account") return <div className="p-8"><AccountSettings /></div>;
+            if (active === "Settings") return <RecruiterSettingsPage />;
+            return <RecruiterDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;
         }
-        return <RecruiterDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;
+
+        // Candidate Role Routing
+        if (active === "Profile") return <CandidateProfilePage />;
+        if (active === "Jobs") return <JobsPage />;
+        if (active === "Applications") return <CandidateApplicationsPage />;
+        if (active === "Saved Jobs") return <CandidateSavedJobsPage />;
+        if (active === "Resume AI") return <CandidateResumeAIPage />;
+        if (active === "Activity") return <CandidateActivityPage />;
+        if (active === "Interviews" || active === "Interview") return <CandidateInterviewsPage />;
+        if (active === "Settings" || active === "Account") return <CandidateSettingsPage />;
+
+        return <CandidateDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;
     };
 
     return (

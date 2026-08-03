@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, User, Sparkles, CheckCircle, AlertCircle, Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
@@ -23,7 +23,6 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
     };
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchMyApplications();
     }, []);
 
@@ -42,8 +41,8 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
 
                 <div className="bg-white border-0 shadow-sm rounded-2xl p-6 mb-6">
                     <div className="flex items-center mb-4">
-                        <div className="bg-blue-100 rounded-full p-4 mr-4 flex items-center justify-center">
-                            <i className="bi bi-person-fill text-blue-600 text-2xl"></i>
+                        <div className="bg-blue-100 rounded-full p-4 mr-4 flex items-center justify-center text-blue-600">
+                            <User size={24} />
                         </div>
                         <div>
                             <h5 className="font-bold text-lg text-slate-900 mb-0">Welcome, {auth.username}!</h5>
@@ -75,17 +74,17 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                                 {app.resume_score > 0 && (
                                     <div className="mb-4">
                                         <span
-                                            className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-${getScoreColor(app.resume_score)}-100 text-${getScoreColor(app.resume_score)}-700`}
+                                            className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${getScoreColor(app.resume_score)}`}
                                         >
-                                            <i className="bi bi-stars mr-1.5"></i>{app.resume_score}% Match
+                                            <Sparkles size={12} className="mr-1.5" />{app.resume_score}% Match
                                         </span>
                                     </div>
                                 )}
 
                                 {app.ai_feedback && (
                                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                        <strong className="block text-emerald-600 text-xs uppercase font-bold tracking-wider mb-2">
-                                            <i className="bi bi-check-circle-fill mr-1.5"></i>Strengths
+                                        <strong className="flex items-center text-emerald-600 text-xs uppercase font-bold tracking-wider mb-2">
+                                            <CheckCircle size={12} className="mr-1.5" />Strengths
                                         </strong>
                                         <div className="mb-3 flex flex-wrap gap-1.5">
                                             {app.ai_feedback.strengths?.slice(0, 3).map((s, i) => (
@@ -94,8 +93,8 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                                                 </span>
                                             ))}
                                         </div>
-                                        <strong className="block text-rose-600 text-xs uppercase font-bold tracking-wider mb-2">
-                                            <i className="bi bi-exclamation-circle-fill mr-1.5"></i>To Improve
+                                        <strong className="flex items-center text-rose-600 text-xs uppercase font-bold tracking-wider mb-2">
+                                            <AlertCircle size={12} className="mr-1.5" />To Improve
                                         </strong>
                                         <div className="flex flex-wrap gap-1.5">
                                             {app.ai_feedback.missing_skills?.slice(0, 3).map((s, i) => (
@@ -111,14 +110,14 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                     ))}
                     {myApplications.length === 0 && (
                         <div className="col-span-full text-center py-16">
-                            <i className="bi bi-briefcase text-slate-300 text-6xl"></i>
-                            <p className="text-slate-500 mt-4">You haven't applied to any jobs yet. Visit the <Link to="/findjobs" className="text-blue-600 hover:underline">Job Board</Link> to get started!</p>
+                            <Briefcase className="mx-auto text-slate-300 text-5xl mb-3" />
+                            <p className="text-slate-500">You haven't applied to any jobs yet. Visit the <Link to="/findjobs" className="text-blue-600 hover:underline">Job Board</Link> to get started!</p>
                         </div>
                     )}
                 </div>
             </div>
         </main>
-    )
+    );
 }
 
 export default CandidateDashboard

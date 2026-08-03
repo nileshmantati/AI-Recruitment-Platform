@@ -225,8 +225,21 @@ const JobsPage = () => {
 
     const fetchJobs = useCallback(async () => {
         try {
-            const response = await api.get('jobs/my/');
-            setJobs(response.data);
+            const response = await api.get('jobs/');
+            let userAppliedJobIds = new Set();
+            try {
+                const appsRes = await api.get('applications/my/');
+                if (Array.isArray(appsRes.data)) {
+                    userAppliedJobIds = new Set(appsRes.data.map(app => app.job || app.job_details?.id));
+                }
+            } catch {
+                // Unauthenticated or not candidate
+            }
+            const jobsWithApplied = (response.data || []).map(j => ({
+                ...j,
+                isApplied: userAppliedJobIds.has(j.id)
+            }));
+            setJobs(jobsWithApplied);
         } catch (err) {
             console.error('Failed to load jobs', err);
             toast.error('Failed to load jobs.');
@@ -246,12 +259,16 @@ const JobsPage = () => {
 
     const filteredJobs = useMemo(() => {
         let result = [...jobs];
+        const isSearchingOrFiltering = searchQuery.trim() !== '' || activeFilter !== 'All';
+
         if (searchQuery) {
             const q = searchQuery.toLowerCase();
             result = result.filter(j =>
                 j.title?.toLowerCase().includes(q) ||
                 j.description?.toLowerCase().includes(q) ||
-                j.required_skills?.some(s => s.toLowerCase().includes(q))
+                (Array.isArray(j.required_skills)
+                    ? j.required_skills.some(s => s.toLowerCase().includes(q))
+                    : (j.required_skills || '').toLowerCase().includes(q))
             );
         }
         if (activeFilter !== 'All') {
@@ -270,6 +287,11 @@ const JobsPage = () => {
             default:
                 result.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
         }
+
+        if (!isSearchingOrFiltering) {
+            return result.slice(0, 5);
+        }
+
         return result;
     }, [jobs, searchQuery, activeFilter, sortBy]);
 
@@ -415,6 +437,9 @@ const JobsPage = () => {
                         <p className="mt-3 text-xs font-medium text-slate-400">
                             Showing <span className="text-slate-700">{filteredJobs.length}</span> of{' '}
                             <span className="text-slate-700">{jobs.length}</span> jobs
+                            {(!searchQuery.trim() && activeFilter === 'All' && jobs.length > 5) && (
+                                <span className="ml-1 font-normal text-slate-400"> (Showing top 5 recent jobs. Search or filter to explore all {jobs.length})</span>
+                            )}
                         </p>
                     </div>
 
