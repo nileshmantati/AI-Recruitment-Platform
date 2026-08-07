@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, FileText, CheckCircle, Clock, TrendingUp, Sparkles, BarChart3, Calendar } from 'lucide-react';
-import api from '../../services/api';
+import api from '../../../services/api';
 import toast from 'react-hot-toast';
-import { T } from '../../Js/theme';
-import { KpiCard } from '../../ui/DashboardUI';
+import { T } from '../../../Js/theme';
+import { KpiCard } from '../../../ui/DashboardUI';
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };

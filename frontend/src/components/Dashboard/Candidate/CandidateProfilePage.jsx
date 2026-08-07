@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import api from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
+import api from '../../../services/api';
+import { useAuth } from '../../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone, MapPin, Globe, Briefcase, GraduationCap, Code2, Edit3, Save, X, Plus, Trash2, Camera } from 'lucide-react';
-import { T } from '../../Js/theme';
+import { T } from '../../../Js/theme';
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };

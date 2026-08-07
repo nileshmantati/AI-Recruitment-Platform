@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import api from '../../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import api from '../../../services/api';
 import toast from 'react-hot-toast';
-import { T } from '../../Js/theme';
+import { T } from '../../../Js/theme';
 import {
     FileText, Search, Filter, ChevronDown, Eye, Briefcase, Calendar,
     ArrowLeft, CheckCircle, XCircle, Sparkles, MapPin, IndianRupee

@@ -4,9 +4,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Loader2, User, Mail, Phone, Building2, Briefcase, Edit3, Save, X, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../../services/api';
+import api from '../../../services/api';
 import { motion } from 'framer-motion';
-import { T } from '../../Js/theme';
+import { T } from '../../../Js/theme';
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } } };
 const containerVariants = {

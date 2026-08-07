@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bookmark, Briefcase, Clock, IndianRupee, Search, BookmarkX } from 'lucide-react';
-import { T } from '../../Js/theme';
+import { T } from '../../../Js/theme';
 import toast from 'react-hot-toast';
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };

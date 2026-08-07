@@ -4,9 +4,9 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, UploadCloud, FileText, CheckCircle, AlertCircle, Loader2, Star, TrendingUp, X } from 'lucide-react';
-import api from '../../services/api';
+import api from '../../../services/api';
 import toast from 'react-hot-toast';
-import { T } from '../../Js/theme';
+import { T } from '../../../Js/theme';
 
 const fadeUp = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } };
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };

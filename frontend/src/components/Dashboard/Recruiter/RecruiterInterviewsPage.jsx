@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import api from '../../services/api';
+import api from '../../../services/api';
 
 import {
     Calendar, Video, Clock, CheckCircle, Users,
     Search, Filter, ChevronRight
 } from 'lucide-react';
-import { KpiCard } from '../../ui/DashboardUI.jsx';
+import { KpiCard } from '../../../ui/DashboardUI.jsx';
 import ApplicationDetails from './ApplicationDetails.jsx';
 import toast from 'react-hot-toast';
 

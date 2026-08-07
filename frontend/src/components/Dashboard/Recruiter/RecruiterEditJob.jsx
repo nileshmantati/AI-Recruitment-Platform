@@ -1,5 +1,5 @@
 import { ArrowLeft, Briefcase, Clock, Edit3, Trash2, Save, X, Users, IndianRupee } from "lucide-react";
-import { T } from "../../Js/theme.js";
+import { T } from "../../../Js/theme.js";
 
 const RecruiterEditJob = ({
     selectedJob,

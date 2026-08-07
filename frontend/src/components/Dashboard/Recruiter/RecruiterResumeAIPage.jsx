@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { T } from '../../Js/theme.js';
+import { T } from '../../../Js/theme.js';
 import {
     Sparkles, UploadCloud, Bot, Search,
     TrendingUp, Award, AlertCircle, X,
     ExternalLink, ChevronDown
 } from 'lucide-react';
-import api, { analyzeResume } from '../../services/api';
+import api, { analyzeResume } from '../../../services/api';
 import toast from 'react-hot-toast';
 import CandidateDeepDiveDrawer from './CandidateDeepDiveDrawer';
 

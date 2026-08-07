@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import {
     Building2, MapPin, Globe, Users, Mail, Phone, Edit, CheckCircle, Target, Briefcase, Zap
 } from 'lucide-react';
-import CompanyProfileForm from '../CompanyProfile/CompanyProfileForm';
-import { companyService } from '../../services/companyService';
+import CompanyProfileForm from '../../CompanyProfile/CompanyProfileForm';
+import { companyService } from '../../../services/companyService';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 

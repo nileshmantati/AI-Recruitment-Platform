@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../context/AuthContext';
-import api, { updateApplicationStatus } from '../../services/api';
-import PostJobModal from '../Modals/PostJobModal';
+import { useAuth } from '../../../context/AuthContext';
+import api, { updateApplicationStatus } from '../../../services/api';
+import PostJobModal from '../../Modals/PostJobModal';
 import AnalyticsOverview from './AnalyticsOverview';
-import ScheduleInterviewModal from '../Modals/ScheduleInterviewModal';
+import ScheduleInterviewModal from '../../Modals/ScheduleInterviewModal';
 import { MapPin, Users, ChevronRight, Briefcase, Plus } from "lucide-react";
 
 import toast from 'react-hot-toast';

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import api from '../../services/api';
-import { T } from '../../Js/theme.js';
+import api from '../../../services/api';
+import { T } from '../../../Js/theme.js';
 import {
     Search, Filter, ChevronDown, User, Briefcase, ArrowLeft
 } from 'lucide-react';

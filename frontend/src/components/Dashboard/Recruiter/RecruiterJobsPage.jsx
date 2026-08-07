@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import api from '../../services/api';
-import { T } from '../../Js/theme.js';
-import PostJobModal from '../Modals/PostJobModal';
+import api from '../../../services/api';
+import { T } from '../../../Js/theme.js';
+import PostJobModal from '../../Modals/PostJobModal';
 import {
     Briefcase, Plus, Search, Filter, Users, IndianRupee,
     ChevronDown, Eye, Edit3, Trash2

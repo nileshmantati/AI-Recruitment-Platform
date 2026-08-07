@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../../context/AuthContext";
-import api from '../../services/api';
+import { useAuth } from "../../../context/AuthContext";
+import api from '../../../services/api';
 import toast from 'react-hot-toast';
 import { Loader2, Sparkles, CheckCircle, Briefcase, FileText, Calendar, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { T } from '../../Js/theme';
-import { KpiCard } from "../../ui/DashboardUI";
+import { T } from '../../../Js/theme';
+import { KpiCard } from "../../../ui/DashboardUI";
 
 const containerVariants = {
     hidden: { opacity: 0 },

@@ -4,15 +4,15 @@ import {
     AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import api from '../../services/api';
-import {
-    BarChart3, TrendingUp, Users, Briefcase, Award,
-    Sparkles, CheckCircle2, AlertCircle, ArrowUpRight, Download,
-    RefreshCw, Target, Layers
-} from 'lucide-react';
+import api from '../../../services/api';
 import toast from 'react-hot-toast';
-import { KpiCard } from '../../ui/DashboardUI.jsx';
-import { T } from '../../Js/theme.js';
+import {
+    TrendingUp, Users, Briefcase, CheckCircle2, XCircle, Clock,
+    DollarSign, Award, Target, ChevronDown, Download, BarChart2,
+    Calendar, ArrowUpRight, ArrowDownRight, UserCheck, ShieldAlert
+} from 'lucide-react';
+import { KpiCard } from '../../../ui/DashboardUI.jsx';
+import { T } from '../../../Js/theme.js';
 
 const STATUS_COLORS = {
     PENDING: '#64748B',

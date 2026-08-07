@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import api from '../../services/api';
+import api from '../../../services/api';
 import { Briefcase, Users, FileText, CheckCircle2 } from 'lucide-react';
-import { T } from '../../Js/theme.js';
-import { KpiCard } from '../../ui/DashboardUI.jsx';
+import { T } from '../../../Js/theme.js';
+import { KpiCard } from '../../../ui/DashboardUI.jsx';
 import toast from 'react-hot-toast';
 
 const getTimeAgo = (date) => {

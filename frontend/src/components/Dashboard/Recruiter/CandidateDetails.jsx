@@ -1,4 +1,4 @@
-import { T } from "../../Js/theme";
+import { T } from "../../../Js/theme";
 import { ArrowLeft, User, Link, Globe, FileText, Star, Briefcase } from "lucide-react";
 
 const CandidateDetails = ({ candidate, setSelectedCandidate, getStatusStyle, formatStatus }) => {
@@ -9,7 +9,7 @@ const CandidateDetails = ({ candidate, setSelectedCandidate, getStatusStyle, for
             <main className="flex-1 pb-12">
                 <div className="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
                     <button onClick={() => setSelectedCandidate(null)}
-                        className="flex items-center px-2 py-1.5 mb-3 border border-black outline-none rounded-lg! cursor-pointer gap-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition">
+                        className="flex items-center px-2 py-1.5 mb-3 border border-black outline-none rounded-lg cursor-pointer gap-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition">
                         <ArrowLeft size={16} /> Back to Candidates
                     </button>
 
@@ -50,7 +50,7 @@ const CandidateDetails = ({ candidate, setSelectedCandidate, getStatusStyle, for
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                                 <div className="col-span-2 space-y-8">
                                     <div>
-                                        <h4 className="text-lg! font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                                        <h4 className="text-lg font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
                                             <FileText size={20} className="text-indigo-500" /> About Candidate
                                         </h4>
                                         <p className="text-base text-slate-700 leading-relaxed bg-slate-50 rounded-2xl p-6 border border-slate-100">
@@ -59,7 +59,7 @@ const CandidateDetails = ({ candidate, setSelectedCandidate, getStatusStyle, for
                                     </div>
 
                                     <div>
-                                        <h4 className="text-lg! font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                                        <h4 className="text-lg font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
                                             <Star size={20} className="text-amber-500" /> Skills & Expertise
                                         </h4>
                                         <div className="flex flex-wrap gap-2.5">
@@ -78,15 +78,15 @@ const CandidateDetails = ({ candidate, setSelectedCandidate, getStatusStyle, for
 
                                 {/* Applications Summary for this Candidate */}
                                 <div className="space-y-4">
-                                    <h4 className="text-lg! font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                                    <h4 className="text-lg font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
                                         <Briefcase size={20} className="text-emerald-500" /> Applied Jobs
                                     </h4>
 
                                     <div className="flex flex-col gap-4 overflow-hidden">
                                         {c.applications.map(app => (
-                                            <div key={app.id} className="rounded-2xl border border-slate-200 bg-white hover:bg-gray-100! ps-3 pe-2 py-2 shadow-sm relative overflow-hidden transition hover:shadow-md">
+                                            <div key={app.id} className="rounded-2xl border border-slate-200 bg-white hover:bg-gray-100 ps-3 pe-2 py-2 shadow-sm relative overflow-hidden transition hover:shadow-md">
                                                 <div className="absolute left-0 top-0 w-1.5 h-full" style={{ background: T.primary }}></div>
-                                                <h6 className="font-bold text-slate-900 text-lg! truncate pr-4 capitalize">{app.job_details?.title}</h6>
+                                                <h6 className="font-bold text-slate-900 text-lg truncate pr-4 capitalize">{app.job_details?.title}</h6>
 
                                                 <div className="mt-3 flex items-center justify-between">
                                                     <span className={`px-2.5 py-1 text-[11px] font-bold rounded-lg uppercase tracking-wide ${getStatusStyle(app.status)}`}>

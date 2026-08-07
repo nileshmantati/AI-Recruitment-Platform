@@ -1,4 +1,4 @@
-import { T } from '../../Js/theme.js';
+import { T } from '../../../Js/theme.js';
 import { ArrowLeft, User, Briefcase, Star, CheckCircle, XCircle, Calendar } from 'lucide-react';
 
 const ApplicationDetails = ({ setSelectedApp, app, updatingStatus, handleUpdateStatus, getTimeAgo, getScoreColor, getStatusStyle, formatStatus }) => {
