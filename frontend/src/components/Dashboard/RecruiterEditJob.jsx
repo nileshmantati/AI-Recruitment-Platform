@@ -27,7 +27,7 @@ const RecruiterEditJob = ({
                 <div className="space-y-6 p-6 lg:p-8">
                     {/* Back button */}
                     <button onClick={() => { setSelectedJob(null); cancelEditing(); }}
-                        className="flex items-center px-2 py-1.5 mb-3 border border-black outline-none rounded-lg! cursor-pointer gap-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition">
+                        className="flex items-center px-2 py-1.5 mb-3 border border-black outline-none rounded-lg cursor-pointer gap-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition">
                         <ArrowLeft size={16} /> Back to Jobs
                     </button>
 
@@ -62,11 +62,11 @@ const RecruiterEditJob = ({
                                     {isEditing ? (
                                         <>
                                             <button onClick={cancelEditing}
-                                                className="flex items-center gap-1.5 rounded-lg! border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                                                className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
                                                 <X size={15} /> Cancel
                                             </button>
                                             <button onClick={() => handleSaveEdit(job.id)} disabled={saving}
-                                                className="flex items-center gap-1.5 rounded-lg! px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5"
+                                                className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5"
                                                 style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                                                 <Save size={15} /> {saving ? 'Saving...' : 'Save Changes'}
                                             </button>
@@ -74,11 +74,11 @@ const RecruiterEditJob = ({
                                     ) : (
                                         <>
                                             <button onClick={() => startEditing(job)}
-                                                className="flex items-center gap-1.5 rounded-lg! border border-slate-200 px-4 py-2 text-sm font-semibold text-yellow-600 hover:bg-yellow-100 transition">
+                                                className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-yellow-600 hover:bg-yellow-100 transition">
                                                 <Edit3 size={15} /> Edit
                                             </button>
                                             <button onClick={() => handleDelete(job.id)} disabled={deleting === job.id}
-                                                className="flex items-center gap-1.5 rounded-lg! border border-red-200 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-100 transition disabled:opacity-50">
+                                                className="flex items-center gap-1.5 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-100 transition disabled:opacity-50">
                                                 <Trash2 size={15} /> {deleting === job.id ? 'Deleting...' : 'Delete'}
                                             </button>
                                         </>

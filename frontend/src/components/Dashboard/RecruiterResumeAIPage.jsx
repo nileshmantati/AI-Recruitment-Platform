@@ -335,7 +335,7 @@ const RecruiterResumeAIPage = () => {
                             <button
                                 type="submit"
                                 disabled={isScanning}
-                                className="me-2 px-6 py-2.5 rounded-xl! hover:scale-90 active:scale-95 font-semibold! text-white text-xs sm:text-sm whitespace-nowrap transition-all duration-300 flex items-center gap-2"
+                                className="me-2 px-6 py-2.5 rounded-xl hover:scale-90 active:scale-95 font-semibold text-white text-xs sm:text-sm whitespace-nowrap transition-all duration-300 flex items-center gap-2"
                                 style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
                             >
                                 <Search size={18} />
@@ -359,7 +359,7 @@ const RecruiterResumeAIPage = () => {
                             <button
                                 key={index}
                                 onClick={() => handlePromptClick(prompt)}
-                                className="px-3.5 py-1.5 rounded-xl! hover:scale-90 text-sm active:scale-95 bg-white hover:bg-indigo-50/80 active:bg-indigo-100 border border-slate-200/80 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium transition-all shadow-xs shrink-0 flex items-center gap-1.5 group"
+                                className="px-3.5 py-1.5 rounded-xl hover:scale-90 text-sm active:scale-95 bg-white hover:bg-indigo-50/80 active:bg-indigo-100 border border-slate-200/80 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium transition-all shadow-xs shrink-0 flex items-center gap-1.5 group"
                             >
                                 <Sparkles size={11} className="text-indigo-500 group-hover:rotate-12 transition-transform" />
                                 {prompt}
@@ -387,7 +387,7 @@ const RecruiterResumeAIPage = () => {
                         >
                             <input ref={fileInputRef} type="file" multiple accept=".pdf,.doc,.docx" className="hidden" onChange={handleFileUpload} />
 
-                            <div className="w-16 h-16 rounded-2xl! flex items-center justify-center mb-4 bg-gradient-to-tr from-indigo-600/10 via-indigo-500/5 to-purple-500/10 border border-indigo-200/60 text-indigo-600 shadow-inner group-hover:scale-110 transition-transform duration-300">
+                            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 bg-gradient-to-tr from-indigo-600/10 via-indigo-500/5 to-purple-500/10 border border-indigo-200/60 text-indigo-600 shadow-inner group-hover:scale-110 transition-transform duration-300">
                                 <UploadCloud size={32} />
                             </div>
                             <h3 className="text-base font-bold text-slate-900 mb-1">Bulk Parse Candidate CVs</h3>
@@ -403,7 +403,7 @@ const RecruiterResumeAIPage = () => {
 
                             <button
                                 type="button"
-                                className="rounded-2xl! px-6 py-3 text-sm font-bold text-white w-full hover:scale-90! transition-all active:scale-95!"
+                                className="rounded-2xl px-6 py-3 text-sm font-bold text-white w-full hover:scale-90 transition-all active:scale-95"
                                 style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
                             >
                                 Browse Files or Drop Here
@@ -441,7 +441,7 @@ const RecruiterResumeAIPage = () => {
                                         <button
                                             key={i}
                                             onClick={() => handlePromptClick(skill)}
-                                            className="px-3 py-1.5 rounded-xl! text-sm! bg-slate-800/80 hover:bg-indigo-600/30 font-semibold text-indigo-200 hover:text-white border border-indigo-500/20 transition-all duration-200 flex items-center gap-1.5 group"
+                                            className="px-3 py-1.5 rounded-xl text-xs bg-slate-800/80 hover:bg-indigo-600/30 font-semibold text-indigo-200 hover:text-white border border-indigo-500/20 transition-all duration-200 flex items-center gap-1.5 group"
                                         >
                                             <AlertCircle size={12} className="text-amber-400 group-hover:scale-110 transition-transform" />
                                             {skill}
@@ -472,13 +472,13 @@ const RecruiterResumeAIPage = () => {
                                     <button
                                         key={tab.key}
                                         onClick={() => setSelectedTier(tab.key)}
-                                        className={`px-3 py-1.5 rounded-lg! text-xs font-medium transition-all flex items-center gap-1.5 ${selectedTier === tab.key
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${selectedTier === tab.key
                                             ? 'bg-white text-slate-900 shadow-sm'
                                             : 'text-slate-500 hover:text-slate-700'
                                             }`}
                                     >
                                         {tab.label}
-                                        <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 rounded-md!">
+                                        <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 rounded-md">
                                             {tab.count}
                                         </span>
                                     </button>
@@ -508,7 +508,7 @@ const RecruiterResumeAIPage = () => {
                                 {(searchQuery || selectedTier !== "ALL") && (
                                     <button
                                         onClick={() => { setSearchQuery(""); setSelectedTier("ALL"); }}
-                                        className="px-5 py-2.5 rounded-xl! hover:scale-90 transition-all duration-150 bg-indigo-50 text-indigo-700 font-bold text-xs hover:bg-indigo-100"
+                                        className="px-5 py-2.5 rounded-xl hover:scale-90 transition-all duration-150 bg-indigo-50 text-indigo-700 font-bold text-xs hover:bg-indigo-100"
                                     >
                                         Reset AI Filters
                                     </button>
@@ -530,7 +530,7 @@ const RecruiterResumeAIPage = () => {
                                     return (
                                         <div
                                             key={candidate.id}
-                                            className={`group relative flex flex-col py-3.5! px-5! rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 border-l-4 ${badge.border} ${isDropdownOpen ? 'z-30 overflow-visible shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/20' : 'overflow-hidden z-0'
+                                            className={`group relative flex flex-col py-3.5 px-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 border-l-4 ${badge.border} ${isDropdownOpen ? 'z-30 overflow-visible shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/20' : 'overflow-hidden z-0'
                                                 }`}
                                         >
                                             {/* Subtle Card Background Glow */}
@@ -561,7 +561,7 @@ const RecruiterResumeAIPage = () => {
                                                 <div className="flex items-center justify-end gap-2 w-full sm:w-auto mt-2 border-t sm:border-t-0 border-slate-100 shrink-0 z-10">
                                                     <div className="relative flex gap-2 items-center justify-between text-left" onClick={(e) => e.stopPropagation()}>
                                                         <div className="inline-flex items-center gap-2">
-                                                            <span className={`px-3 py-1.5 rounded-xl text-md font-bold border ${badge.classes} shadow! flex items-center gap-1.5`}>
+                                                            <span className={`px-3 py-1.5 rounded-xl text-md font-bold border ${badge.classes} shadow flex items-center gap-1.5`}>
                                                                 <span className={`w-2 h-2 rounded-full ${badge.dot} animate-pulse`}></span>
                                                                 {candidate.score}%
                                                             </span>
@@ -570,7 +570,7 @@ const RecruiterResumeAIPage = () => {
                                                             type="button"
                                                             disabled={updatingId === candidate.id}
                                                             onClick={() => setActiveStatusDropdown(isDropdownOpen ? null : candidate.id)}
-                                                            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg! text-[14px]! font-semibold uppercase tracking-wider border cursor-pointer shadow-2xs hover:shadow-sm active:scale-[0.98] transition-all ${STATUS_CHOICES.find(s => s.value === candidate.status)?.bg || 'bg-slate-100 text-slate-700 border-slate-300'
+                                                            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-semibold uppercase tracking-wider border cursor-pointer shadow-2xs hover:shadow-sm active:scale-[0.98] transition-all ${STATUS_CHOICES.find(s => s.value === candidate.status)?.bg || 'bg-slate-100 text-slate-700 border-slate-300'
                                                                 } ${updatingId === candidate.id ? 'opacity-50 pointer-events-none animate-pulse' : ''}`}
                                                             title="Change application status"
                                                         >
@@ -581,7 +581,7 @@ const RecruiterResumeAIPage = () => {
 
                                                         {/* Modern Tailwind Custom Status Options Box */}
                                                         {isDropdownOpen && (
-                                                            <div className="absolute right-0 sm:left-auto sm:right-0! top-full mt-2 w-52 p-2 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-xl shadow-slate-900/10 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150 origin-top-right sm:origin-top-left" style={{ zIndex: 100 }}>
+                                                            <div className="absolute right-0 sm:left-auto sm:right-0 top-full mt-2 w-52 p-2 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-xl shadow-slate-900/10 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150 origin-top-right sm:origin-top-left" style={{ zIndex: 100 }}>
                                                                 {STATUS_CHOICES.map(s => {
                                                                     const isCurrent = candidate.status === s.value;
                                                                     return (
@@ -594,7 +594,7 @@ const RecruiterResumeAIPage = () => {
                                                                                     handleUpdateStatus(candidate.id, s.value, e);
                                                                                 }
                                                                             }}
-                                                                            className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg! text-sm! transition-all duration-150 ${isCurrent
+                                                                            className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-sm transition-all duration-150 ${isCurrent
                                                                                 ? 'bg-indigo-50/90 text-indigo-700 font-extrabold shadow-2xs border border-indigo-100'
                                                                                 : 'text-slate-600 font-bold hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]'
                                                                                 }`}

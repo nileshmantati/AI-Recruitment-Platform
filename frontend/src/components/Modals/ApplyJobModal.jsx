@@ -117,7 +117,7 @@ const ApplyJobModal = ({ show, handleClose, job }) => {
                     </h3>
                     <button
                         onClick={handleCloseModal}
-                        className="rounded-lg! cursor-pointer p-2 transition-colors hover:bg-slate-100 text-slate-600"
+                        className="rounded-lg cursor-pointer p-2 transition-colors hover:bg-slate-100 text-slate-600"
                     >
                         <X size={20} />
                     </button>
@@ -178,14 +178,14 @@ const ApplyJobModal = ({ show, handleClose, job }) => {
                         <button
                             type="button"
                             onClick={handleCloseModal}
-                            className="rounded-lg! px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors bg-slate-100 hover:scale-95"
+                            className="rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors bg-slate-100 hover:scale-95"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isLoading || !resumeFile}
-                            className="flex items-center gap-2 rounded-lg! px-6 py-2.5 text-sm font-bold text-indigo-100 shadow-md transition-all hover:scale-95 cursor-pointer"
+                            className="flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold text-indigo-100 shadow-md transition-all hover:scale-95 cursor-pointer"
                             style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
                         >
                             {isLoading ? (

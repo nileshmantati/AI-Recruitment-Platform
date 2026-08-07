@@ -1,18 +1,16 @@
 
 import logging
-# pyrefly: ignore [missing-import]
+import threading
+from django.db import connection
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Application
 from .serializers import ApplicationSerializer
-from ai_engine.tasks import process_resume_scoring
-from django.shortcuts import get_object_or_404
+from ai_engine.tasks import process_resume_scoring, send_status_update_email, send_interview_invitation
 from ai_engine.services import generate_interview_questions
-from rest_framework.views import APIView
-from ai_engine.tasks import send_status_update_email, send_interview_invitation
-import threading
-from django.db import connection
 
 
 logger = logging.getLogger(__name__)

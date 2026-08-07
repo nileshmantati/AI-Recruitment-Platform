@@ -145,10 +145,10 @@ const RecruiterInterviewsPage = () => {
                                 <Video size={16} />
                                 <span>Interview Command Center</span>
                             </div>
-                            <h1 className="text-3xl! sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
+                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
                                 Manage <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-800 to-indigo-500">Scheduled Interviews</span>
                             </h1>
-                            <p className="text-slate-600 text-base! sm:text-lg font-semibold max-w-xl leading-relaxed">
+                            <p className="text-slate-600 text-base sm:text-lg font-semibold max-w-xl leading-relaxed">
                                 Track upcoming meetings and coordinate with shortlisted candidates easily.
                             </p>
                         </div>
@@ -179,15 +179,15 @@ const RecruiterInterviewsPage = () => {
                             className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-slate-700 placeholder:text-slate-400 pl-10 h-10 text-sm font-medium"
                         />
                     </div>
-                    <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full! bg-slate-900 text-white hover:bg-slate-800 transition-colors text-sm font-semibold">
+                    <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-colors text-sm font-semibold">
                         <Filter size={16} /> Filter
                     </button>
                 </motion.div>
 
                 {/* Pipeline / List */}
                 <motion.div variants={itemVariants} className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-                    <div className="px-6 py-2.5! border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                        <h3 className="font-bold text-2xl! text-slate-800">Scheduled Interviews</h3>
+                    <div className="px-6 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <h3 className="font-bold text-2xl text-slate-800">Scheduled Interviews</h3>
                         <span className="text-xs font-semibold text-slate-500 bg-slate-200 px-2.5 py-1 rounded-full">
                             {filteredInterviews.length} Total
                         </span>
@@ -249,7 +249,7 @@ const RecruiterInterviewsPage = () => {
 
                                         <button
                                             onClick={() => setSelectedApp(app)}
-                                            className="flex items-center gap-2 px-4 py-2 rounded-xl! bg-white border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all shadow-[0_2px_4px_rgba(0,0,0,0.02)]"
+                                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all shadow-[0_2px_4px_rgba(0,0,0,0.02)]"
                                         >
                                             <span>View Details</span>
                                             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" />

@@ -77,7 +77,7 @@ const Register = () => {
     return (
         <motion.div variants={containerVariants}
             initial="hidden"
-            animate="show" className="py-10! flex items-center justify-center relative overflow-hidden" style={{ background: `radial-gradient(1200px 600px at 50% -10%, ${T.primary}14, transparent), radial-gradient(800px 500px at 90% 10%, ${T.secondary}14, transparent)` }}>
+            animate="show" className="py-10 flex items-center justify-center relative overflow-hidden" style={{ background: `radial-gradient(1200px 600px at 50% -10%, ${T.primary}14, transparent), radial-gradient(800px 500px at 90% 10%, ${T.secondary}14, transparent)` }}>
             <motion.div variants={itemVariants} className="relative z-10 w-full max-w-md px-6">
                 <GlassCard className="px-8 py-4">
                     <h1 className="mb-2 text-3xl text-center font-extrabold text-slate-900">Create Account</h1>
@@ -89,7 +89,7 @@ const Register = () => {
                                     key={r.id}
                                     type="button"
                                     onClick={() => setValue("role", r.id)}
-                                    className={`flex items-center justify-center gap-2 rounded-xl! py-2.5 text-sm font-semibold transition-all ${currentRole === r.id ? "bg-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all ${currentRole === r.id ? "bg-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
                                     style={currentRole === r.id ? { color: T.primary } : {}}
                                 >
                                     <r.icon size={16} /> {r.label}
@@ -122,7 +122,7 @@ const Register = () => {
                             {...register("password")}
                         />
 
-                        <PrimaryButton type="submit" className="w-full! rounded-2xl! my-3 py-2.5! hover:scale-95 transition-all duration-300" >Sign Up</PrimaryButton>
+                        <PrimaryButton type="submit" className="w-full rounded-2xl my-3 py-2.5 hover:scale-95 transition-all duration-300" >Sign Up</PrimaryButton>
 
                         <p className="mt-6 text-center text-sm text-slate-500">
                             Already have an account? <button type="button" onClick={() => navigate("/login")} className="font-semibold transition-opacity hover:opacity-80" style={{ color: T.primary }}>Log in</button>

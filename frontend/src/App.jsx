@@ -80,7 +80,7 @@ function App() {
             </ToastBar>
           )}
         </Toaster>
-        <div className="bg-light min-vh-100">
+        <div className="bg-slate-50 min-h-screen">
           <Routes>
             <Route element={<MainLayout />}>
               <Route path="/" element={<Home />} />

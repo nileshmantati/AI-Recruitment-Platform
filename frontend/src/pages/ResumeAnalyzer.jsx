@@ -187,7 +187,7 @@ export default function ResumeAnalyzer() {
                   {(file?.name ?? savedFileName ?? 'resume.pdf')} — Analysis Complete
                 </span>
                 <button onClick={handleReset}
-                  className="flex-1 sm:flex-none py-2 px-6 rounded-lg! font-semibold text-sm flex items-center justify-center gap-2 hover:bg-black! hover:text-white! transition-all duration-400"
+                  className="flex-1 sm:flex-none py-2 px-6 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-black hover:text-white transition-all duration-400"
                   style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0)', color: T.onSurfaceVariant }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
@@ -297,7 +297,7 @@ export default function ResumeAnalyzer() {
                     <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.88)' }}>{result.ai_strategy}</p>
                     <button
                       onClick={() => { setCheckedItems({}); setShowSuggestions(true); }}
-                      className="w-full py-3 sm:py-3.5 rounded-xl! font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95"
+                      className="w-full py-3 sm:py-3.5 rounded-xl font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95"
                       style={{ background: '#fff', color: T.primary, boxShadow: '0 8px 24px rgba(0,0,0,0.18)' }}
                     >
                       Apply AI Suggestions
@@ -365,7 +365,7 @@ export default function ResumeAnalyzer() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <PrimaryButton
                       onClick={handleDownloadReport}
-                      className="flex-1 py-3! rounded-xl! font-bold! text-sm! text-white! flex items-center justify-center gap-2"
+                      className="flex-1 py-3 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-2"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
@@ -572,13 +572,13 @@ export default function ResumeAnalyzer() {
                       setCheckedItems(all);
                       setTimeout(() => setShowSuggestions(false), 2600);
                     }}
-                      className="flex-1 py-2.5 rounded-xl! text-sm font-bold transition-opacity hover:opacity-90 hover:cursor-pointer "
+                      className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-opacity hover:opacity-90 hover:cursor-pointer "
                       style={{ background: `${T.primary}14`, color: T.primary }}
                     >
                       Mark all done
                     </button>
                     <button onClick={() => setCheckedItems({})}
-                      className="flex-1 sm:flex-none py-2.5 px-6 rounded-lg! font-medium text-sm flex items-center justify-center gap-2 hover:bg-black! hover:text-white! transition-all duration-400"
+                      className="flex-1 sm:flex-none py-2.5 px-6 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-black hover:text-white transition-all duration-400"
                       style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0)', color: T.onSurfaceVariant }}>
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />

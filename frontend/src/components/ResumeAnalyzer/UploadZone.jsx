@@ -18,7 +18,7 @@ export default function UploadZone({ onFile }) {
 
   return (
     <div
-      className={`rounded-3xl p-5 sm:p-12 text-center border-2 border-dashed! relative overflow-hidden cursor-pointer transition-all duration-200 ${dragOver ? 'scale-[1.01]' : ''}`}
+      className={`rounded-3xl p-5 sm:p-12 text-center border-2 border-dashed relative overflow-hidden cursor-pointer transition-all duration-200 ${dragOver ? 'scale-[1.01]' : ''}`}
       style={{ ...glass, borderColor: dragOver ? T.primary : `${T.primary}55` }}
       onDragOver={e => { prevent(e); setDragOver(true); }}
       onDragEnter={e => { prevent(e); setDragOver(true); }}
@@ -47,7 +47,7 @@ export default function UploadZone({ onFile }) {
         </div>
         <PrimaryButton
           onClick={e => { e.stopPropagation(); inputRef.current?.click(); }}
-          className="px-8! py-3! rounded-full! font-semibold! text-sm! text-white! transition-all!"
+          className="px-8 py-3 rounded-full font-semibold text-sm text-white transition-all"
         >
           Select File
         </PrimaryButton>
