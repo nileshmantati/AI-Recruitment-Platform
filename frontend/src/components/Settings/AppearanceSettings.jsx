@@ -13,17 +13,20 @@ const AppearanceSettings = () => {
         emerald: '#10b981',
         amber: '#f59e0b',
         rose: '#f43f5e'
-    };const fetchSettings = async () => {
+    };
+
+    const fetchSettings = async () => {
         try {
             const response = await api.get('/settings/appearance/');
             setSettings(response.data);
-        } catch { toast.error('Failed to load appearance settings');
+        } catch {
+            toast.error('Failed to load appearance settings');
         } finally {
             setIsLoading(false);
         }
     };
 
-    
+
 
     useEffect(() => {
         fetchSettings();
@@ -35,7 +38,8 @@ const AppearanceSettings = () => {
         try {
             await api.put('/settings/appearance/', { [key]: value });
             toast.success('Appearance updated');
-        } catch { toast.error('Failed to update appearance');
+        } catch {
+            toast.error('Failed to update appearance');
         }
     };
 

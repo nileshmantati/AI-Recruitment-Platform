@@ -124,7 +124,7 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
                         <i className="bi bi-robot text-indigo-600 text-3xl"></i>
                     </div>
                     <div>
-                        <h4 className="font-extrabold text-slate-800 text-lg">Synthesizing Comapny Profile data...</h4>
+                        <h4 className="font-extrabold text-slate-800 text-lg">Synthesizing Company Profile data...</h4>
                     </div>
                 </div>
             </div>
@@ -234,7 +234,7 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
                         {/* RIGHT CONTENT */}
                         <motion.div variants={itemVariants} className="lg:col-span-9">
                             <div className="bg-white rounded-2xl shadow p-6 h-full">
-                                <h3 className="text-lg! font-bold mb-0 text-slate-900 mb-4">
+                                <h3 className="text-lg font-bold text-slate-900 mb-4">
                                     {selectedJob
                                         ? `Candidates for ${selectedJob.title}`
                                         : "Select a job to view candidates"}
@@ -257,17 +257,15 @@ const RecruiterDashboard = ({ getScoreColor, getStatusBadge }) => {
                                                             <i className="bi bi-person-fill"></i>
                                                         </div>
                                                         <div className="break-all">
-                                                            <h4 className="font-bold text-lg! mb-0 capitalize">
+                                                            <h4 className="font-bold text-lg mb-0 capitalize">
                                                                 {app.candidate_name}
                                                             </h4>
-                                                            {/* <div className="flex items-center gap-3 text-sm text-gray-500"> */}
                                                             <p className="text-sm text-gray-500 mb-1">
                                                                 Applied:{" "}
                                                                 {new Date(app.applied_at).toLocaleDateString()}
                                                             </p>
 
                                                             {getStatusBadge(app.status)}
-                                                            {/* </div> */}
                                                         </div>
                                                     </div>
 

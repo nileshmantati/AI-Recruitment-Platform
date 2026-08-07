@@ -4,6 +4,7 @@ import { Activity, FileText, CheckCircle, Clock, TrendingUp, Sparkles, BarChart3
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { T } from '../../Js/theme';
+import { KpiCard } from '../../ui/DashboardUI';
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
@@ -23,20 +24,6 @@ const getTimeAgo = (date) => {
     if (d < 7) return `${d}d ago`; if (d < 30) return `${Math.floor(d / 7)}w ago`;
     return new Date(date).toLocaleDateString();
 };
-
-const KpiCard = ({ icon: Icon, label, value, color }) => (
-    <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-        <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: `${color}15` }}>
-                <Icon size={18} style={{ color }} />
-            </div>
-            <div>
-                <p className="text-2xl font-extrabold text-slate-900">{value}</p>
-                <p className="text-xs font-semibold text-slate-500">{label}</p>
-            </div>
-        </div>
-    </motion.div>
-);
 
 const CandidateActivityPage = () => {
     const [applications, setApplications] = useState([]);
@@ -72,11 +59,21 @@ const CandidateActivityPage = () => {
         return events.sort((a, b) => new Date(b.date) - new Date(a.date));
     }, [applications]);
 
-    if (loading) return (
-        <div className="flex h-[80vh] items-center justify-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="flex h-[85vh] w-full items-center justify-center bg-slate-50/50">
+                <div className="flex flex-col items-center gap-4 text-center p-8 max-w-sm">
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
+                        <i className="bi bi-robot text-indigo-600 text-3xl"></i>
+                    </div>
+                    <div>
+                        <h4 className="font-extrabold text-slate-800 text-lg">Loading your activity data...</h4>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <motion.main variants={container} initial="hidden" animate="show"
@@ -89,11 +86,15 @@ const CandidateActivityPage = () => {
 
             {/* KPI Grid */}
             <motion.div variants={container} className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
-                <KpiCard icon={FileText} label="Total Applied" value={stats.total} color={T.primary} />
-                <KpiCard icon={Sparkles} label="AI Evaluated" value={stats.evaluated} color="#06B6D4" />
-                <KpiCard icon={CheckCircle} label="Shortlisted" value={stats.shortlisted} color="#22C55E" />
-                <KpiCard icon={Calendar} label="Interviews" value={stats.interviews} color="#6366F1" />
-                <KpiCard icon={BarChart3} label="Avg Score" value={`${stats.avgScore}%`} color="#F59E0B" />
+                {[
+                    { label: "Total Applied", value: stats.total, color: T.primary, icon: FileText },
+                    { label: "AI Evaluated", value: stats.evaluated, color: "#06B6D4", icon: Sparkles },
+                    { label: "Shortlisted", value: stats.shortlisted, color: "#22C55E", icon: CheckCircle },
+                    { label: "Interviews", value: stats.interviews, color: "#6366F1", icon: Calendar },
+                    { label: "Avg Score", value: `${stats.avgScore}%`, color: "#F59E0B", icon: BarChart3 },
+                ].map((s, i) => (
+                    <KpiCard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />
+                ))}
             </motion.div>
 
             {/* Score distribution bar */}

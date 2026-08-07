@@ -19,9 +19,13 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 
+from users.views import CandidateProfileView, RecruiterProfileView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('users.urls')),  # Include user-related URLs
+    path('api/candidate/profile/', CandidateProfileView.as_view(), name='candidate-profile'),
+    path('api/recruiter/profile/', RecruiterProfileView.as_view(), name='recruiter-profile'),
     path('api/jobs/', include('jobs.urls')),  # Include job-related URLs
     path('api/applications/', include('applications.urls')),  # Include application-related URLs
     path('api/analytics/', include('analytics.urls')),  # Include analytics-related URLs

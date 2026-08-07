@@ -21,7 +21,8 @@ const DangerZoneSettings = () => {
             toast.success('Account deactivated');
             logout();
             navigate('/login');
-        } catch { toast.error('Failed to deactivate account');
+        } catch {
+            toast.error('Failed to deactivate account');
         } finally {
             setIsDeactivating(false);
         }
@@ -46,7 +47,8 @@ const DangerZoneSettings = () => {
                 navigate('/dashboard/company');
             }
             setDeleteModalOpen(false);
-        } catch {(`Failed to delete ${deleteType}`);
+        } catch {
+            toast.error(`Failed to delete ${deleteType}`);
         } finally {
             setIsDeleting(false);
         }
@@ -106,21 +108,23 @@ const DangerZoneSettings = () => {
                         </button>
                     </div>
 
-                    {/* Delete Company */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <h4 className="text-base font-medium text-slate-900 ">Delete Company</h4>
-                            <p className="text-sm text-slate-500  mt-1 max-w-lg">
-                                Permanently delete the company workspace, including all jobs, candidates, and team members.
-                            </p>
+                    {/* Delete Company (Recruiter only) */}
+                    {auth?.role?.toLowerCase() === 'recruiter' && (
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h4 className="text-base font-medium text-slate-900 ">Delete Company</h4>
+                                <p className="text-sm text-slate-500  mt-1 max-w-lg">
+                                    Permanently delete the company workspace, including all jobs, candidates, and team members.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => openDeleteModal('company')}
+                                className="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+                            >
+                                Delete Company
+                            </button>
                         </div>
-                        <button
-                            onClick={() => openDeleteModal('company')}
-                            className="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
-                        >
-                            Delete Company
-                        </button>
-                    </div>
+                    )}
 
                 </div>
             </div>

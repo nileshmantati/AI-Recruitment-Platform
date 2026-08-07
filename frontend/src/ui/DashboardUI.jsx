@@ -5,7 +5,7 @@ export const KpiCard = ({ icon: Icon, label, value, color, badge = null, subtitl
         <motion.div
             whileHover={{ y: -5, scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="group relative p-6 rounded-[2rem] bg-white border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500"
+            className="group relative p-5 rounded-[2rem] bg-white border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500"
             style={{
                 '--hover-color': color,
                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)'

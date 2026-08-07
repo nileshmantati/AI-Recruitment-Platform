@@ -5,6 +5,7 @@ import DashboardSidebar from '../components/Dashboard/DashboardSidebar.jsx';
 import DashboardTopbar from '../components/Dashboard/DashboardTopbar.jsx';
 import RecruiterDashboard from '../components/Dashboard/RecruiterDashboard.jsx';
 import CandidateDashboard from '../components/Dashboard/CandidateDashboard.jsx';
+import RecruiterProfile from '../components/Dashboard/RecruiterProfile.jsx';
 import RecruiterJobsPage from '../components/Dashboard/RecruiterJobsPage.jsx';
 import RecruiterApplicationsPage from '../components/Dashboard/RecruiterApplicationsPage.jsx';
 import RecruiterCandidatesPage from '../components/Dashboard/RecruiterCandidatesPage.jsx';
@@ -12,8 +13,7 @@ import RecruiterResumeAIPage from '../components/Dashboard/RecruiterResumeAIPage
 import RecruiterAnalyticsPage from '../components/Dashboard/RecruiterAnalyticsPage.jsx';
 import RecruiterInterviewsPage from '../components/Dashboard/RecruiterInterviewsPage.jsx';
 import RecruiterCompanyProfilePage from '../components/Dashboard/RecruiterCompanyProfilePage.jsx';
-import RecruiterSettingsPage from '../pages/RecruiterSettingsPage.jsx';
-import AccountSettings from '../components/Dashboard/AccountSettings.jsx';
+import RecruiterSettingsPage from '../components/Dashboard/RecruiterSettingsPage.jsx';
 import { T } from "../Js/theme.js";
 import NotFoundPage from './NotFoundPage.jsx';
 import CandidateProfilePage from '../components/Dashboard/CandidateProfilePage.jsx';
@@ -48,7 +48,6 @@ const Dashboard = () => {
     else if (normalizedPath === '/dashboard/analytics') active = "Analytics";
     else if (normalizedPath === '/dashboard/interview') active = "Interview";
     else if (normalizedPath === '/dashboard/interviews') active = "Interviews";
-    else if (normalizedPath === '/dashboard/account') active = "Account";
     else if (normalizedPath === '/dashboard/profile') active = "Profile";
     else if (normalizedPath === '/dashboard/saved-jobs') active = "Saved Jobs";
     else if (normalizedPath === '/dashboard/activity') active = "Activity";
@@ -62,7 +61,7 @@ const Dashboard = () => {
     }, [role, isProfileCompleted, normalizedPath, navigate]);
 
     const handleSetActive = (tab) => {
-        if (role === 'recruiter' && !isProfileCompleted && tab !== 'Company' && tab !== 'Settings' && tab !== 'Account') {
+        if (role === 'recruiter' && !isProfileCompleted && tab !== 'Company' && tab !== 'Settings' && tab !== 'Profile') {
             return; // Prevent navigation away from onboarding
         }
         if (tab === "Dashboard") navigate('/dashboard');
@@ -133,13 +132,13 @@ const Dashboard = () => {
 
         if (role === 'recruiter') {
             if (active === "Company") return <RecruiterCompanyProfilePage isProfileCompleted={isProfileCompleted} setIsProfileCompleted={setIsProfileCompleted} />;
+            if (active === "Profile") return <RecruiterProfile />;
             if (active === "Jobs") return <RecruiterJobsPage />;
             if (active === "Applications") return <RecruiterApplicationsPage />;
             if (active === "Candidates") return <RecruiterCandidatesPage />;
             if (active === "Resume AI") return <RecruiterResumeAIPage />;
             if (active === "Analytics") return <RecruiterAnalyticsPage />;
             if (active === "Interview" || active === "Interviews") return <RecruiterInterviewsPage />;
-            if (active === "Account") return <div className="p-8"><AccountSettings /></div>;
             if (active === "Settings") return <RecruiterSettingsPage />;
             return <RecruiterDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;
         }
@@ -152,7 +151,7 @@ const Dashboard = () => {
         if (active === "Resume AI") return <CandidateResumeAIPage />;
         if (active === "Activity") return <CandidateActivityPage />;
         if (active === "Interviews" || active === "Interview") return <CandidateInterviewsPage />;
-        if (active === "Settings" || active === "Account") return <CandidateSettingsPage />;
+        if (active === "Settings") return <CandidateSettingsPage />;
 
         return <CandidateDashboard getScoreColor={getScoreColor} getStatusBadge={getStatusBadge} />;
     };

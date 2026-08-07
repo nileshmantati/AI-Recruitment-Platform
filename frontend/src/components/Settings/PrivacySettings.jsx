@@ -5,17 +5,18 @@ import api from '../../services/api';
 
 const PrivacySettings = () => {
     const [settings, setSettings] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);const fetchSettings = async () => {
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchSettings = async () => {
         try {
             const response = await api.get('/settings/privacy/');
             setSettings(response.data);
-        } catch { toast.error('Failed to load privacy settings');
+        } catch {
+            toast.error('Failed to load privacy settings');
         } finally {
             setIsLoading(false);
         }
     };
-
-    
 
     useEffect(() => {
         fetchSettings();
@@ -27,7 +28,8 @@ const PrivacySettings = () => {
         try {
             await api.put('/settings/privacy/', { [key]: value });
             toast.success('Privacy preferences updated');
-        } catch { toast.error('Failed to update privacy preferences');
+        } catch {
+            toast.error('Failed to update privacy preferences');
         }
     };
 

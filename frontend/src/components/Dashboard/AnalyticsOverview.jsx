@@ -91,10 +91,21 @@ const AnalyticsOverview = () => {
             className="space-y-6"
         >
             <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <KpiCard icon={Briefcase} label="Total Jobs" value={stats.total_jobs} color={T.primary} gradient />
-                <KpiCard icon={Users} label="Total Applications" value={stats.total_applications} color={T.secondary} gradient />
-                <KpiCard icon={CheckCircle2} label="Active Jobs" value={stats.is_active} color={T.success} />
-                <KpiCard icon={FileText} label="Shortlisted" value={stats.shortlisted} color={T.warning} />
+                {[
+                    { label: "Total Jobs", value: stats.total_jobs, icon: Briefcase, color: T.primary, gradient: true },
+                    { label: "Total Applications", value: stats.total_applications, icon: Users, color: T.secondary, gradient: true },
+                    { label: "Active Jobs", value: stats.is_active, icon: CheckCircle2, color: T.success },
+                    { label: "Shortlisted", value: stats.shortlisted, icon: FileText, color: T.warning },
+                ].map((card, index) => (
+                    <KpiCard
+                        key={index}
+                        label={card.label}
+                        value={card.value}
+                        icon={card.icon}
+                        color={card.color}
+                        gradient={card.gradient}
+                    />
+                ))}
             </motion.div>
 
             <motion.div variants={itemVariants}>

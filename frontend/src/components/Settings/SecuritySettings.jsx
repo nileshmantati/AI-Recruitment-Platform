@@ -6,7 +6,11 @@ import api from '../../services/api';
 const SecuritySettings = () => {
     const [settings, setSettings] = useState(null);
     const [loginHistory, setLoginHistory] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);const fetchData = async () => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [passwords, setPasswords] = useState({ current: '', new_pass: '' });
+    const [isSubmittingPass, setIsSubmittingPass] = useState(false);
+
+    const fetchData = async () => {
         try {
             const [settingsRes, historyRes] = await Promise.all([
                 api.get('/settings/security/'),
@@ -14,17 +18,41 @@ const SecuritySettings = () => {
             ]);
             setSettings(settingsRes.data);
             setLoginHistory(historyRes.data);
-        } catch { toast.error('Failed to load security data');
+        } catch {
+            toast.error('Failed to load security data');
         } finally {
             setIsLoading(false);
         }
     };
 
-    
-
     useEffect(() => {
         fetchData();
     }, []);
+
+    const handleChangePassword = async () => {
+        if (!passwords.current || !passwords.new_pass) {
+            toast.error('Please enter both current and new password');
+            return;
+        }
+        if (passwords.new_pass.length < 8) {
+            toast.error('New password must be at least 8 characters');
+            return;
+        }
+
+        setIsSubmittingPass(true);
+        try {
+            await api.put('/settings/security/', {
+                current_password: passwords.current,
+                new_password: passwords.new_pass
+            });
+            toast.success('Password updated successfully');
+            setPasswords({ current: '', new_pass: '' });
+        } catch (err) {
+            toast.error(err.response?.data?.error || 'Failed to update password');
+        } finally {
+            setIsSubmittingPass(false);
+        }
+    };
 
     const handle2FAToggle = async () => {
         const newValue = !settings.two_factor_auth;
@@ -36,7 +64,8 @@ const SecuritySettings = () => {
             } else {
                 toast.success('2FA Disabled');
             }
-        } catch { setSettings(settings);
+        } catch {
+            setSettings(settings);
             toast.error('Failed to update 2FA settings');
         }
     };
@@ -71,14 +100,31 @@ const SecuritySettings = () => {
                         <div className="mt-4 space-y-4 max-w-md">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 ">Current Password</label>
-                                <input type="password" placeholder="••••••••" className="mt-1 block w-full rounded-md border-slate-300  bg-white  px-3 py-2 border shadow-sm sm:text-sm" />
+                                <input
+                                    type="password"
+                                    value={passwords.current}
+                                    onChange={(e) => setPasswords(p => ({ ...p, current: e.target.value }))}
+                                    placeholder="••••••••"
+                                    className="mt-1 block w-full rounded-md border-slate-300  bg-white  px-3 py-2 border shadow-sm sm:text-sm"
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 ">New Password</label>
-                                <input type="password" placeholder="••••••••" className="mt-1 block w-full rounded-md border-slate-300  bg-white  px-3 py-2 border shadow-sm sm:text-sm" />
+                                <input
+                                    type="password"
+                                    value={passwords.new_pass}
+                                    onChange={(e) => setPasswords(p => ({ ...p, new_pass: e.target.value }))}
+                                    placeholder="••••••••"
+                                    className="mt-1 block w-full rounded-md border-slate-300  bg-white  px-3 py-2 border shadow-sm sm:text-sm"
+                                />
                             </div>
-                            <button onClick={() => toast.success('Password updated successfully')} className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-                                Update Password
+                            <button
+                                type="button"
+                                onClick={handleChangePassword}
+                                disabled={isSubmittingPass}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-60 transition"
+                            >
+                                {isSubmittingPass ? 'Updating...' : 'Update Password'}
                             </button>
                         </div>
                     </div>

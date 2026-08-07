@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Plus, Check } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 
@@ -72,8 +72,8 @@ const IntegrationsSettings = () => {
                         <button
                             onClick={() => toggleIntegration(integration.id)}
                             className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 border rounded-md shadow-sm text-sm font-medium transition-colors ${integration.connected
-                                    ? 'border-slate-300  bg-white  text-slate-700  hover:bg-slate-50 '
-                                    : 'border-transparent text-white bg-blue-600 hover:bg-blue-700'
+                                ? 'border-slate-300  bg-white  text-slate-700  hover:bg-slate-50 '
+                                : 'border-transparent text-white bg-blue-600 hover:bg-blue-700'
                                 }`}
                         >
                             {integration.connected ? (

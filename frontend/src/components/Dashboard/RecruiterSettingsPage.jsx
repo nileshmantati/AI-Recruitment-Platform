@@ -1,12 +1,12 @@
-import TeamMembersSettings from '../components/Settings/TeamMembersSettings';
-import NotificationsSettings from '../components/Settings/NotificationsSettings';
-import SecuritySettings from '../components/Settings/SecuritySettings';
-import AISettings from '../components/Settings/AISettings';
-import HiringWorkflowSettings from '../components/Settings/HiringWorkflowSettings';
-import IntegrationsSettings from '../components/Settings/IntegrationsSettings';
-import AppearanceSettings from '../components/Settings/AppearanceSettings';
-import PrivacySettings from '../components/Settings/PrivacySettings';
-import DangerZoneSettings from '../components/Settings/DangerZoneSettings';
+import TeamMembersSettings from '../Settings/TeamMembersSettings';
+import NotificationsSettings from '../Settings/NotificationsSettings';
+import SecuritySettings from '../Settings/SecuritySettings';
+import AISettings from '../Settings/AISettings';
+import HiringWorkflowSettings from '../Settings/HiringWorkflowSettings';
+import IntegrationsSettings from '../Settings/IntegrationsSettings';
+import AppearanceSettings from '../Settings/AppearanceSettings';
+import PrivacySettings from '../Settings/PrivacySettings';
+import DangerZoneSettings from '../Settings/DangerZoneSettings';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 

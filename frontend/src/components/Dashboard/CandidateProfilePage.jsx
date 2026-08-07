@@ -44,23 +44,43 @@ const CandidateProfilePage = () => {
     const [education, setEducation] = useState([]);
 
     useEffect(() => {
-        (async () => {
+        const fetchProfile = async () => {
             try {
                 const res = await api.get('candidate/profile/');
                 const d = res.data;
-                setProfile({ full_name: d.full_name || auth.username || '', email: d.email || '', phone: d.phone || '', location: d.location || '', website: d.website || '', linkedin: d.linkedin || '', bio: d.bio || '', current_role: d.current_role || '', experience_years: d.experience_years || '' });
+                setProfile({
+                    full_name: d.full_name || auth.username || '',
+                    email: d.email || '',
+                    phone: d.phone || '',
+                    location: d.location || '',
+                    website: d.website || '',
+                    linkedin: d.linkedin || '',
+                    bio: d.bio || '',
+                    current_role: d.current_role || '',
+                    experience_years: d.experience_years || ''
+                });
                 setSkills(d.skills || []);
                 setEducation(d.education || []);
-            } catch { setProfile(p => ({ ...p, full_name: auth.username || '', email: auth.email || '' })); }
-            finally { setLoading(false); }
-        })();
+            } catch {
+                setProfile(p => ({ ...p, full_name: auth.username || '', email: auth.email || '' }));
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
     }, [auth]);
 
     const handleSave = async () => {
         setSaving(true);
-        try { await api.patch('candidate/profile/', { ...profile, skills, education }); toast.success('Profile updated!'); setEditMode(false); }
-        catch { toast.error('Failed to update profile.'); }
-        finally { setSaving(false); }
+        try {
+            await api.patch('candidate/profile/', { ...profile, skills, education });
+            toast.success('Profile updated!');
+            setEditMode(false);
+        } catch {
+            toast.error('Failed to update profile.');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const addSkill = () => { const s = newSkill.trim(); if (s && !skills.includes(s)) { setSkills(p => [...p, s]); setNewSkill(''); } };
@@ -71,11 +91,21 @@ const CandidateProfilePage = () => {
 
     const initials = (profile.full_name || auth.username || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
-    if (loading) return (
-        <div className="flex h-[80vh] items-center justify-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="flex h-[85vh] w-full items-center justify-center bg-slate-50/50">
+                <div className="flex flex-col items-center gap-4 text-center p-8 max-w-sm">
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
+                        <i className="bi bi-robot text-indigo-600 text-3xl"></i>
+                    </div>
+                    <div>
+                        <h4 className="font-extrabold text-slate-800 text-lg">Loading Profile data...</h4>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <motion.main variants={container} initial="hidden" animate="show"

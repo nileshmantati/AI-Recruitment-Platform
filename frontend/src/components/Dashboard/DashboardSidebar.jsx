@@ -2,8 +2,8 @@ import {
     Sparkles, LogOut, ChevronRight, ChevronLeft, LayoutDashboard,
     Briefcase, Users, Settings, FileText, BarChart3, Calendar,
     Building2, ChevronDown, User, Shield, Bell, Bot, GitMerge,
-    Puzzle, Palette, Lock, AlertTriangle, Bookmark, FileUser,
-    Activity, UserCircle, CreditCard, HelpCircle, KeyRound
+    Puzzle, Palette, Lock, AlertTriangle, Bookmark,
+    Activity, CreditCard, HelpCircle
 } from "lucide-react";
 import { T } from "../../Js/theme.js";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -12,19 +12,19 @@ import { useState, useEffect } from 'react';
 
 const RecruiterSidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard" },
-    { icon: User, label: "Account" },
+    { icon: User, label: "Profile" },
     { icon: Building2, label: "Company" },
     { icon: Briefcase, label: "Jobs" },
     { icon: FileText, label: "Applications" },
     { icon: Users, label: "Candidates" },
     { icon: Sparkles, label: "Resume AI" },
     { icon: BarChart3, label: "Analytics" },
-    { icon: Calendar, label: "Interview" },
+    { icon: Calendar, label: "Interviews" },
     { icon: Settings, label: "Settings" },
 ];
 const CandidateSidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard" },
-    { icon: UserCircle, label: "Profile" },
+    { icon: User, label: "Profile" },
     { icon: Briefcase, label: "Jobs" },
     { icon: FileText, label: "Applications" },
     { icon: Bookmark, label: "Saved Jobs" },
@@ -35,7 +35,6 @@ const CandidateSidebarItems = [
 ];
 
 const CANDIDATE_SETTINGS_SECTIONS = [
-    { id: 'account', label: 'Account', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'privacy', label: 'Privacy & Data', icon: Lock },
@@ -81,7 +80,8 @@ const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive, role }) 
         }
     };
 
-    const currentHash = location.hash.replace('#', '') || 'team';
+    const defaultHash = role === 'recruiter' ? 'team' : 'notifications';
+    const currentHash = location.hash.replace('#', '') || defaultHash;
 
     return (
         <aside className={`flex flex-col border-r border-slate-100 bg-white transition-all duration-300 ${collapsed ? "w-20" : "w-64"}`}>

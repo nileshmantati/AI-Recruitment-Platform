@@ -5,7 +5,9 @@ import api from '../../services/api';
 
 const TeamMembersSettings = () => {
     const [members, setMembers] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);const fetchMembers = async () => {
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchMembers = async () => {
         try {
             const response = await api.get('/settings/team/');
             setMembers(response.data);
@@ -16,7 +18,7 @@ const TeamMembersSettings = () => {
         }
     };
 
-    
+
 
     useEffect(() => {
         fetchMembers();

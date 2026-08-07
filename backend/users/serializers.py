@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import User, CandidateProfile
+from .models import User, CandidateProfile, RecruiterProfile
 from rest_framework.exceptions import AuthenticationFailed
 
 class UserSerializer(serializers.ModelSerializer):
@@ -9,9 +9,42 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'role', 'phone')
 
 class CandidateProfileSerializer(serializers.ModelSerializer):
+    email = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
+
     class Meta:
         model = CandidateProfile
-        fields = ('id', 'skills', 'experience', 'portfolio_url', 'github_url', 'bio')
+        fields = ('id', 'first_name', 'last_name', 'phone', 'profile_image', 'skills', 'experience', 'resume', 'portfolio_url', 'github_url', 'bio', 'email')
+
+    def get_email(self, obj):
+        return obj.user.email
+
+    def get_profile_image(self, obj):
+        if obj.profile_image:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.profile_image.url)
+            return obj.profile_image.url
+        return None
+
+class RecruiterProfileSerializer(serializers.ModelSerializer):
+    email = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RecruiterProfile
+        fields = ('id', 'first_name', 'last_name', 'phone', 'profile_image', 'company', 'position', 'email')
+
+    def get_email(self, obj):
+        return obj.user.email
+
+    def get_profile_image(self, obj):
+        if obj.profile_image:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.profile_image.url)
+            return obj.profile_image.url
+        return None
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True) # Ensures password isn't returned in JSON

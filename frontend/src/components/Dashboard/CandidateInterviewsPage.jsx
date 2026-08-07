@@ -4,6 +4,7 @@ import { Calendar, Video, Clock, Search, Briefcase, CheckCircle, AlertCircle, Us
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { T } from '../../Js/theme';
+import { KpiCard } from '../../ui/DashboardUI';
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
@@ -44,11 +45,21 @@ const CandidateInterviewsPage = () => {
 
     const scoreColor = (s) => s >= 85 ? 'text-green-700 bg-green-50 border-green-200' : s >= 65 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200';
 
-    if (loading) return (
-        <div className="flex h-[80vh] items-center justify-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="flex h-[85vh] w-full items-center justify-center bg-slate-50/50">
+                <div className="flex flex-col items-center gap-4 text-center p-8 max-w-sm">
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
+                        <i className="bi bi-robot text-indigo-600 text-3xl"></i>
+                    </div>
+                    <div>
+                        <h4 className="font-extrabold text-slate-800 text-lg">Loading Interview data...</h4>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <motion.main variants={container} initial="hidden" animate="show"
@@ -65,18 +76,12 @@ const CandidateInterviewsPage = () => {
             </motion.div>
 
             {/* Stats */}
-            <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
+            <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                     { label: 'Scheduled', value: interviews.length, color: '#6366F1', icon: Calendar },
                     { label: 'This Week', value: interviews.filter(a => { const d = Math.floor((new Date(a.updated_at) - Date.now()) / 864e5); return d >= 0 && d <= 7; }).length, color: '#F59E0B', icon: Clock },
                     { label: 'Completed', value: 0, color: '#22C55E', icon: CheckCircle },
-                ].map(s => (
-                    <div key={s.label} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm text-center">
-                        <s.icon size={20} className="mx-auto mb-1" style={{ color: s.color }} />
-                        <p className="text-2xl font-extrabold text-slate-900">{s.value}</p>
-                        <p className="text-xs font-semibold text-slate-500">{s.label}</p>
-                    </div>
-                ))}
+                ].map((s, i) => <KpiCard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />)}
             </motion.div>
 
             {/* Search */}

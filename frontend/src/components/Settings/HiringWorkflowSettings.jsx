@@ -18,20 +18,21 @@ const HiringWorkflowSettings = () => {
         { id: 5, name: 'Final Interview' },
         { id: 6, name: 'Offer' },
         { id: 7, name: 'Hired' },
-    ]);const fetchWorkflow = async () => {
+    ]);
+
+    const fetchWorkflow = async () => {
         try {
             const response = await api.get('/settings/workflow/');
             setWorkflow(response.data);
             if (response.data.stages && response.data.stages.length > 0) {
                 setStages(response.data.stages);
             }
-        } catch { toast.error('Failed to load workflow settings');
+        } catch {
+            toast.error('Failed to load workflow settings');
         } finally {
             setIsLoading(false);
         }
     };
-
-    
 
     useEffect(() => {
         fetchWorkflow();
@@ -57,7 +58,8 @@ const HiringWorkflowSettings = () => {
             // For now, simulate success
             await new Promise(resolve => setTimeout(resolve, 500));
             toast.success('Hiring workflow updated successfully');
-        } catch { toast.error('Failed to update workflow');
+        } catch {
+            toast.error('Failed to update workflow');
         } finally {
             setIsSaving(false);
         }

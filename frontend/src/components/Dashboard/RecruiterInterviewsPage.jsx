@@ -157,10 +157,14 @@ const RecruiterInterviewsPage = () => {
 
                 {/* Metrics Bento Grid */}
                 <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <KpiCard icon={Calendar} label="Total Scheduled" value={scheduledInterviews.length} color="#75A5FF" />
-                    <KpiCard icon={Clock} label="Pending Action" value={Math.floor(scheduledInterviews.length / 2)} color="#FFBD59" />
-                    <KpiCard icon={CheckCircle} label="Completed" value={0} color="#36E095" />
-                    <KpiCard icon={Users} label="Candidates" value={scheduledInterviews.length} color="#200D33" />
+                    {[
+                        { label: "Total Scheduled", value: scheduledInterviews.length, icon: Calendar, color: "#75A5FF" },
+                        { label: "Pending Action", value: Math.floor(scheduledInterviews.length / 2), icon: Clock, color: "#FFBD59" },
+                        { label: "Completed", value: 0, icon: CheckCircle, color: "#36E095" },
+                        { label: "Candidates", value: scheduledInterviews.length, icon: Users, color: "#200D33" },
+                    ].map((item, index) => (
+                        <KpiCard key={index} icon={item.icon} label={item.label} value={item.value} color={item.color} />
+                    ))}
                 </motion.div>
 
                 {/* Filter and Search Bar */}

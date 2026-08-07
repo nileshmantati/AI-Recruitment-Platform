@@ -133,8 +133,17 @@ class SecuritySettingsView(BaseSettingsView):
         return Response(serializer.data)
 
     def put(self, request):
+        user = request.user
+        data = request.data
+        if 'current_password' in data and 'new_password' in data:
+            if not user.check_password(data['current_password']):
+                return Response({"error": "Current password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(data['new_password'])
+            user.save()
+            return Response({"message": "Password changed successfully"})
+
         settings, _ = SecuritySettings.objects.get_or_create(user=request.user)
-        serializer = SecuritySettingsSerializer(settings, data=request.data, partial=True)
+        serializer = SecuritySettingsSerializer(settings, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

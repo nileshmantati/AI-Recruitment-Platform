@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { KpiCard } from '../../ui/DashboardUI.jsx';
+import { T } from '../../Js/theme.js';
 
 const STATUS_COLORS = {
     PENDING: '#64748B',
@@ -323,38 +324,20 @@ export default function RecruiterAnalyticsPage() {
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <KpiCard
-                        icon={Users}
-                        label="Total Pool"
-                        value={<AnimatedCounter end={kpiMetrics.totalApps} duration={2.5} separator="," />}
-                        color="#1C0C2D"
-                        badge={<><ArrowUpRight size={12} /> 14%</>}
-                    />
-
-                    <KpiCard
-                        icon={Briefcase}
-                        label="Active Jobs"
-                        value={<AnimatedCounter end={kpiMetrics.activeJobsCount} duration={2.5} />}
-                        subtitle={`/ ${kpiMetrics.totalJobsCount}`}
-                        color="#0284C7"
-                        badge={<><span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /> Live</>}
-                    />
-
-                    <KpiCard
-                        icon={Award}
-                        label="Avg Match"
-                        value={<><AnimatedCounter end={kpiMetrics.avgScore || 82} duration={2.5} />%</>}
-                        color="#D97706"
-                        badge={<><Sparkles size={12} /> Optimal</>}
-                    />
-
-                    <KpiCard
-                        icon={Target}
-                        label="Velocity"
-                        value={<><AnimatedCounter end={kpiMetrics.shortlistRate || 34} duration={2.5} />%</>}
-                        color="#059669"
-                        badge={<><CheckCircle2 size={12} /> Fast Track</>}
-                    />
+                    {[
+                        { label: "Total Pool", value: kpiMetrics.totalApps, icon: Users, color: T.primary, badge: (<><ArrowUpRight size={12} /> 14%</>) },
+                        { label: "Active Jobs", value: kpiMetrics.activeJobsCount, icon: Briefcase, color: T.secondary, badge: (<><span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /> Live</>) },
+                        { label: "Average Match", value: kpiMetrics.avgScore, icon: Award, color: T.warning, badge: (<><Sparkles size={12} />Optical</>) },
+                        { label: "Shortlist Rate", value: kpiMetrics.shortlistRate, icon: CheckCircle2, color: T.success, badge: kpiMetrics.shortlistRate > 75 ? (<><CheckCircle2 size={12} /> {kpiMetrics.shortlistRate}%</>) : "Low" },
+                    ].map((s, i) =>
+                        <KpiCard
+                            key={i}
+                            label={s.label}
+                            value={<AnimatedCounter end={s.value} duration={2.5} separator="," />}
+                            icon={s.icon}
+                            color={s.color}
+                            badge={s.badge}
+                        />)}
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">

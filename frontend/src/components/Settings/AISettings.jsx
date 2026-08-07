@@ -10,17 +10,18 @@ const AISettings = () => {
 
     // For arrays
     const [skillInput, setSkillInput] = useState('');
-    const [blacklistInput, setBlacklistInput] = useState('');const fetchSettings = async () => {
+    const [blacklistInput, setBlacklistInput] = useState('');
+
+    const fetchSettings = async () => {
         try {
             const response = await api.get('/settings/ai/');
             setSettings(response.data);
-        } catch { toast.error('Failed to load AI preferences');
+        } catch {
+            toast.error('Failed to load AI preferences');
         } finally {
             setIsLoading(false);
         }
     };
-
-    
 
     useEffect(() => {
         fetchSettings();
@@ -31,7 +32,8 @@ const AISettings = () => {
         try {
             await api.put('/settings/ai/', settings);
             toast.success('AI Preferences saved successfully');
-        } catch { toast.error('Failed to save AI preferences');
+        } catch {
+            toast.error('Failed to save AI preferences');
         } finally {
             setIsSaving(false);
         }
@@ -137,8 +139,8 @@ const AISettings = () => {
                                 className="w-full mt-2 accent-blue-600"
                             />
                             <div className="flex justify-between text-xs text-slate-500 mt-1">
-                                <span>Strict (100)</span>
                                 <span>Lenient (0)</span>
+                                <span>Strict (100)</span>
                             </div>
                         </div>
 
