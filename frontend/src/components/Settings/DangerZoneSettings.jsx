@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const DangerZoneSettings = () => {
-    const { logout } = useAuth();
+    const { logout, auth } = useAuth();
     const navigate = useNavigate();
     const [isDeactivating, setIsDeactivating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);

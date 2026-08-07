@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, User, Menu, X } from "lucide-react";
+import { ArrowRight, User, Menu, X, Bot } from "lucide-react";
 import PrimaryButton from './PrimaryButton';
 import { T } from '../Js/theme';
 
@@ -84,7 +84,7 @@ const Navigation = () => {
                         className="flex items-center gap-2 no-underline"
                     >
                         <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight flex items-center">
-                            <i className="bi bi-robot me-2" style={{ color: T.primary }}></i>
+                            <Bot size={26} className="me-2" style={{ color: T.primary }} />
                             <span className="text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                                 AI
                             </span> <span className="ml-1">Recruiter</span>

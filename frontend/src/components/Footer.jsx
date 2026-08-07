@@ -1,4 +1,5 @@
 import { FaTwitter, FaLinkedin, FaGithub, FaArrowRight } from "react-icons/fa";
+import { Bot } from "lucide-react";
 import { T } from "../Js/theme";
 
 const Footer = () => {
@@ -10,8 +11,8 @@ const Footer = () => {
 
                     <div className="md:col-span-2">
                         <div className="mb-4 flex items-center gap-2">
-                            <span className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight">
-                                <i className="bi bi-robot me-2" style={{ color: T.primary }}></i>
+                            <span className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight flex items-center">
+                                <Bot size={22} className="me-2 inline-block" style={{ color: T.primary }} />
                                 <span className="text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                                     AI
                                 </span> Recruiter

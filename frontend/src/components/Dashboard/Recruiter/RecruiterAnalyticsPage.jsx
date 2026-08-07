@@ -7,9 +7,8 @@ import {
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
 import {
-    TrendingUp, Users, Briefcase, CheckCircle2, XCircle, Clock,
-    DollarSign, Award, Target, ChevronDown, Download, BarChart2,
-    Calendar, ArrowUpRight, ArrowDownRight, UserCheck, ShieldAlert
+    TrendingUp, Users, Briefcase, CheckCircle2, RefreshCw, Layers, Sparkles, Award, Download, ArrowUpRight, AlertCircle,
+    BarChart3
 } from 'lucide-react';
 import { KpiCard } from '../../../ui/DashboardUI.jsx';
 import { T } from '../../../Js/theme.js';
