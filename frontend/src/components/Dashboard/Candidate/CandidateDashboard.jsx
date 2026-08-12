@@ -76,18 +76,18 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                 {/* Header */}
                 <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight mb-1 flex items-center gap-2">
+                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mb-1 flex items-center gap-2">
                             Good morning, {auth.username}
                             <span className="inline-block animate-bounce origin-[70%_70%]">👋</span>
                         </h2>
-                        <p className="text-slate-500 font-medium">Here's what's happening with your job applications today.</p>
+                        <p className="text-sm sm:text-base text-slate-500 font-medium">Here's what's happening with your job applications today.</p>
                     </div>
                     <Link
                         to="/findjobs"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm shadow-md transition hover:scale-95 cursor-pointer"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm sm:text-base shadow-md transition hover:scale-95 cursor-pointer"
                         style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
                     >
-                        <Briefcase size={16} /> Explore Jobs
+                        <Briefcase size={18} /> Explore Jobs
                     </Link>
                 </motion.div>
 
@@ -105,10 +105,10 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                 <motion.div variants={itemVariants} className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200/70 p-6">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
                                 Recent Applications
                             </h3>
-                            <p className="text-xs text-slate-400 mt-0.5">
+                            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
                                 Track the real-time status and AI feedback of your submitted positions
                             </p>
                         </div>
@@ -120,22 +120,22 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                                 <div className="p-5 flex flex-col h-full justify-between">
                                     <div>
                                         <div className="flex justify-between items-start mb-2 gap-2">
-                                            <h5 className="font-bold text-slate-900 mb-0 line-clamp-1">{app.job_details?.title}</h5>
+                                            <h5 className="text-base sm:text-lg font-bold text-slate-900 mb-0 line-clamp-1">{app.job_details?.title}</h5>
                                             {getStatusBadge(app.status)}
                                         </div>
-                                        <p className="text-slate-500 text-sm mb-1 font-medium">
+                                        <p className="text-slate-500 text-sm sm:text-base mb-1 font-medium">
                                             {app.job_details?.salary || 'Salary Undisclosed'}
                                         </p>
-                                        <p className="text-slate-400 text-xs mb-4">
+                                        <p className="text-slate-400 text-xs sm:text-sm mb-4">
                                             Applied: {new Date(app.applied_at).toLocaleDateString()}
                                         </p>
 
                                         {app.resume_score > 0 && (
                                             <div className="mb-4">
                                                 <span
-                                                    className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${getScoreColor(app.resume_score)}`}
+                                                    className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold ${getScoreColor(app.resume_score)}`}
                                                 >
-                                                    <Sparkles size={12} className="mr-1.5" />{app.resume_score}% Match
+                                                    <Sparkles size={14} className="mr-1.5" />{app.resume_score}% Match
                                                 </span>
                                             </div>
                                         )}
@@ -144,12 +144,12 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
                                                 {app.ai_feedback.strengths?.length > 0 && (
                                                     <div>
-                                                        <strong className="flex items-center text-emerald-600 text-xs uppercase font-bold tracking-wider mb-1.5">
-                                                            <CheckCircle size={12} className="mr-1.5" />Top Strengths
+                                                        <strong className="flex items-center text-emerald-600 text-xs sm:text-sm uppercase font-bold tracking-wider mb-1.5">
+                                                            <CheckCircle size={14} className="mr-1.5" />Top Strengths
                                                         </strong>
                                                         <div className="flex flex-wrap gap-1.5">
                                                             {app.ai_feedback.strengths?.slice(0, 3).map((s, i) => (
-                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200" key={i}>
+                                                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs sm:text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200" key={i}>
                                                                     {s}
                                                                 </span>
                                                             ))}
@@ -158,12 +158,12 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                                                 )}
                                                 {app.ai_feedback.missing_skills?.length > 0 && (
                                                     <div>
-                                                        <strong className="flex items-center text-rose-600 text-xs uppercase font-bold tracking-wider mb-1.5">
-                                                            <AlertCircle size={12} className="mr-1.5" />Skills to Highlight
+                                                        <strong className="flex items-center text-rose-600 text-xs sm:text-sm uppercase font-bold tracking-wider mb-1.5">
+                                                            <AlertCircle size={14} className="mr-1.5" />Skills to Highlight
                                                         </strong>
                                                         <div className="flex flex-wrap gap-1.5">
                                                             {app.ai_feedback.missing_skills?.slice(0, 3).map((s, i) => (
-                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200" key={i}>
+                                                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs sm:text-sm font-medium bg-rose-50 text-rose-700 border border-rose-200" key={i}>
                                                                     {s}
                                                                 </span>
                                                             ))}
@@ -180,10 +180,10 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
                         {myApplications.length === 0 && (
                             <div className="col-span-full text-center py-16">
                                 <Briefcase className="mx-auto text-slate-300 text-5xl mb-3" />
-                                <p className="text-slate-500 font-medium">You haven't applied to any jobs yet.</p>
-                                <p className="text-xs text-slate-400 mt-1 mb-4">Visit the Job Board to discover open roles that match your skill set.</p>
-                                <Link to="/findjobs" className="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 hover:underline">
-                                    <Briefcase size={16} /> Visit Job Board
+                                <p className="text-slate-600 text-base font-semibold">You haven't applied to any jobs yet.</p>
+                                <p className="text-sm text-slate-500 mt-1 mb-4">Visit the Job Board to discover open roles that match your skill set.</p>
+                                <Link to="/findjobs" className="inline-flex items-center gap-2 text-sm sm:text-base font-bold text-indigo-600 hover:underline">
+                                    <Briefcase size={18} /> Visit Job Board
                                 </Link>
                             </div>
                         )}

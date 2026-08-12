@@ -4,8 +4,8 @@ const CandidateHelpSettings = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium leading-6 text-slate-900">Help & Support</h3>
-                <p className="mt-1 text-sm text-slate-500">
+                <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">Help & Support</h3>
+                <p className="mt-1 text-sm sm:text-base text-slate-500">
                     Get assistance, read documentation, or contact support.
                 </p>
             </div>
@@ -21,10 +21,10 @@ const CandidateHelpSettings = () => {
                         key={item.label}
                         type="button"
                         onClick={item.action}
-                        className="p-5 border border-slate-200 bg-white rounded-lg shadow-sm text-left hover:border-blue-300 hover:shadow transition"
+                        className="p-5 border border-slate-200 bg-white rounded-xl shadow-sm text-left hover:border-indigo-300 hover:shadow transition"
                     >
-                        <h4 className="font-semibold text-slate-900 text-sm">{item.label}</h4>
-                        <p className="text-xs text-slate-500 mt-1">{item.desc}</p>
+                        <h4 className="font-bold text-slate-900 text-base sm:text-lg">{item.label}</h4>
+                        <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">{item.desc}</p>
                     </button>
                 ))}
             </div>

@@ -63,17 +63,17 @@ const CandidateSavedJobsPage = () => {
             {/* Header */}
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">Saved Jobs</h1>
-                    <p className="mt-1 text-sm text-slate-500">{savedJobs.length} job{savedJobs.length !== 1 ? 's' : ''} saved for later</p>
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900">Saved Jobs</h1>
+                    <p className="mt-1 text-sm sm:text-base text-slate-500">{savedJobs.length} job{savedJobs.length !== 1 ? 's' : ''} saved for later</p>
                 </div>
             </motion.div>
 
             {/* Search */}
             {savedJobs.length > 0 && (
-                <motion.div variants={fadeUp} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-400 transition-all">
-                    <Search size={15} className="text-slate-400 shrink-0" />
+                <motion.div variants={fadeUp} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-400 transition-all">
+                    <Search size={16} className="text-slate-400 shrink-0" />
                     <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search saved jobs..."
-                        className="w-full bg-transparent text-sm outline-none text-slate-700 placeholder:text-slate-400" />
+                        className="w-full bg-transparent text-sm sm:text-base outline-none text-slate-700 placeholder:text-slate-400" />
                 </motion.div>
             )}
 
@@ -83,8 +83,8 @@ const CandidateSavedJobsPage = () => {
                     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: `${T.primary}10` }}>
                         <Bookmark size={28} style={{ color: T.primary }} />
                     </div>
-                    <h3 className="font-bold text-slate-700 text-lg">{search ? 'No matching saved jobs' : 'No saved jobs yet'}</h3>
-                    <p className="mt-2 max-w-sm text-sm text-slate-500">
+                    <h3 className="font-extrabold text-slate-800 text-lg sm:text-xl">{search ? 'No matching saved jobs' : 'No saved jobs yet'}</h3>
+                    <p className="mt-2 max-w-sm text-sm sm:text-base text-slate-500">
                         {search ? 'Try a different search term.' : 'Browse the Jobs page and bookmark roles you\'re interested in.'}
                     </p>
                 </motion.div>
@@ -106,26 +106,26 @@ const CandidateSavedJobsPage = () => {
                                             <Briefcase size={20} />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="truncate font-bold capitalize text-slate-900 group-hover:text-indigo-600 transition-colors">{job.title}</h3>
-                                            <p className="text-xs text-slate-500">Posted by {job.recruiter_name}</p>
+                                            <h3 className="truncate text-base sm:text-lg font-bold capitalize text-slate-900 group-hover:text-indigo-600 transition-colors">{job.title}</h3>
+                                            <p className="text-xs sm:text-sm text-slate-500">Posted by {job.recruiter_name}</p>
                                         </div>
                                         <button onClick={() => removeSaved(job.id)}
                                             className="shrink-0 text-slate-300 hover:text-red-500 transition" title="Remove">
-                                            <BookmarkX size={17} />
+                                            <BookmarkX size={18} />
                                         </button>
                                     </div>
                                     {/* Description */}
-                                    <p className="mb-3 line-clamp-2 text-xs leading-relaxed text-slate-500">
+                                    <p className="mb-3 line-clamp-2 text-xs sm:text-sm leading-relaxed text-slate-600">
                                         {job.description || 'No description provided.'}
                                     </p>
                                     {/* Skills */}
                                     {skills.length > 0 && (
                                         <div className="mb-3 flex flex-wrap gap-1.5">
                                             {skills.slice(0, 3).map((s, i) => (
-                                                <span key={i} className="rounded-lg px-2 py-0.5 text-[11px] font-semibold"
+                                                <span key={i} className="rounded-lg px-2.5 py-0.5 text-xs sm:text-sm font-semibold"
                                                     style={{ background: `${T.primary}12`, color: T.primary }}>{s}</span>
                                             ))}
-                                            {skills.length > 3 && <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-[11px] text-slate-500">+{skills.length - 3}</span>}
+                                            {skills.length > 3 && <span className="rounded-lg bg-slate-100 px-2.5 py-0.5 text-xs sm:text-sm font-semibold text-slate-500">+{skills.length - 3}</span>}
                                         </div>
                                     )}
                                     <div className="flex-1" />
@@ -133,20 +133,20 @@ const CandidateSavedJobsPage = () => {
                                     <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-2">
                                         <div className="flex items-center gap-3">
                                             {job.salary && (
-                                                <span className="flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-600">
-                                                    <IndianRupee size={11} />{job.salary}
+                                                <span className="flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-0.5 text-xs sm:text-sm font-bold text-emerald-600">
+                                                    <IndianRupee size={12} />{job.salary}
                                                 </span>
                                             )}
-                                            <span className="flex items-center gap-1 text-xs text-slate-500">
-                                                <Clock size={11} />{getTimeAgo(job.savedAt || job.created_at)}
+                                            <span className="flex items-center gap-1 text-xs sm:text-sm text-slate-500">
+                                                <Clock size={12} />{getTimeAgo(job.savedAt || job.created_at)}
                                             </span>
                                         </div>
                                         {job.type && (
-                                            <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                                            <span className="rounded-full px-2.5 py-0.5 text-xs sm:text-sm font-semibold"
                                                 style={{ background: `${T.accent}15`, color: T.accent }}>{job.type}</span>
                                         )}
                                     </div>
-                                    <button className="mt-3 w-full !rounded-lg py-2 text-xs font-bold text-white transition hover:scale-95"
+                                    <button className="mt-3 w-full !rounded-xl py-2.5 text-xs sm:text-sm font-bold text-white transition hover:scale-95 shadow-sm"
                                         style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                                         Apply Now
                                     </button>

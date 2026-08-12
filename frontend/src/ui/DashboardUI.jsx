@@ -39,7 +39,7 @@ export const KpiCard = ({ icon: Icon, label, value, color, badge = null, subtitl
                     <motion.span
                         initial={{ opacity: 0, x: 10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="text-[10px] font-extrabold px-2.5 py-1.5 rounded-full border shadow-sm flex items-center gap-1.5 uppercase tracking-wider bg-white/50 backdrop-blur-sm"
+                        className="text-xs font-extrabold px-2.5 py-1.5 rounded-full border shadow-sm flex items-center gap-1.5 uppercase tracking-wider bg-white/50 backdrop-blur-sm"
                         style={{ color: color, borderColor: `${color}30` }}
                     >
                         {badge}
@@ -48,10 +48,10 @@ export const KpiCard = ({ icon: Icon, label, value, color, badge = null, subtitl
             </div>
 
             <div className="relative z-10">
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 group-hover:text-slate-500 transition-colors">{label}</p>
-                <h3 className="text-3xl font-black text-slate-800 flex items-baseline tracking-tight">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 group-hover:text-slate-500 transition-colors">{label}</p>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-800 flex items-baseline tracking-tight">
                     {value}
-                    {subtitle && <span className="text-sm font-semibold text-slate-400 ml-2 tracking-normal">{subtitle}</span>}
+                    {subtitle && <span className="text-sm sm:text-base font-semibold text-slate-400 ml-2 tracking-normal">{subtitle}</span>}
                 </h3>
             </div>
         </motion.div>

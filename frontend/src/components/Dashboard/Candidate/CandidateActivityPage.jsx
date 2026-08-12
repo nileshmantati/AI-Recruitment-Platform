@@ -77,11 +77,11 @@ const CandidateActivityPage = () => {
 
     return (
         <motion.main variants={container} initial="hidden" animate="show"
-            className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+            className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
             {/* Header */}
             <motion.div variants={fadeUp}>
-                <h1 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">Activity</h1>
-                <p className="mt-1 text-sm text-slate-500">Your complete application journey and achievements</p>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900">Activity</h1>
+                <p className="mt-1 text-sm sm:text-base text-slate-500">Your complete application journey and achievements</p>
             </motion.div>
 
             {/* KPI Grid */}
@@ -97,74 +97,76 @@ const CandidateActivityPage = () => {
                 ))}
             </motion.div>
 
-            {/* Score distribution bar */}
-            {applications.length > 0 && (
-                <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                    <h3 className="mb-4 font-bold text-slate-800 text-sm">Application Status Breakdown</h3>
-                    <div className="space-y-3">
-                        {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
-                            const count = applications.filter(a => a.status === key).length;
-                            const pct = applications.length ? Math.round((count / applications.length) * 100) : 0;
-                            return (
-                                <div key={key} className="flex items-center gap-3">
-                                    <span className="w-28 shrink-0 text-xs font-semibold text-slate-500">{cfg.label}</span>
-                                    <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                                        <div className="h-full rounded-full transition-all duration-700"
-                                            style={{ width: `${pct}%`, background: cfg.color }} />
-                                    </div>
-                                    <span className="w-8 shrink-0 text-right text-xs font-bold text-slate-700">{count}</span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </motion.div>
-            )}
-
-            {/* Timeline */}
-            <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-                <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4" style={{ background: `${T.primary}06` }}>
-                    <Activity size={16} style={{ color: T.primary }} />
-                    <h3 className="font-bold text-slate-800">Activity Timeline</h3>
-                    <span className="ml-auto rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-500">{timeline.length} events</span>
-                </div>
-
-                {timeline.length === 0 ? (
-                    <div className="flex flex-col items-center py-16 text-center">
-                        <Activity size={36} className="mb-3 text-slate-300" />
-                        <h3 className="font-bold text-slate-700">No activity yet</h3>
-                        <p className="mt-1 text-sm text-slate-400">Apply to jobs to see your activity here</p>
-                    </div>
-                ) : (
-                    <div className="relative px-6 py-4">
-                        <div className="absolute left-10 top-4 bottom-4 w-px bg-slate-100" />
-                        <div className="space-y-5">
-                            {timeline.map(ev => {
-                                const cfg = STATUS_CONFIG[ev.type] || STATUS_CONFIG.PENDING;
-                                const Icon = cfg.icon;
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Score distribution bar */}
+                {applications.length > 0 && (
+                    <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                        <h3 className="mb-4 text-base sm:text-lg font-extrabold text-slate-800">Application Status Breakdown</h3>
+                        <div className="space-y-3">
+                            {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
+                                const count = applications.filter(a => a.status === key).length;
+                                const pct = applications.length ? Math.round((count / applications.length) * 100) : 0;
                                 return (
-                                    <div key={ev.id} className="relative flex items-start gap-4">
-                                        <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${cfg.bg} ${cfg.border}`}>
-                                            <Icon size={14} className={cfg.text} />
+                                    <div key={key} className="flex items-center gap-3">
+                                        <span className="w-28 shrink-0 text-xs sm:text-sm font-semibold text-slate-600">{cfg.label}</span>
+                                        <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                                            <div className="h-full rounded-full transition-all duration-700"
+                                                style={{ width: `${pct}%`, background: cfg.color }} />
                                         </div>
-                                        <div className="flex-1 min-w-0 pt-0.5">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold ${cfg.bg} ${cfg.text} ${cfg.border}`}>
-                                                    {cfg.label}
-                                                </span>
-                                                {ev.score > 0 && (
-                                                    <span className="text-[11px] font-bold text-slate-500">{ev.score}% match</span>
-                                                )}
-                                            </div>
-                                            <p className="mt-0.5 text-sm font-semibold text-slate-700 truncate capitalize">{ev.jobTitle || 'Job Position'}</p>
-                                            <p className="text-xs text-slate-400">{ev.note} · {getTimeAgo(ev.date)}</p>
-                                        </div>
+                                        <span className="w-8 shrink-0 text-right text-xs sm:text-sm font-bold text-slate-700">{count}</span>
                                     </div>
                                 );
                             })}
                         </div>
-                    </div>
+                    </motion.div>
                 )}
-            </motion.div>
+
+                {/* Timeline */}
+                <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+                    <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4" style={{ background: `${T.primary}06` }}>
+                        <Activity size={18} style={{ color: T.primary }} />
+                        <h3 className="text-base sm:text-lg font-extrabold text-slate-800">Activity Timeline</h3>
+                        <span className="ml-auto rounded-full bg-slate-100 px-3 py-1 text-xs sm:text-sm font-bold text-slate-600">{timeline.length} events</span>
+                    </div>
+
+                    {timeline.length === 0 ? (
+                        <div className="flex flex-col items-center py-16 text-center">
+                            <Activity size={36} className="mb-3 text-slate-300" />
+                            <h3 className="text-lg font-extrabold text-slate-800">No activity yet</h3>
+                            <p className="mt-1 text-sm sm:text-base text-slate-500">Apply to jobs to see your activity here</p>
+                        </div>
+                    ) : (
+                        <div className="relative px-6 py-4">
+                            <div className="absolute left-10 top-4 bottom-4 w-px bg-slate-100" />
+                            <div className="space-y-5">
+                                {timeline.map(ev => {
+                                    const cfg = STATUS_CONFIG[ev.type] || STATUS_CONFIG.PENDING;
+                                    const Icon = cfg.icon;
+                                    return (
+                                        <div key={ev.id} className="relative flex items-start gap-4">
+                                            <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${cfg.bg} ${cfg.border}`}>
+                                                <Icon size={14} className={cfg.text} />
+                                            </div>
+                                            <div className="flex-1 min-w-0 pt-0.5">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs sm:text-sm font-bold ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+                                                        {cfg.label}
+                                                    </span>
+                                                    {ev.score > 0 && (
+                                                        <span className="text-xs sm:text-sm font-bold text-slate-500">{ev.score}% match</span>
+                                                    )}
+                                                </div>
+                                                <p className="mt-0.5 text-sm sm:text-base font-bold text-slate-800 truncate capitalize">{ev.jobTitle || 'Job Position'}</p>
+                                                <p className="text-xs sm:text-sm text-slate-500">{ev.note} · {getTimeAgo(ev.date)}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
+            </div>
         </motion.main>
     );
 };

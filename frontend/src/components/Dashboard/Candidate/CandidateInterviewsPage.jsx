@@ -63,15 +63,15 @@ const CandidateInterviewsPage = () => {
 
     return (
         <motion.main variants={container} initial="hidden" animate="show"
-            className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+            className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
             {/* Header */}
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="flex-1">
-                    <h1 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">My Interviews</h1>
-                    <p className="mt-1 text-sm text-slate-500">Track your scheduled interviews and prepare to ace them</p>
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900">My Interviews</h1>
+                    <p className="mt-1 text-sm sm:text-base text-slate-500">Track your scheduled interviews and prepare to ace them</p>
                 </div>
-                <div className="flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-sm font-bold text-indigo-700">
-                    <Video size={14} /> {interviews.length} scheduled
+                <div className="flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-sm sm:text-base font-bold text-indigo-700 shadow-sm">
+                    <Video size={16} /> {interviews.length} scheduled
                 </div>
             </motion.div>
 
@@ -86,10 +86,10 @@ const CandidateInterviewsPage = () => {
 
             {/* Search */}
             {interviews.length > 0 && (
-                <motion.div variants={fadeUp} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-400 transition-all">
-                    <Search size={14} className="text-slate-400 shrink-0" />
+                <motion.div variants={fadeUp} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-400 transition-all">
+                    <Search size={16} className="text-slate-400 shrink-0" />
                     <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by job title..."
-                        className="w-full bg-transparent text-sm outline-none text-slate-700 placeholder:text-slate-400" />
+                        className="w-full bg-transparent text-sm sm:text-base outline-none text-slate-700 placeholder:text-slate-400" />
                 </motion.div>
             )}
 
@@ -100,8 +100,8 @@ const CandidateInterviewsPage = () => {
                         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: `${T.primary}10` }}>
                             <Calendar size={28} style={{ color: T.primary }} />
                         </div>
-                        <h3 className="font-bold text-slate-700 text-lg">{search ? 'No matching interviews' : 'No interviews scheduled yet'}</h3>
-                        <p className="mt-2 max-w-sm text-sm text-slate-500">
+                        <h3 className="font-extrabold text-slate-800 text-lg sm:text-xl">{search ? 'No matching interviews' : 'No interviews scheduled yet'}</h3>
+                        <p className="mt-2 max-w-sm text-sm sm:text-base text-slate-500">
                             {search ? 'Try a different search.' : 'When a recruiter shortlists you and schedules an interview, it will appear here.'}
                         </p>
                     </motion.div>
@@ -110,41 +110,41 @@ const CandidateInterviewsPage = () => {
                         className="group rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden hover:shadow-md hover:border-indigo-200 transition-all">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5">
                             {/* Avatar */}
-                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white font-extrabold text-xl shadow-md"
+                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white font-extrabold text-xl sm:text-2xl shadow-md"
                                 style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                                 {(app.job_details?.title || 'J')[0].toUpperCase()}
                             </div>
                             {/* Info */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                                    <h4 className="font-bold text-slate-900 capitalize truncate">{app.job_details?.title}</h4>
-                                    <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
-                                        <Video size={11} className="mr-1" /> Interview Scheduled
+                                    <h4 className="text-base sm:text-lg font-bold text-slate-900 capitalize truncate">{app.job_details?.title}</h4>
+                                    <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-xs sm:text-sm font-bold text-indigo-700">
+                                        <Video size={13} className="mr-1" /> Interview Scheduled
                                     </span>
                                     {app.resume_score > 0 && (
-                                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-bold ${scoreColor(app.resume_score)}`}>
+                                        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs sm:text-sm font-bold ${scoreColor(app.resume_score)}`}>
                                             {app.resume_score}% match
                                         </span>
                                     )}
                                 </div>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                                    <span className="flex items-center gap-1"><Calendar size={11} />Date: {formatDate(app.interview_date)}</span>
-                                    <span className="flex items-center gap-1"><Clock size={11} />Time: TBD / Via Email</span>
-                                    <span className="flex items-center gap-1"><User size={11} />Recruiter: {app.recruiter_name || 'Hiring Team'}</span>
+                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs sm:text-sm text-slate-600 font-medium">
+                                    <span className="flex items-center gap-1"><Calendar size={13} />Date: {formatDate(app.interview_date)}</span>
+                                    <span className="flex items-center gap-1"><Clock size={13} />Time: TBD / Via Email</span>
+                                    <span className="flex items-center gap-1"><User size={13} />Recruiter: {app.recruiter_name || 'Hiring Team'}</span>
                                 </div>
                             </div>
                             {/* Mode badge */}
                             <div className="flex flex-col items-end gap-2 shrink-0">
-                                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-bold text-indigo-700">
-                                    <Video size={11} /> Video Call
+                                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs sm:text-sm font-bold text-indigo-700">
+                                    <Video size={13} /> Video Call
                                 </span>
                             </div>
                         </div>
                         {/* Prep tip */}
                         <div className="border-t border-slate-100 bg-slate-50 px-5 py-3 flex items-start gap-2">
-                            <AlertCircle size={13} className="shrink-0 mt-0.5 text-amber-500" />
-                            <p className="text-xs text-slate-500">
-                                <span className="font-semibold text-slate-700">Prep tip: </span>
+                            <AlertCircle size={15} className="shrink-0 mt-0.5 text-amber-500" />
+                            <p className="text-xs sm:text-sm text-slate-600">
+                                <span className="font-semibold text-slate-800">Prep tip: </span>
                                 {TIPS[Math.abs(app.id % TIPS.length)]?.tip}
                             </p>
                         </div>
@@ -155,14 +155,14 @@ const CandidateInterviewsPage = () => {
             {/* Interview Tips */}
             <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4" style={{ background: `${T.primary}06` }}>
-                    <Briefcase size={15} style={{ color: T.primary }} />
-                    <h3 className="font-bold text-slate-800 text-sm">Interview Preparation Tips</h3>
+                    <Briefcase size={18} style={{ color: T.primary }} />
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-800">Interview Preparation Tips</h3>
                 </div>
                 <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3">
                     {TIPS.map((t, i) => (
-                        <div key={i} className="flex items-start gap-3 rounded-xl bg-slate-50 p-3">
-                            <span className="text-xl">{t.icon}</span>
-                            <p className="text-xs text-slate-600 leading-relaxed">{t.tip}</p>
+                        <div key={i} className="flex items-start gap-3 rounded-xl bg-slate-50 p-3.5">
+                            <span className="text-xl sm:text-2xl">{t.icon}</span>
+                            <p className="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">{t.tip}</p>
                         </div>
                     ))}
                 </div>

@@ -14,9 +14,9 @@ const SectionCard = ({ title, icon: Icon, children }) => (
         <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100" style={{ background: `${T.primary}06` }}>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white"
                 style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
-                <Icon size={15} />
+                <Icon size={16} />
             </div>
-            <h3 className="font-bold text-slate-800 text-sm tracking-wide uppercase">{title}</h3>
+            <h3 className="font-extrabold text-slate-800 text-sm sm:text-base tracking-wide uppercase">{title}</h3>
         </div>
         <div className="p-6">{children}</div>
     </motion.div>
@@ -24,11 +24,11 @@ const SectionCard = ({ title, icon: Icon, children }) => (
 
 const Field = ({ label, value, onChange, type = 'text', icon: Icon, placeholder, disabled }) => (
     <div>
-        <label className="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
-            {Icon && <Icon size={14} className="shrink-0 text-slate-400" />}
+        <label className="mb-1.5 block text-xs sm:text-sm font-bold text-slate-600 uppercase tracking-wider">{label}</label>
+        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+            {Icon && <Icon size={16} className="shrink-0 text-slate-400" />}
             <input type={type} value={value} onChange={onChange} placeholder={placeholder} disabled={disabled}
-                className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:text-slate-500" />
+                className="w-full bg-transparent text-sm sm:text-base text-slate-800 outline-none placeholder:text-slate-400 disabled:text-slate-500 font-medium" />
         </div>
     </div>
 );
@@ -113,26 +113,26 @@ const CandidateProfilePage = () => {
             {/* Header */}
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">My Profile</h1>
-                    <p className="mt-1 text-sm text-slate-500">Manage your personal information and career details</p>
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900">My Profile</h1>
+                    <p className="mt-1 text-sm sm:text-base text-slate-500">Manage your personal information and career details</p>
                 </div>
                 <div className="flex gap-2">
                     {editMode ? (
                         <>
-                            <button onClick={() => setEditMode(false)} className="flex items-center gap-2 !rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                                <X size={14} /> Cancel
+                            <button onClick={() => setEditMode(false)} className="flex items-center gap-2 !rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm sm:text-base font-semibold text-slate-600 hover:bg-slate-50 transition">
+                                <X size={16} /> Cancel
                             </button>
                             <button onClick={handleSave} disabled={saving}
-                                className="flex items-center gap-2 !rounded-xl px-5 py-2 text-sm font-bold text-white shadow-md transition hover:scale-95 disabled:opacity-60"
+                                className="flex items-center gap-2 !rounded-xl px-5 py-2 text-sm sm:text-base font-bold text-white shadow-md transition hover:scale-95 disabled:opacity-60"
                                 style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
-                                <Save size={14} /> {saving ? 'Saving...' : 'Save Changes'}
+                                <Save size={16} /> {saving ? 'Saving...' : 'Save Changes'}
                             </button>
                         </>
                     ) : (
                         <button onClick={() => setEditMode(true)}
-                            className="flex items-center gap-2 !rounded-xl px-5 py-2 text-sm font-bold text-white shadow-md transition hover:scale-95"
+                            className="flex items-center gap-2 !rounded-xl px-5 py-2 text-sm sm:text-base font-bold text-white shadow-md transition hover:scale-95"
                             style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
-                            <Edit3 size={14} /> Edit Profile
+                            <Edit3 size={16} /> Edit Profile
                         </button>
                     )}
                 </div>
@@ -146,22 +146,22 @@ const CandidateProfilePage = () => {
                         style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>{initials}</div>
                     {editMode && (
                         <button className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition">
-                            <Camera size={12} className="text-slate-500" />
+                            <Camera size={14} className="text-slate-500" />
                         </button>
                     )}
                 </div>
                 <div className="flex-1 text-center sm:text-left">
-                    <h2 className="text-xl font-extrabold text-slate-900">{profile.full_name || auth.username}</h2>
-                    <p className="text-sm text-slate-500">{profile.current_role || 'Add your current role'}</p>
-                    <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-3 text-xs text-slate-500">
-                        {profile.location && <span className="flex items-center gap-1"><MapPin size={11} />{profile.location}</span>}
-                        {profile.experience_years && <span className="flex items-center gap-1"><Briefcase size={11} />{profile.experience_years} yrs exp</span>}
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">{profile.full_name || auth.username}</h2>
+                    <p className="text-sm sm:text-base font-medium text-slate-600 mt-0.5">{profile.current_role || 'Add your current role'}</p>
+                    <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-3 text-xs sm:text-sm text-slate-600 font-medium">
+                        {profile.location && <span className="flex items-center gap-1"><MapPin size={13} />{profile.location}</span>}
+                        {profile.experience_years && <span className="flex items-center gap-1"><Briefcase size={13} />{profile.experience_years} yrs exp</span>}
                     </div>
                     <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-1.5">
                         {skills.slice(0, 5).map((s, i) => (
-                            <span key={i} className="rounded-lg px-2.5 py-0.5 text-[11px] font-semibold" style={{ background: `${T.primary}12`, color: T.primary }}>{s}</span>
+                            <span key={i} className="rounded-lg px-2.5 py-1 text-xs sm:text-sm font-semibold" style={{ background: `${T.primary}12`, color: T.primary }}>{s}</span>
                         ))}
-                        {skills.length > 5 && <span className="rounded-lg bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-500">+{skills.length - 5}</span>}
+                        {skills.length > 5 && <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs sm:text-sm font-semibold text-slate-500">+{skills.length - 5}</span>}
                     </div>
                 </div>
             </motion.div>
@@ -177,10 +177,10 @@ const CandidateProfilePage = () => {
                     <Field label="Experience (Years)" value={profile.experience_years} onChange={e => setProfile(p => ({ ...p, experience_years: e.target.value }))} placeholder="3" disabled={!editMode} />
                 </div>
                 <div className="mt-4">
-                    <label className="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wider">Bio</label>
+                    <label className="mb-1.5 block text-xs sm:text-sm font-bold text-slate-600 uppercase tracking-wider">Bio</label>
                     <textarea rows={3} value={profile.bio} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))} disabled={!editMode}
                         placeholder="A short description about yourself..."
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all disabled:text-slate-500 resize-none" />
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-800 outline-none placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all disabled:text-slate-500 resize-none font-medium" />
                 </div>
             </SectionCard>
 
@@ -196,21 +196,21 @@ const CandidateProfilePage = () => {
             <SectionCard title="Skills" icon={Code2}>
                 <div className="flex flex-wrap gap-2">
                     {skills.map((skill, i) => (
-                        <div key={i} className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold" style={{ background: `${T.primary}12`, color: T.primary }}>
+                        <div key={i} className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm sm:text-base font-semibold" style={{ background: `${T.primary}12`, color: T.primary }}>
                             {skill}
-                            {editMode && <button onClick={() => removeSkill(i)} className="hover:text-red-500 transition ml-0.5"><X size={11} /></button>}
+                            {editMode && <button onClick={() => removeSkill(i)} className="hover:text-red-500 transition ml-0.5"><X size={13} /></button>}
                         </div>
                     ))}
-                    {skills.length === 0 && !editMode && <p className="text-sm text-slate-400">No skills added yet.</p>}
+                    {skills.length === 0 && !editMode && <p className="text-sm sm:text-base text-slate-500">No skills added yet.</p>}
                 </div>
                 {editMode && (
                     <div className="mt-4 flex gap-2">
-                        <div className="flex flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
-                            <Code2 size={14} className="text-slate-400" />
-                            <input value={newSkill} onChange={e => setNewSkill(e.target.value)} onKeyDown={e => e.key === 'Enter' && addSkill()} placeholder="Add a skill (e.g. React)" className="w-full bg-transparent text-sm outline-none" />
+                        <div className="flex flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+                            <Code2 size={16} className="text-slate-400" />
+                            <input value={newSkill} onChange={e => setNewSkill(e.target.value)} onKeyDown={e => e.key === 'Enter' && addSkill()} placeholder="Add a skill (e.g. React)" className="w-full bg-transparent text-sm sm:text-base outline-none text-slate-800 font-medium" />
                         </div>
-                        <button onClick={addSkill} className="flex items-center !rounded-xl px-4 py-2.5 text-sm font-bold text-white transition hover:scale-95"
-                            style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}><Plus size={15} /></button>
+                        <button onClick={addSkill} className="flex items-center !rounded-xl px-4 py-2.5 text-sm sm:text-base font-bold text-white transition hover:scale-95"
+                            style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}><Plus size={18} /></button>
                     </div>
                 )}
             </SectionCard>
@@ -221,7 +221,7 @@ const CandidateProfilePage = () => {
                     {education.map((edu, i) => (
                         <div key={i} className="relative rounded-xl border border-slate-100 bg-slate-50 p-4">
                             {editMode && (
-                                <button onClick={() => removeEdu(i)} className="absolute right-3 top-3 text-slate-300 hover:text-red-500 transition"><Trash2 size={14} /></button>
+                                <button onClick={() => removeEdu(i)} className="absolute right-3 top-3 text-slate-300 hover:text-red-500 transition"><Trash2 size={16} /></button>
                             )}
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                 <Field label="Degree" value={edu.degree} onChange={e => updateEdu(i, 'degree', e.target.value)} placeholder="B.Tech Computer Science" disabled={!editMode} />
@@ -230,10 +230,10 @@ const CandidateProfilePage = () => {
                             </div>
                         </div>
                     ))}
-                    {education.length === 0 && !editMode && <p className="text-sm text-slate-400">No education details added yet.</p>}
+                    {education.length === 0 && !editMode && <p className="text-sm sm:text-base text-slate-500">No education details added yet.</p>}
                     {editMode && (
-                        <button onClick={addEducation} className="flex items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 px-4 py-3 text-sm font-semibold text-slate-500 hover:border-indigo-300 hover:text-indigo-600 transition-all w-full justify-center">
-                            <Plus size={14} /> Add Education
+                        <button onClick={addEducation} className="flex items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 px-4 py-3 text-sm sm:text-base font-semibold text-slate-600 hover:border-indigo-300 hover:text-indigo-600 transition-all w-full justify-center">
+                            <Plus size={16} /> Add Education
                         </button>
                     )}
                 </div>

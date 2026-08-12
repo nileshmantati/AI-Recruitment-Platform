@@ -67,8 +67,8 @@ const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
         >
             <div className="mx-auto max-w-4xl space-y-6 p-6 lg:p-8">
                 <button onClick={() => setSelectedApp(null)}
-                    className="flex items-center px-3 py-2 border border-slate-200 bg-white outline-none rounded-xl! shadow-sm cursor-pointer gap-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                    <ArrowLeft size={16} /> Back to Applications
+                    className="flex items-center px-3 py-2 border border-slate-200 bg-white outline-none rounded-xl! shadow-sm cursor-pointer gap-2 text-sm sm:text-base font-semibold text-slate-600 hover:bg-slate-50 transition">
+                    <ArrowLeft size={18} /> Back to Applications
                 </button>
 
                 <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
@@ -83,16 +83,16 @@ const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
                                     <Briefcase size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-extrabold capitalize text-slate-900 tracking-tight">
+                                    <h3 className="text-2xl sm:text-3xl font-extrabold capitalize text-slate-900 tracking-tight">
                                         {app.job_details?.title || 'Job Application'}
                                     </h3>
-                                    <p className="text-sm font-medium text-slate-500 flex items-center gap-2 mt-1">
+                                    <p className="text-sm sm:text-base font-medium text-slate-500 flex items-center gap-2 mt-1">
                                         {app.job_details?.company && (
                                             <span className="font-semibold text-slate-700">{app.job_details.company}</span>
                                         )}
                                         {app.job_details?.location && (
                                             <span className="flex items-center gap-1 text-slate-400">
-                                                <MapPin size={13} /> {app.job_details.location}
+                                                <MapPin size={15} /> {app.job_details.location}
                                             </span>
                                         )}
                                     </p>
@@ -100,7 +100,7 @@ const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
                             </div>
 
                             <div className="flex items-center gap-2">
-                                <span className={`px-3.5 py-1.5 text-xs font-bold rounded-full border uppercase tracking-wider ${getStatusStyle(app.status)}`}>
+                                <span className={`px-3.5 py-1.5 text-xs sm:text-sm font-bold rounded-full border uppercase tracking-wider ${getStatusStyle(app.status)}`}>
                                     {formatStatus(app.status)}
                                 </span>
                             </div>
@@ -109,29 +109,29 @@ const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
                         {/* Overview Stats */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
                             <div className="rounded-xl bg-slate-50 px-4 py-3 border border-slate-100">
-                                <p className="text-[11px] mb-1 font-bold uppercase tracking-wider text-slate-400">AI Score Match</p>
-                                <span className={`inline-flex items-center gap-1 text-sm font-black px-2.5 py-1 rounded-lg border ${getScoreColor(app.resume_score)}`}>
-                                    <Sparkles size={13} />
+                                <p className="text-xs sm:text-sm mb-1 font-bold uppercase tracking-wider text-slate-400">AI Score Match</p>
+                                <span className={`inline-flex items-center gap-1 text-sm sm:text-base font-black px-2.5 py-1 rounded-lg border ${getScoreColor(app.resume_score)}`}>
+                                    <Sparkles size={14} />
                                     {app.resume_score ? `${app.resume_score}%` : 'N/A'}
                                 </span>
                             </div>
                             <div className="rounded-xl bg-slate-50 px-4 py-3 border border-slate-100">
-                                <p className="text-[11px] mb-1 font-bold uppercase tracking-wider text-slate-400">Applied On</p>
-                                <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5 mt-0.5">
-                                    <Calendar size={14} className="text-slate-400" /> {getTimeAgo(app.applied_at)}
+                                <p className="text-xs sm:text-sm mb-1 font-bold uppercase tracking-wider text-slate-400">Applied On</p>
+                                <p className="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-1.5 mt-0.5">
+                                    <Calendar size={15} className="text-slate-400" /> {getTimeAgo(app.applied_at)}
                                 </p>
                             </div>
                             {app.job_details?.salary && (
                                 <div className="rounded-xl bg-slate-50 px-4 py-3 border border-slate-100">
-                                    <p className="text-[11px] mb-1 font-bold uppercase tracking-wider text-slate-400">Salary</p>
-                                    <p className="text-sm font-bold text-slate-800 flex items-center gap-1 mt-0.5">
-                                        <IndianRupee size={14} className="text-slate-400" /> {app.job_details.salary}
+                                    <p className="text-xs sm:text-sm mb-1 font-bold uppercase tracking-wider text-slate-400">Salary</p>
+                                    <p className="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-1 mt-0.5">
+                                        <IndianRupee size={15} className="text-slate-400" /> {app.job_details.salary}
                                     </p>
                                 </div>
                             )}
                             <div className="rounded-xl bg-slate-50 px-4 py-3 border border-slate-100">
-                                <p className="text-[11px] mb-1 font-bold uppercase tracking-wider text-slate-400">Status</p>
-                                <p className="text-sm font-bold text-slate-800 capitalize mt-0.5">
+                                <p className="text-xs sm:text-sm mb-1 font-bold uppercase tracking-wider text-slate-400">Status</p>
+                                <p className="text-sm sm:text-base font-bold text-slate-800 capitalize mt-0.5">
                                     {formatStatus(app.status)}
                                 </p>
                             </div>
@@ -139,16 +139,16 @@ const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
 
                         {/* AI Feedback Analysis */}
                         <div className="mb-8">
-                            <h4 className="text-lg font-extrabold text-slate-900 mb-4 flex items-center gap-2">
-                                <Sparkles size={20} className="text-indigo-500" /> AI Feedback & Insights
+                            <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                                <Sparkles size={22} className="text-indigo-500" /> AI Feedback & Insights
                             </h4>
                             {app.ai_feedback ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-5">
-                                        <h5 className="text-xs font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-1.5">
-                                            <CheckCircle size={16} className="text-emerald-500" /> Key Strengths
+                                        <h5 className="text-sm font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-1.5">
+                                            <CheckCircle size={18} className="text-emerald-500" /> Key Strengths
                                         </h5>
-                                        <ul className="space-y-2 text-sm text-slate-700">
+                                        <ul className="space-y-2 text-sm sm:text-base text-slate-700">
                                             {(app.ai_feedback.strengths || []).map((s, i) => (
                                                 <li key={i} className="flex items-start gap-2">
                                                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
@@ -156,15 +156,15 @@ const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
                                                 </li>
                                             ))}
                                             {!app.ai_feedback.strengths?.length && (
-                                                <li className="text-slate-400 text-xs italic">No specific strengths highlighted.</li>
+                                                <li className="text-slate-400 text-sm italic">No specific strengths highlighted.</li>
                                             )}
                                         </ul>
                                     </div>
                                     <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-5">
-                                        <h5 className="text-xs font-extrabold uppercase tracking-wider text-amber-600 mb-3 flex items-center gap-1.5">
-                                            <XCircle size={16} className="text-amber-500" /> Skill Gaps & Improvements
+                                        <h5 className="text-sm font-extrabold uppercase tracking-wider text-amber-600 mb-3 flex items-center gap-1.5">
+                                            <XCircle size={18} className="text-amber-500" /> Skill Gaps & Improvements
                                         </h5>
-                                        <ul className="space-y-2 text-sm text-slate-700">
+                                        <ul className="space-y-2 text-sm sm:text-base text-slate-700">
                                             {(app.ai_feedback.missing_skills || app.ai_feedback.weaknesses || []).map((w, i) => (
                                                 <li key={i} className="flex items-start gap-2">
                                                     <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-2 shrink-0" />
@@ -172,19 +172,19 @@ const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
                                                 </li>
                                             ))}
                                             {!app.ai_feedback.missing_skills?.length && !app.ai_feedback.weaknesses?.length && (
-                                                <li className="text-slate-400 text-xs italic">No significant skill gaps found.</li>
+                                                <li className="text-slate-400 text-sm italic">No significant skill gaps found.</li>
                                             )}
                                         </ul>
                                     </div>
                                     {app.ai_feedback.summary && (
                                         <div className="md:col-span-2 rounded-xl border border-slate-100 bg-indigo-50/40 p-5">
-                                            <p className="text-xs font-extrabold uppercase tracking-wider text-indigo-600 mb-2">AI Assessment Summary</p>
-                                            <p className="text-sm text-slate-700 leading-relaxed">{app.ai_feedback.summary}</p>
+                                            <p className="text-sm font-extrabold uppercase tracking-wider text-indigo-600 mb-2">AI Assessment Summary</p>
+                                            <p className="text-sm sm:text-base text-slate-700 leading-relaxed">{app.ai_feedback.summary}</p>
                                         </div>
                                     )}
                                 </div>
                             ) : (
-                                <div className="rounded-xl bg-slate-50 border border-slate-100 p-6 text-center text-sm text-slate-500">
+                                <div className="rounded-xl bg-slate-50 border border-slate-100 p-6 text-center text-sm sm:text-base text-slate-500">
                                     AI analysis is currently being processed for this application.
                                 </div>
                             )}
@@ -193,8 +193,8 @@ const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
                         {/* Job Overview */}
                         {app.job_details?.description && (
                             <div className="border-t border-slate-100 pt-6">
-                                <h4 className="text-md font-bold text-slate-800 mb-2">Job Description Summary</h4>
-                                <p className="text-sm text-slate-600 line-clamp-4 leading-relaxed">
+                                <h4 className="text-lg font-extrabold text-slate-800 mb-2">Job Description Summary</h4>
+                                <p className="text-sm sm:text-base text-slate-600 line-clamp-4 leading-relaxed">
                                     {app.job_details.description}
                                 </p>
                             </div>
@@ -281,36 +281,36 @@ const CandidateApplicationsPage = () => {
                 {/* Header */}
                 <motion.div variants={itemVariants} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-slate-900">
-                            <FileText className="text-indigo-500" size={24} />
+                        <h2 className="flex items-center gap-2 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900">
+                            <FileText className="text-indigo-500" size={28} />
                             My Applications
                         </h2>
-                        <p className="mt-1 text-sm text-slate-500">Track the status of all your job applications.</p>
+                        <p className="mt-1 text-sm sm:text-base text-slate-500">Track the status of all your job applications.</p>
                     </div>
                 </motion.div>
 
                 {/* Filter Bar */}
                 <motion.div variants={itemVariants} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200 focus-within:ring-2 focus-within:ring-indigo-400 transition-all sm:w-80 shadow-sm w-full">
-                        <Search size={16} className="text-slate-400 shrink-0" />
+                    <div className="flex items-center gap-2 rounded-xl bg-white px-3.5 py-2.5 ring-1 ring-slate-200 focus-within:ring-2 focus-within:ring-indigo-400 transition-all sm:w-80 shadow-sm w-full">
+                        <Search size={18} className="text-slate-400 shrink-0" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             placeholder="Search by job title or company..."
-                            className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400 text-slate-700"
+                            className="w-full bg-transparent text-sm sm:text-base outline-none placeholder:text-slate-400 text-slate-700"
                         />
                     </div>
                     <div className="flex w-full justify-between gap-2 sm:w-auto sm:justify-end">
                         <div className="relative flex-1 sm:flex-none">
                             <button
                                 onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                                className="flex w-full items-center justify-between sm:justify-center gap-2 rounded-lg! border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm"
+                                className="flex w-full items-center justify-between sm:justify-center gap-2 rounded-lg! border border-slate-200 bg-white px-4 py-2.5 text-sm sm:text-base font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm"
                             >
                                 <span className="flex items-center gap-1.5">
-                                    <Filter size={14} /> {statusFilter === 'All' ? 'All Status' : formatStatus(statusFilter)}
+                                    <Filter size={16} /> {statusFilter === 'All' ? 'All Status' : formatStatus(statusFilter)}
                                 </span>
-                                <ChevronDown size={14} className={`transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`} />
+                                <ChevronDown size={16} className={`transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`} />
                             </button>
                             {showStatusDropdown && (
                                 <div className="absolute left-0 sm:right-0 sm:left-auto top-12 z-20 w-48 overflow-hidden rounded-xl border border-slate-100 bg-white py-1 shadow-xl">
@@ -318,7 +318,7 @@ const CandidateApplicationsPage = () => {
                                         <button
                                             key={opt}
                                             onClick={() => { setStatusFilter(opt); setShowStatusDropdown(false); }}
-                                            className={`w-full px-4 py-2 text-left text-sm transition ${statusFilter === opt ? 'bg-indigo-50 font-bold text-indigo-600' : 'text-slate-600 hover:bg-slate-50 font-medium'}`}
+                                            className={`w-full px-4 py-2 text-left text-sm sm:text-base transition ${statusFilter === opt ? 'bg-indigo-50 font-bold text-indigo-600' : 'text-slate-600 hover:bg-slate-50 font-medium'}`}
                                         >
                                             {opt === 'All' ? 'All Status' : formatStatus(opt)}
                                         </button>
@@ -329,8 +329,8 @@ const CandidateApplicationsPage = () => {
                     </div>
                 </motion.div>
 
-                <motion.p variants={itemVariants} className="text-sm font-medium text-slate-400">
-                    Showing <span className="text-slate-700">{filteredApplications.length}</span> of <span className="text-slate-700">{applications.length}</span> applications
+                <motion.p variants={itemVariants} className="text-sm sm:text-base font-medium text-slate-500">
+                    Showing <span className="text-slate-800 font-bold">{filteredApplications.length}</span> of <span className="text-slate-800 font-bold">{applications.length}</span> applications
                 </motion.p>
 
                 {filteredApplications.length > 0 ? (
@@ -346,21 +346,21 @@ const CandidateApplicationsPage = () => {
                                                 <Briefcase size={18} />
                                             </div>
                                             <div>
-                                                <h3 className="font-bold capitalize text-slate-900 leading-tight">{app.job_details?.title || 'Job Application'}</h3>
-                                                <p className="text-[11px] font-medium text-slate-400 mt-0.5 truncate max-w-[180px]">{app.job_details?.company || 'Company'}</p>
+                                                <h3 className="text-base sm:text-lg font-bold capitalize text-slate-900 leading-tight">{app.job_details?.title || 'Job Application'}</h3>
+                                                <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-0.5 truncate max-w-[180px]">{app.job_details?.company || 'Company'}</p>
                                             </div>
                                         </div>
-                                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded border uppercase ${getStatusStyle(app.status)}`}>
+                                        <span className={`px-2.5 py-1 text-xs sm:text-sm font-bold rounded border uppercase ${getStatusStyle(app.status)}`}>
                                             {formatStatus(app.status)}
                                         </span>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-2 mt-1">
-                                        <div className="flex items-center justify-between rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs">
+                                        <div className="flex items-center justify-between rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs sm:text-sm">
                                             <span className="text-slate-500 font-medium">Match Score</span>
                                             <span className={`font-bold px-1.5 rounded ${getScoreColor(app.resume_score)}`}>{app.resume_score ? `${app.resume_score}%` : 'N/A'}</span>
                                         </div>
-                                        <div className="flex items-center justify-between rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs">
+                                        <div className="flex items-center justify-between rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs sm:text-sm">
                                             <span className="text-slate-500 font-medium">Applied</span>
                                             <span className="font-semibold text-slate-700">{getTimeAgo(app.applied_at)}</span>
                                         </div>
@@ -369,9 +369,9 @@ const CandidateApplicationsPage = () => {
                                     <div className="mt-2 pt-2 border-t border-slate-100">
                                         <button
                                             onClick={() => setSelectedApp(app)}
-                                            className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-indigo-50 py-2 text-xs font-bold text-indigo-600 transition hover:bg-indigo-100"
+                                            className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-indigo-50 py-2.5 text-xs sm:text-sm font-bold text-indigo-600 transition hover:bg-indigo-100"
                                         >
-                                            <Eye size={14} /> Review Application
+                                            <Eye size={16} /> Review Application
                                         </button>
                                     </div>
                                 </div>
@@ -380,15 +380,15 @@ const CandidateApplicationsPage = () => {
 
                         {/* Desktop View (md+) */}
                         <motion.div variants={itemVariants} className="hidden md:block overflow-auto rounded-2xl border border-slate-100 bg-white shadow-sm">
-                            <table className="w-full text-left text-sm">
+                            <table className="w-full text-left text-sm sm:text-base">
                                 <thead>
                                     <tr className="border-b border-slate-100 bg-slate-50/80">
-                                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Job Position</th>
-                                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Company</th>
-                                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400 text-center">Match Score</th>
-                                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400 text-center">Status</th>
-                                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Applied On</th>
-                                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400 text-center">Action</th>
+                                        <th className="px-5 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Job Position</th>
+                                        <th className="px-5 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Company</th>
+                                        <th className="px-5 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 text-center">Match Score</th>
+                                        <th className="px-5 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 text-center">Status</th>
+                                        <th className="px-5 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Applied On</th>
+                                        <th className="px-5 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -398,34 +398,34 @@ const CandidateApplicationsPage = () => {
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white"
                                                         style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
-                                                        <Briefcase size={14} />
+                                                        <Briefcase size={16} />
                                                     </div>
-                                                    <span className="font-bold capitalize text-slate-800">{app.job_details?.title || 'Job Application'}</span>
+                                                    <span className="text-sm sm:text-base font-bold capitalize text-slate-800">{app.job_details?.title || 'Job Application'}</span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-4">
-                                                <span className="font-semibold text-slate-600">{app.job_details?.company || 'N/A'}</span>
+                                                <span className="text-sm sm:text-base font-semibold text-slate-600">{app.job_details?.company || 'N/A'}</span>
                                             </td>
                                             <td className="px-5 py-4 text-center">
-                                                <span className={`inline-flex px-2 py-0.5 rounded-md border font-bold text-xs ${getScoreColor(app.resume_score)}`}>
+                                                <span className={`inline-flex px-2.5 py-1 rounded-md border font-bold text-xs sm:text-sm ${getScoreColor(app.resume_score)}`}>
                                                     {app.resume_score ? `${app.resume_score}%` : 'N/A'}
                                                 </span>
                                             </td>
                                             <td className="px-5 py-4 text-center">
-                                                <span className={`inline-flex px-2.5 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${getStatusStyle(app.status)}`}>
+                                                <span className={`inline-flex px-2.5 py-1 rounded-full border text-xs sm:text-sm font-bold uppercase tracking-wider ${getStatusStyle(app.status)}`}>
                                                     {formatStatus(app.status)}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4 text-sm font-medium text-slate-500">
+                                            <td className="px-5 py-4 text-sm sm:text-base font-medium text-slate-500">
                                                 {getTimeAgo(app.applied_at)}
                                             </td>
                                             <td className="px-5 py-4 text-center">
                                                 <button
                                                     onClick={() => setSelectedApp(app)}
                                                     title="Review Application"
-                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg! bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition"
+                                                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg! bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition"
                                                 >
-                                                    <Eye size={15} />
+                                                    <Eye size={17} />
                                                 </button>
                                             </td>
                                         </tr>
@@ -439,10 +439,10 @@ const CandidateApplicationsPage = () => {
                         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: `${T.primary}10` }}>
                             <FileText size={28} style={{ color: T.primary }} />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-800">
+                        <h3 className="text-lg sm:text-xl font-extrabold text-slate-800">
                             {searchQuery || statusFilter !== 'All' ? 'No matching applications found' : 'No applications submitted yet'}
                         </h3>
-                        <p className="mt-2 max-w-sm text-sm text-slate-500">
+                        <p className="mt-2 max-w-sm text-sm sm:text-base text-slate-500">
                             {searchQuery || statusFilter !== 'All' ? 'Try adjusting your search or filters.' : 'Browse open jobs and apply to track your applications here.'}
                         </p>
                     </motion.div>

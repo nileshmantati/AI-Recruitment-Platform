@@ -40,7 +40,7 @@ const RecruiterSettingsPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="max-w-4xl mx-auto pb-20"
+                        className="max-w-5xl mx-auto pb-20"
                     >
                         {renderSection()}
                     </motion.div>

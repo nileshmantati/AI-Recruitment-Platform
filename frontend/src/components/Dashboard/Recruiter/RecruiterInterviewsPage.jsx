@@ -145,7 +145,7 @@ const RecruiterInterviewsPage = () => {
                                 <Video size={16} />
                                 <span>Interview Command Center</span>
                             </div>
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
+                            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
                                 Manage <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-800 to-indigo-500">Scheduled Interviews</span>
                             </h1>
                             <p className="text-slate-600 text-base sm:text-lg font-semibold max-w-xl leading-relaxed">
