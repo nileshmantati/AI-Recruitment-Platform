@@ -10,4 +10,3 @@ admin.site.register(TeamMember)
 admin.site.register(AppearanceSettings)
 admin.site.register(PrivacySettings)
 admin.site.register(IntegrationSettings)
-

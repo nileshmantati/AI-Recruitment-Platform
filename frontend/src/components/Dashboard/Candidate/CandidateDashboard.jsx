@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
-import { Loader2, Sparkles, CheckCircle, Briefcase, FileText, Calendar, AlertCircle } from 'lucide-react';
+import { Sparkles, CheckCircle, Briefcase, FileText, Calendar, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { T } from '../../../Js/theme';
@@ -26,20 +26,21 @@ const CandidateDashboard = ({ getScoreColor, getStatusBadge }) => {
     const [myApplications, setMyApplications] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchMyApplications = async () => {
-        try {
-            const response = await api.get('applications/my/');
-            setMyApplications(response.data);
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to load your applications.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        let isMounted = true;
+        const fetchMyApplications = async () => {
+            try {
+                const response = await api.get('applications/my/');
+                if (isMounted) setMyApplications(response.data);
+            } catch (err) {
+                console.error(err);
+                if (isMounted) toast.error('Failed to load your applications.');
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
         fetchMyApplications();
+        return () => { isMounted = false; };
     }, []);
 
     const stats = useMemo(() => ({

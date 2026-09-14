@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
 import { T } from '../../../Js/theme';
@@ -214,20 +214,21 @@ const CandidateApplicationsPage = () => {
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
     const [selectedApp, setSelectedApp] = useState(null);
 
-    const fetchApplications = async () => {
-        try {
-            const res = await api.get('applications/my/');
-            setApplications(res.data);
-        } catch (err) {
-            console.error('Failed to load applications', err);
-            toast.error('Failed to load applications.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchApplications();
+        let isMounted = true;
+        const loadApplications = async () => {
+            try {
+                const res = await api.get('applications/my/');
+                if (isMounted) setApplications(res.data);
+            } catch (err) {
+                console.error('Failed to load applications', err);
+                if (isMounted) toast.error('Failed to load applications.');
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+        loadApplications();
+        return () => { isMounted = false; };
     }, []);
 
     const filteredApplications = useMemo(() => {

@@ -24,16 +24,24 @@ from users.views import CandidateProfileView, RecruiterProfileView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('users.urls')),  # Include user-related URLs
-    path('api/candidate/profile/', CandidateProfileView.as_view(), name='candidate-profile'),
-    path('api/recruiter/profile/', RecruiterProfileView.as_view(), name='recruiter-profile'),
+    path('api/candidate/profile/', CandidateProfileView.as_view(),
+         name='candidate-profile'),
+    path('api/recruiter/profile/', RecruiterProfileView.as_view(),
+         name='recruiter-profile'),
     path('api/jobs/', include('jobs.urls')),  # Include job-related URLs
-    path('api/applications/', include('applications.urls')),  # Include application-related URLs
-    path('api/analytics/', include('analytics.urls')),  # Include analytics-related URLs
-    path('api/company/', include('companies.urls')),    # Include company-related URLs
-    path('api/ai/', include('ai_engine.urls')),          # Include AI engine URLs
-    path('api/settings/', include('recruiter_settings.urls')),  # Include settings URLs
+    # Include application-related URLs
+    path('api/applications/', include('applications.urls')),
+    # Include analytics-related URLs
+    path('api/analytics/', include('analytics.urls')),
+    # Include company-related URLs
+    path('api/company/', include('companies.urls')),
+    # Include AI engine URLs
+    path('api/ai/', include('ai_engine.urls')),
+    # Include settings URLs
+    path('api/settings/', include('recruiter_settings.urls')),
 ]
 
 # Required to serve uploaded resume PDFs during development
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

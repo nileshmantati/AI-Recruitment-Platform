@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { GlassCard, TextField } from '../ui/AuthUI';
-import { GraduationCap, Building2, Users, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { GraduationCap, Building2, Users, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import PrimaryButton from '../components/PrimaryButton';
 import { T } from '../Js/theme';
 import toast from 'react-hot-toast';
@@ -38,7 +38,7 @@ const Register = () => {
     const { auth } = useAuth();
     const [showPass, setShowPass] = useState(false);
 
-    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+    const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
             username: '',
@@ -48,6 +48,7 @@ const Register = () => {
         }
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const currentRole = watch("role");
     const navigate = useNavigate();
 
@@ -122,7 +123,16 @@ const Register = () => {
                             {...register("password")}
                         />
 
-                        <PrimaryButton type="submit" className="w-full rounded-2xl my-3 py-2.5 hover:scale-95 transition-all duration-300" >Sign Up</PrimaryButton>
+                        <PrimaryButton type="submit" disabled={isSubmitting} className="w-full rounded-2xl my-3 py-2.5 hover:scale-95 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:scale-100" >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="animate-spin" size={20} />
+                                    Creating account...
+                                </>
+                            ) : (
+                                "Sign Up"
+                            )}
+                        </PrimaryButton>
 
                         <p className="mt-6 text-center text-sm text-slate-500">
                             Already have an account? <button type="button" onClick={() => navigate("/login")} className="font-semibold transition-opacity hover:opacity-80" style={{ color: T.primary }}>Log in</button>

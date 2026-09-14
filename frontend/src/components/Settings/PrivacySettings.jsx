@@ -7,19 +7,20 @@ const PrivacySettings = () => {
     const [settings, setSettings] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    const fetchSettings = async () => {
-        try {
-            const response = await api.get('/settings/privacy/');
-            setSettings(response.data);
-        } catch {
-            toast.error('Failed to load privacy settings');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchSettings();
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const response = await api.get('/settings/privacy/');
+                if (isMounted) setSettings(response.data);
+            } catch {
+                if (isMounted) toast.error('Failed to load privacy settings');
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+        load();
+        return () => { isMounted = false; };
     }, []);
 
     const handleUpdate = async (key, value) => {

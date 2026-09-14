@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='application',
             name='status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('EVALUATED', 'Evaluated'), ('SHORTLISTED', 'Shortlisted'), ('REJECTED', 'Rejected'), ('INTERVIEW_SCHEDULED', 'Interview Scheduled'), ('ERROR', 'Error')], default='PENDING', max_length=25),
+            field=models.CharField(choices=[('PENDING', 'Pending'), ('EVALUATED', 'Evaluated'), ('SHORTLISTED', 'Shortlisted'), (
+                'REJECTED', 'Rejected'), ('INTERVIEW_SCHEDULED', 'Interview Scheduled'), ('ERROR', 'Error')], default='PENDING', max_length=25),
         ),
     ]

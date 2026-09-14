@@ -30,38 +30,33 @@ const Toggle = ({ enabled, onChange, label, description }) => (
 const NotificationsSettings = () => {
     const [settings, setSettings] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
-
-    const fetchSettings = async () => {
-        try {
-            const response = await api.get('/settings/notifications/');
-            setSettings(response.data);
-        } catch {
-            toast.error('Failed to load notification settings');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-
 
     useEffect(() => {
-        fetchSettings();
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const response = await api.get('/settings/notifications/');
+                if (isMounted) setSettings(response.data);
+            } catch {
+                if (isMounted) toast.error('Failed to load notification settings');
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+        load();
+        return () => { isMounted = false; };
     }, []);
 
     const handleToggle = async (key, value) => {
         const newSettings = { ...settings, [key]: value };
         setSettings(newSettings); // Optimistic UI update
-        setIsSaving(true);
 
         try {
             await api.put('/settings/notifications/', { [key]: value });
             toast.success('Preferences updated');
         } catch {
-            setSettings(settings); // Revert on failure
-            toast.error('Failed to update preferences');
-        } finally {
-            setIsSaving(false);
+            setSettings(settings); // Revert
+            toast.error('Failed to update preference');
         }
     };
 

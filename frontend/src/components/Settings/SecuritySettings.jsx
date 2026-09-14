@@ -10,23 +10,26 @@ const SecuritySettings = () => {
     const [passwords, setPasswords] = useState({ current: '', new_pass: '' });
     const [isSubmittingPass, setIsSubmittingPass] = useState(false);
 
-    const fetchData = async () => {
-        try {
-            const [settingsRes, historyRes] = await Promise.all([
-                api.get('/settings/security/'),
-                api.get('/settings/security/login-history/')
-            ]);
-            setSettings(settingsRes.data);
-            setLoginHistory(historyRes.data);
-        } catch {
-            toast.error('Failed to load security data');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchData();
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const [settingsRes, historyRes] = await Promise.all([
+                    api.get('/settings/security/'),
+                    api.get('/settings/security/login-history/')
+                ]);
+                if (isMounted) {
+                    setSettings(settingsRes.data);
+                    setLoginHistory(historyRes.data);
+                }
+            } catch {
+                if (isMounted) toast.error('Failed to load security data');
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+        load();
+        return () => { isMounted = false; };
     }, []);
 
     const handleChangePassword = async () => {

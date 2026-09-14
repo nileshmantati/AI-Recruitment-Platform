@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -66,6 +66,7 @@ const RecruiterProfile = () => {
         resolver: yupResolver(accountSchema)
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const firstName = watch('first_name', '');
     const lastName = watch('last_name', '');
     const email = watch('email', '');
@@ -75,11 +76,7 @@ const RecruiterProfile = () => {
 
     const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'RP';
 
-    useEffect(() => {
-        fetchAccountData();
-    }, []);
-
-    const fetchAccountData = async () => {
+    const fetchAccountData = useCallback(async () => {
         try {
             const response = await api.get('/recruiter/profile/');
             reset(response.data);
@@ -88,12 +85,16 @@ const RecruiterProfile = () => {
             } else {
                 setProfileImage(null);
             }
-        } catch (error) {
+        } catch {
             toast.error('Failed to load profile data');
         } finally {
             setLoading(false);
         }
-    };
+    }, [reset]);
+
+    useEffect(() => {
+        fetchAccountData();
+    }, [fetchAccountData]);
 
     const onSubmit = async (data) => {
         setIsSaving(true);
@@ -119,7 +120,7 @@ const RecruiterProfile = () => {
             await fetchAccountData();
             setProfileImageFile(null);
             setEditMode(false);
-        } catch (error) {
+        } catch {
             toast.error('Failed to update account');
         } finally {
             setIsSaving(false);

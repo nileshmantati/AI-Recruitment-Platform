@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Bookmark, Briefcase, Clock, IndianRupee, Search, BookmarkX } from 'lucide-react';
 import { T } from '../../../Js/theme';
@@ -18,17 +18,11 @@ const getTimeAgo = (date) => {
 };
 
 const CandidateSavedJobsPage = () => {
-    const [savedJobs, setSavedJobs] = useState([]);
+    const [savedJobs, setSavedJobs] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+        catch { return []; }
+    });
     const [search, setSearch] = useState('');
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        try {
-            const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            setSavedJobs(stored);
-        } catch { setSavedJobs([]); }
-        finally { setLoading(false); }
-    }, []);
 
     const removeSaved = (id) => {
         const updated = savedJobs.filter(j => j.id !== id);
@@ -41,21 +35,6 @@ const CandidateSavedJobsPage = () => {
         ? savedJobs.filter(j => j.title?.toLowerCase().includes(search.toLowerCase()) || j.recruiter_name?.toLowerCase().includes(search.toLowerCase()))
         : savedJobs;
 
-    if (loading) {
-        return (
-            <div className="flex h-[85vh] w-full items-center justify-center bg-slate-50/50">
-                <div className="flex flex-col items-center gap-4 text-center p-8 max-w-sm">
-                    <div className="relative w-16 h-16 flex items-center justify-center">
-                        <div className="absolute inset-0 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
-                        <i className="bi bi-robot text-indigo-600 text-3xl"></i>
-                    </div>
-                    <div>
-                        <h4 className="font-extrabold text-slate-800 text-lg">Loading Saved Jobs...</h4>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <motion.main variants={container} initial="hidden" animate="show"

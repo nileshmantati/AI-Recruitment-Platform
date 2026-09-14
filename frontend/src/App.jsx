@@ -15,6 +15,7 @@ import Footer from './components/Footer';
 import JobsPage from './pages/JobsPage';
 import Dashboard from './pages/Dashboard';
 import NotFoundPage from './pages/NotFoundPage';
+import FeaturesPage from './pages/FeaturesPage';
 
 const MainLayout = () => (
   <>
@@ -87,6 +88,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/findjobs" element={<JobsPage />} />
+              <Route path="/features" element={<FeaturesPage />} />
               <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
             </Route>
             <Route path="/dashboard/*" element={

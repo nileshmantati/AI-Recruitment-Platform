@@ -1,16 +1,18 @@
 from rest_framework import serializers
 from .models import Job
 
+
 class JobSerializer(serializers.ModelSerializer):
     # This pulls the username from the related User model automatically
-    recruiter_name = serializers.CharField(source='recruiter.username', read_only=True)
+    recruiter_name = serializers.CharField(
+        source='recruiter.username', read_only=True)
     applicants = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Job
         fields = [
-            'id', 'title', 'description', 'required_skills', 
-            'salary', 'recruiter', 'recruiter_name', 
+            'id', 'title', 'description', 'required_skills',
+            'salary', 'recruiter', 'recruiter_name',
             'applicants', 'created_at', 'is_active'
         ]
         # We make recruiter read-only because we will set it automatically from the requested user

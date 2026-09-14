@@ -9,35 +9,42 @@ from .models import (
     CompanyAIPreferences
 )
 
+
 class CompanySocialSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanySocial
         exclude = ('id', 'company')
+
 
 class CompanyLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyLocation
         exclude = ('company',)
 
+
 class CompanyDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyDocument
         exclude = ('company',)
+
 
 class CompanyBrandingSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyBranding
         exclude = ('id', 'company')
 
+
 class CompanyGallerySerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyGallery
         exclude = ('company',)
 
+
 class CompanyAIPreferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyAIPreferences
         exclude = ('id', 'company')
+
 
 class CompanySerializer(serializers.ModelSerializer):
     socials = CompanySocialSerializer(required=False)
@@ -56,13 +63,13 @@ class CompanySerializer(serializers.ModelSerializer):
         socials_data = validated_data.pop('socials', {})
         branding_data = validated_data.pop('branding', {})
         ai_prefs_data = validated_data.pop('ai_preferences', {})
-        
+
         company = Company.objects.create(**validated_data)
-        
+
         CompanySocial.objects.create(company=company, **socials_data)
         CompanyBranding.objects.create(company=company, **branding_data)
         CompanyAIPreferences.objects.create(company=company, **ai_prefs_data)
-        
+
         return company
 
     def update(self, instance, validated_data):
@@ -84,14 +91,16 @@ class CompanySerializer(serializers.ModelSerializer):
 
         # Update Branding
         if branding_data is not None:
-            branding, _ = CompanyBranding.objects.get_or_create(company=instance)
+            branding, _ = CompanyBranding.objects.get_or_create(
+                company=instance)
             for attr, value in branding_data.items():
                 setattr(branding, attr, value)
             branding.save()
 
         # Update AI Preferences
         if ai_prefs_data is not None:
-            ai_prefs, _ = CompanyAIPreferences.objects.get_or_create(company=instance)
+            ai_prefs, _ = CompanyAIPreferences.objects.get_or_create(
+                company=instance)
             for attr, value in ai_prefs_data.items():
                 setattr(ai_prefs, attr, value)
             ai_prefs.save()

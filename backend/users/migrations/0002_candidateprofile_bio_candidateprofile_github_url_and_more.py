@@ -30,12 +30,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RecruiterProfile',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('company', models.CharField(blank=True, max_length=100)),
-                ('company_logo', models.ImageField(blank=True, null=True, upload_to='company_logos/')),
+                ('company_logo', models.ImageField(
+                    blank=True, null=True, upload_to='company_logos/')),
                 ('company_website', models.URLField(blank=True, null=True)),
                 ('position', models.CharField(blank=True, max_length=100, null=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='recruiter_profile', to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='recruiter_profile', to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

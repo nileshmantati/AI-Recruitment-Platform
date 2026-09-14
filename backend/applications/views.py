@@ -27,6 +27,7 @@ def _run_in_thread(task_func, *args):
             connection.close()
     threading.Thread(target=wrapper, daemon=True).start()
 
+
 class ApplyJobView(generics.CreateAPIView):
     """
     POST: Candidate applies for a job and uploads/updates their resume.
@@ -34,22 +35,22 @@ class ApplyJobView(generics.CreateAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
     # CRITICAL: These parsers allow DRF to accept PDF file uploads
-    parser_classes = [MultiPartParser, FormParser] 
+    parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
         user = request.user
-        
+
         # Security Check: Only candidates can apply
         if user.role != 'CANDIDATE':
             return Response({"error": "Only candidate accounts can apply for jobs."}, status=status.HTTP_403_FORBIDDEN)
-        
+
         job_id = request.data.get('job')
         resume_file = request.FILES.get('resume')
 
         # Validate that the job exists and is active
         if not job_id:
             return Response({"error": "A job ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         from jobs.models import Job
         job = Job.objects.filter(id=job_id, is_active=True).first()
         if not job:
@@ -81,11 +82,11 @@ class ApplyJobView(generics.CreateAPIView):
             _run_in_thread(process_resume_scoring, application.id)
         except Exception as e:
             # Don't let a broker/Redis failure crash the entire application submission
-            logger.error(f"Failed to enqueue resume scoring task for application {application.id}: {e}")
+            logger.error(
+                f"Failed to enqueue resume scoring task for application {application.id}: {e}")
 
         serializer = self.get_serializer(application)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 
 class MyApplicationsListView(generics.ListAPIView):
@@ -114,6 +115,7 @@ class LatestApplicationsView(generics.ListAPIView):
     def get_queryset(self):
         return Application.objects.filter(job__recruiter=self.request.user).order_by("-applied_at")[:5]
 
+
 class AllRecruiterApplicationsView(generics.ListAPIView):
     """
     GET: Recruiter views all applicants across all their jobs.
@@ -124,6 +126,7 @@ class AllRecruiterApplicationsView(generics.ListAPIView):
     def get_queryset(self):
         return Application.objects.filter(job__recruiter=self.request.user).order_by("-applied_at")
 
+
 class JobApplicantsListView(generics.ListAPIView):
     """
     GET: Recruiter views all applicants for a specific job.
@@ -131,13 +134,13 @@ class JobApplicantsListView(generics.ListAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self): 
+    def get_queryset(self):
         job_id = self.kwargs['job_id']
         # 1. Filter applications for this specific job
         # 2. Ensure the logged-in recruiter actually posted this job
         # 3. Order candidates by AI resume score (highest first)
         return Application.objects.filter(
-            job_id=job_id, 
+            job_id=job_id,
             job__recruiter=self.request.user
         ).order_by('-resume_score')
 
@@ -151,25 +154,27 @@ class GenerateInterviewQuestionsView(generics.GenericAPIView):
     def get(self, request, application_id):
         # 1. Fetch the application securely
         application = get_object_or_404(Application, id=application_id)
-        
+
         # Security Check: Ensure only the recruiter who posted the job can generate questions
         if application.job.recruiter != request.user:
             return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
-        
+
         # 2. Extract context for the AI
         job = application.job
         feedback = application.ai_feedback or "No specific weaknesses identified."
 
         # 3. Call the AI Service
         try:
-            ai_response = generate_interview_questions(job.title, job.description, feedback)
+            ai_response = generate_interview_questions(
+                job.title, job.description, feedback)
         except Exception as e:
-            logger.error(f"AI Question Generation failed for application {application_id}: {e}")
+            logger.error(
+                f"AI Question Generation failed for application {application_id}: {e}")
             return Response(
                 {"error": f"AI service error: {str(e)}", "questions": []},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
         return Response(ai_response, status=status.HTTP_200_OK)
 
 
@@ -187,7 +192,8 @@ class UpdateApplicationStatusView(APIView):
             return Response({"error": "Unauthorized action."}, status=status.HTTP_403_FORBIDDEN)
 
         new_status = request.data.get('status')
-        valid_statuses = ['PENDING', 'EVALUATED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'REJECTED', 'ERROR']
+        valid_statuses = ['PENDING', 'EVALUATED', 'SHORTLISTED',
+                          'INTERVIEW_SCHEDULED', 'REJECTED', 'ERROR']
 
         if new_status not in valid_statuses:
             return Response({"error": "Invalid status provided."}, status=status.HTTP_400_BAD_REQUEST)
@@ -203,6 +209,7 @@ class UpdateApplicationStatusView(APIView):
             "message": f"Application marked as {new_status}. Email notification is being sent.",
             "status": application.status
         }, status=status.HTTP_200_OK)
+
 
 class ScheduleInterviewView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -228,7 +235,8 @@ class ScheduleInterviewView(APIView):
         application.save()
 
         # Send email in background thread (non-blocking)
-        _run_in_thread(send_interview_invitation, application.id, interview_datetime, meeting_link)
+        _run_in_thread(send_interview_invitation, application.id,
+                       interview_datetime, meeting_link)
 
         return Response({
             "message": "Interview scheduled successfully! Invitation email is being sent.",

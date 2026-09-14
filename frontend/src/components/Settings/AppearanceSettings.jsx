@@ -15,21 +15,20 @@ const AppearanceSettings = () => {
         rose: '#f43f5e'
     };
 
-    const fetchSettings = async () => {
-        try {
-            const response = await api.get('/settings/appearance/');
-            setSettings(response.data);
-        } catch {
-            toast.error('Failed to load appearance settings');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-
-
     useEffect(() => {
-        fetchSettings();
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const response = await api.get('/settings/appearance/');
+                if (isMounted) setSettings(response.data);
+            } catch {
+                if (isMounted) toast.error('Failed to load appearance settings');
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+        load();
+        return () => { isMounted = false; };
     }, []);
 
     const handleUpdate = async (key, value) => {

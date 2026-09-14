@@ -7,21 +7,20 @@ const TeamMembersSettings = () => {
     const [members, setMembers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const fetchMembers = async () => {
-        try {
-            const response = await api.get('/settings/team/');
-            setMembers(response.data);
-        } catch (error) {
-            toast.error('Failed to load team members');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-
-
     useEffect(() => {
-        fetchMembers();
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const response = await api.get('/settings/team/');
+                if (isMounted) setMembers(response.data);
+            } catch {
+                if (isMounted) toast.error('Failed to load team members');
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+        load();
+        return () => { isMounted = false; };
     }, []);
 
     const getRoleBadgeColor = (role) => {

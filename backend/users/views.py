@@ -10,7 +10,8 @@ from .serializers import RegisterSerializer, UserSerializer, CustomTokenObtainPa
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
-    permission_classes = (AllowAny,)  # Anyone can access this endpoint to sign up
+    # Anyone can access this endpoint to sign up
+    permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
 
 
@@ -35,12 +36,14 @@ class CandidateProfileView(APIView):
 
     def get(self, request):
         profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
-        serializer = CandidateProfileSerializer(profile, context={'request': request})
+        serializer = CandidateProfileSerializer(
+            profile, context={'request': request})
         return Response(serializer.data)
 
     def patch(self, request):
         profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
-        serializer = CandidateProfileSerializer(profile, data=request.data, partial=True, context={'request': request})
+        serializer = CandidateProfileSerializer(
+            profile, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -54,12 +57,14 @@ class RecruiterProfileView(APIView):
 
     def get(self, request):
         profile, _ = RecruiterProfile.objects.get_or_create(user=request.user)
-        serializer = RecruiterProfileSerializer(profile, context={'request': request})
+        serializer = RecruiterProfileSerializer(
+            profile, context={'request': request})
         return Response(serializer.data)
 
     def patch(self, request):
         profile, _ = RecruiterProfile.objects.get_or_create(user=request.user)
-        serializer = RecruiterProfileSerializer(profile, data=request.data, partial=True, context={'request': request})
+        serializer = RecruiterProfileSerializer(
+            profile, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -67,7 +72,8 @@ class RecruiterProfileView(APIView):
 
     def put(self, request):
         profile, _ = RecruiterProfile.objects.get_or_create(user=request.user)
-        serializer = RecruiterProfileSerializer(profile, data=request.data, partial=True, context={'request': request})
+        serializer = RecruiterProfileSerializer(
+            profile, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

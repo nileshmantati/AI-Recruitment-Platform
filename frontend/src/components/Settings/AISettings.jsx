@@ -12,19 +12,20 @@ const AISettings = () => {
     const [skillInput, setSkillInput] = useState('');
     const [blacklistInput, setBlacklistInput] = useState('');
 
-    const fetchSettings = async () => {
-        try {
-            const response = await api.get('/settings/ai/');
-            setSettings(response.data);
-        } catch {
-            toast.error('Failed to load AI preferences');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchSettings();
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const response = await api.get('/settings/ai/');
+                if (isMounted) setSettings(response.data);
+            } catch {
+                if (isMounted) toast.error('Failed to load AI preferences');
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+        load();
+        return () => { isMounted = false; };
     }, []);
 
     const handleSave = async () => {

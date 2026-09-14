@@ -11,11 +11,13 @@ from .models import (
     IntegrationSettings
 )
 
+
 class NotificationSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationSettings
         fields = '__all__'
         read_only_fields = ('user',)
+
 
 class SecuritySettingsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,15 +25,18 @@ class SecuritySettingsSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('user',)
 
+
 class LoginHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = LoginHistory
         fields = '__all__'
 
+
 class HiringStageSerializer(serializers.ModelSerializer):
     class Meta:
         model = HiringStage
         fields = '__all__'
+
 
 class HiringWorkflowSerializer(serializers.ModelSerializer):
     stages = HiringStageSerializer(many=True, read_only=True)
@@ -40,6 +45,7 @@ class HiringWorkflowSerializer(serializers.ModelSerializer):
         model = HiringWorkflow
         fields = '__all__'
         read_only_fields = ('company',)
+
 
 class TeamMemberSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
@@ -50,17 +56,20 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('company',)
 
+
 class AppearanceSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppearanceSettings
         fields = '__all__'
         read_only_fields = ('user',)
 
+
 class PrivacySettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrivacySettings
         fields = '__all__'
         read_only_fields = ('user',)
+
 
 class IntegrationSettingsSerializer(serializers.ModelSerializer):
     class Meta:

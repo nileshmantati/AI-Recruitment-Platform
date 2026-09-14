@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { GlassCard, TextField } from '../ui/AuthUI';
-import { Building2, GraduationCap, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Building2, GraduationCap, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import PrimaryButton from '../components/PrimaryButton';
 import { T } from '../Js/theme';
 import toast from 'react-hot-toast';
@@ -29,7 +29,7 @@ const Login = () => {
         }
     }, [auth.isAuthenticated, navigate]);
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
             username: '',
@@ -129,7 +129,16 @@ const Login = () => {
                                 <a href="#" className="font-semibold text-decoration-none" style={{ color: T.primary }}>Forgot password?</a>
                             </div>
 
-                            <PrimaryButton type="submit" className="w-full rounded-2xl py-2.5 hover:scale-95 transition-all duration-300" >Log in</PrimaryButton>
+                            <PrimaryButton type="submit" disabled={isSubmitting} className="w-full rounded-2xl py-2.5 hover:scale-95 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:scale-100" >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="animate-spin" size={20} />
+                                        Logging in...
+                                    </>
+                                ) : (
+                                    "Log in"
+                                )}
+                            </PrimaryButton>
 
                             {/* <div className="my-6 flex items-center gap-3">
                             <div className="h-px flex-1 bg-slate-200" /><span className="text-xs font-medium text-slate-400">OR</span><div className="h-px flex-1 bg-slate-200" />

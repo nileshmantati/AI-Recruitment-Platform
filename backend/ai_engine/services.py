@@ -14,7 +14,8 @@ load_dotenv()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     import warnings
-    warnings.warn("GEMINI_API_KEY environment variable is not set. AI features will fail.")
+    warnings.warn(
+        "GEMINI_API_KEY environment variable is not set. AI features will fail.")
 genai.configure(api_key=GEMINI_API_KEY)
 
 
@@ -38,7 +39,8 @@ def extract_text_from_docx(docx_path):
     try:
         import docx as _docx  # lazy import – python-docx
         doc = _docx.Document(docx_path)
-        text = "\n".join(para.text for para in doc.paragraphs if para.text.strip())
+        text = "\n".join(
+            para.text for para in doc.paragraphs if para.text.strip())
         return text if text.strip() else None
     except ImportError:
         print("python-docx not installed; cannot read DOCX files.")

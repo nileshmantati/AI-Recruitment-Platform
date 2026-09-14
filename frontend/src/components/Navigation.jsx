@@ -21,7 +21,7 @@ const Navigation = () => {
     const navItems = [
         { name: "Home", path: "/" },
         { name: "Resume Analyzer", path: "/resume-analyzer" },
-        { name: "Features", path: "#" },
+        { name: "Features", path: "/features" },
         { name: "How it Works", path: "#" },
         { name: "FAQ", path: "#" },
     ];
@@ -34,7 +34,8 @@ const Navigation = () => {
 
     // Close menu when route changes
     useEffect(() => {
-        setIsMobileMenuOpen(false);
+        const timeoutId = setTimeout(() => setIsMobileMenuOpen(false), 0);
+        return () => clearTimeout(timeoutId);
     }, [location.pathname]);
 
     // Close menu when resizing to desktop view

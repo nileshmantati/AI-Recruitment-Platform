@@ -5,23 +5,27 @@ from django.db.models import Count
 from .models import Job
 from .serializers import JobSerializer
 
+
 class JobListCreateView(generics.ListCreateAPIView):
     """
     GET: Lists all active jobs (Available to anyone, even unauthenticated users)
     POST: Creates a new job (Requires JWT Token + RECRUITER role)
     """
-    queryset = Job.objects.filter(is_active=True).annotate(applicants=Count('applications')).order_by('-created_at')
+    queryset = Job.objects.filter(is_active=True).annotate(
+        applicants=Count('applications')).order_by('-created_at')
     serializer_class = JobSerializer
     # Allow read-only for anyone, but require auth for POST
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly] 
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         # Security Check: Ensure the user is actually a recruiter
         if self.request.user.role != 'RECRUITER':
-            raise PermissionDenied("Only verified recruiters can post new jobs.")
-        
+            raise PermissionDenied(
+                "Only verified recruiters can post new jobs.")
+
         # Save the job with the currently logged-in user as the recruiter
         serializer.save(recruiter=self.request.user)
+
 
 class JobDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -36,13 +40,15 @@ class JobDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         # Security Check: Recruiters can only edit their own postings
         if self.get_object().recruiter != self.request.user:
-            raise PermissionDenied("You do not have permission to edit this job posting.")
+            raise PermissionDenied(
+                "You do not have permission to edit this job posting.")
         serializer.save()
 
     def perform_destroy(self, instance):
         # Security Check: Recruiters can only delete their own postings
         if instance.recruiter != self.request.user:
-            raise PermissionDenied("You do not have permission to delete this job posting.")
+            raise PermissionDenied(
+                "You do not have permission to delete this job posting.")
         instance.delete()
 
 

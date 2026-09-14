@@ -155,7 +155,7 @@ export default function ResumeAnalyzer() {
         <div className="absolute -bottom-20 -left-20 w-[340px] h-[340px] rounded-full blur-[90px]" style={{ background: `${T.secondary}18` }} />
       </div>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 space-y-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
         {/* ── Page header ── */}
         <PageHeader />

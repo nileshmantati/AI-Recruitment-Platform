@@ -5,7 +5,6 @@ import api from '../../services/api';
 
 // A simple drag and drop list simulation for UI
 const HiringWorkflowSettings = () => {
-    const [workflow, setWorkflow] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -20,22 +19,22 @@ const HiringWorkflowSettings = () => {
         { id: 7, name: 'Hired' },
     ]);
 
-    const fetchWorkflow = async () => {
-        try {
-            const response = await api.get('/settings/workflow/');
-            setWorkflow(response.data);
-            if (response.data.stages && response.data.stages.length > 0) {
-                setStages(response.data.stages);
-            }
-        } catch {
-            toast.error('Failed to load workflow settings');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchWorkflow();
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const response = await api.get('/settings/workflow/');
+                if (isMounted && response.data.stages && response.data.stages.length > 0) {
+                    setStages(response.data.stages);
+                }
+            } catch {
+                if (isMounted) toast.error('Failed to load workflow settings');
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+        load();
+        return () => { isMounted = false; };
     }, []);
 
     const handleAddStage = () => {
@@ -106,7 +105,7 @@ const HiringWorkflowSettings = () => {
                 </div>
 
                 <div className="space-y-3">
-                    {stages.map((stage, index) => (
+                    {stages.map((stage) => (
                         <div key={stage.id} className="flex items-center gap-3 bg-slate-50  p-3 rounded-md border border-slate-200  group">
                             <div className="cursor-grab text-slate-400 hover:text-slate-600 ">
                                 <GripVertical size={20} />

@@ -64,11 +64,10 @@ const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive, role }) 
     const [settingsOpen, setSettingsOpen] = useState(active === "Settings");
 
     useEffect(() => {
-        if (active === "Settings") {
-            setSettingsOpen(true);
-        } else {
-            setSettingsOpen(false);
-        }
+        const timeoutId = setTimeout(() => {
+            setSettingsOpen(active === "Settings");
+        }, 0);
+        return () => clearTimeout(timeoutId);
     }, [active]);
 
     const handleItemClick = (item) => {

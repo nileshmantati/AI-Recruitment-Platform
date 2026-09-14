@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../../services/api';
+
 
 const IntegrationsSettings = () => {
     const [isLoading, setIsLoading] = useState(true);

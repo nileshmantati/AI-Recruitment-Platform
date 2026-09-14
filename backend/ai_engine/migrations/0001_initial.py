@@ -14,12 +14,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ResumeAnalysis',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('filename', models.CharField(max_length=255)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('ai_score', models.IntegerField(default=0)),
                 ('match_percentage', models.IntegerField(default=0)),
-                ('job_role', models.CharField(default='General Role', max_length=255)),
+                ('job_role', models.CharField(
+                    default='General Role', max_length=255)),
                 ('experience_relevancy', models.IntegerField(default=0)),
                 ('owned_skills', models.JSONField(default=list)),
                 ('missing_skills', models.JSONField(default=list)),

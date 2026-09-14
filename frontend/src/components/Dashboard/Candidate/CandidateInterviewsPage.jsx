@@ -23,6 +23,7 @@ const CandidateInterviewsPage = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [now] = useState(() => Date.now());
 
     useEffect(() => {
         (async () => {
@@ -79,7 +80,7 @@ const CandidateInterviewsPage = () => {
             <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                     { label: 'Scheduled', value: interviews.length, color: '#6366F1', icon: Calendar },
-                    { label: 'This Week', value: interviews.filter(a => { const d = Math.floor((new Date(a.updated_at) - Date.now()) / 864e5); return d >= 0 && d <= 7; }).length, color: '#F59E0B', icon: Clock },
+                    { label: 'This Week', value: interviews.filter(a => { const d = Math.floor((new Date(a.updated_at) - now) / 864e5); return d >= 0 && d <= 7; }).length, color: '#F59E0B', icon: Clock },
                     { label: 'Completed', value: 0, color: '#22C55E', icon: CheckCircle },
                 ].map((s, i) => <KpiCard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />)}
             </motion.div>

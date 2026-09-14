@@ -18,11 +18,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='application',
             name='candidate',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='users.candidateprofile'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='applications', to='users.candidateprofile'),
         ),
         migrations.AddField(
             model_name='application',
             name='job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='jobs.job'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='jobs.job'),
         ),
     ]

@@ -15,17 +15,20 @@ from .serializers import (
     CompanyGallerySerializer
 )
 
+
 class IsRecruiter(permissions.BasePermission):
     """
     Custom permission to only allow recruiters to access company profiles.
     """
+
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated and getattr(request.user, 'role', '') == 'RECRUITER')
+
 
 class CompanyViewSet(viewsets.ModelViewSet):
     serializer_class = CompanySerializer
     permission_classes = [permissions.IsAuthenticated, IsRecruiter]
-    
+
     def get_queryset(self):
         # A recruiter should only see their own company
         return Company.objects.filter(user=self.request.user)
@@ -39,7 +42,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # Upsert logic: if company exists, update it.
         company = self.get_queryset().first()
-        
+
         # Remove logo and cover_banner from request.data if they are strings (URLs)
         # to prevent DRF ImageField validation errors.
         data = request.data.copy()
@@ -100,9 +103,9 @@ class CompanyViewSet(viewsets.ModelViewSet):
         company = self.get_queryset().first()
         if not company:
             return Response({"completion": 0, "status": "incomplete"})
-        
+
         score = 0
-        
+
         # Basic Info (20%)
         if company.name and company.industry and company.email:
             score += 20

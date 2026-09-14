@@ -223,34 +223,35 @@ const JobsPage = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const fetchJobs = useCallback(async () => {
-        try {
-            const response = await api.get('jobs/');
-            let userAppliedJobIds = new Set();
-            try {
-                const appsRes = await api.get('applications/my/');
-                if (Array.isArray(appsRes.data)) {
-                    userAppliedJobIds = new Set(appsRes.data.map(app => app.job || app.job_details?.id));
-                }
-            } catch {
-                // Unauthenticated or not candidate
-            }
-            const jobsWithApplied = (response.data || []).map(j => ({
-                ...j,
-                isApplied: userAppliedJobIds.has(j.id)
-            }));
-            setJobs(jobsWithApplied);
-        } catch (err) {
-            console.error('Failed to load jobs', err);
-            toast.error('Failed to load jobs.');
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
     useEffect(() => {
-        fetchJobs();
-    }, [fetchJobs]);
+        let isMounted = true;
+        const loadJobs = async () => {
+            try {
+                const response = await api.get('jobs/');
+                let userAppliedJobIds = new Set();
+                try {
+                    const appsRes = await api.get('applications/my/');
+                    if (Array.isArray(appsRes.data)) {
+                        userAppliedJobIds = new Set(appsRes.data.map(app => app.job || app.job_details?.id));
+                    }
+                } catch {
+                    // Unauthenticated or not candidate
+                }
+                const jobsWithApplied = (response.data || []).map(j => ({
+                    ...j,
+                    isApplied: userAppliedJobIds.has(j.id)
+                }));
+                if (isMounted) setJobs(jobsWithApplied);
+            } catch (err) {
+                console.error('Failed to load jobs', err);
+                if (isMounted) toast.error('Failed to load jobs.');
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+        loadJobs();
+        return () => { isMounted = false; };
+    }, []);
 
     const handleApplyClick = useCallback((job) => {
         setSelectedJob(job);

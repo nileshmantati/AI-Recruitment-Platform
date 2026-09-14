@@ -14,10 +14,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Application',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('resume_score', models.IntegerField(default=0)),
                 ('ai_feedback', models.JSONField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('EVALUATED', 'Evaluated'), ('SHORTLISTED', 'Shortlisted'), ('REJECTED', 'Rejected')], default='PENDING', max_length=20)),
+                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('EVALUATED', 'Evaluated'), (
+                    'SHORTLISTED', 'Shortlisted'), ('REJECTED', 'Rejected')], default='PENDING', max_length=20)),
                 ('applied_at', models.DateTimeField(auto_now_add=True)),
             ],
         ),
