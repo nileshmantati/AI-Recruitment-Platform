@@ -100,7 +100,7 @@ class MyApplicationsListView(generics.ListAPIView):
         user = self.request.user
         if not hasattr(user, 'candidate_profile'):
             return Application.objects.none()
-        return Application.objects.filter(
+        return Application.objects.select_related('job__recruiter', 'candidate__user').filter(
             candidate=user.candidate_profile
         ).order_by('-applied_at')
 
@@ -113,7 +113,7 @@ class LatestApplicationsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Application.objects.filter(job__recruiter=self.request.user).order_by("-applied_at")[:5]
+        return Application.objects.select_related('job__recruiter', 'candidate__user').filter(job__recruiter=self.request.user).order_by("-applied_at")[:5]
 
 
 class AllRecruiterApplicationsView(generics.ListAPIView):
@@ -124,7 +124,7 @@ class AllRecruiterApplicationsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Application.objects.filter(job__recruiter=self.request.user).order_by("-applied_at")
+        return Application.objects.select_related('job__recruiter', 'candidate__user').filter(job__recruiter=self.request.user).order_by("-applied_at")
 
 
 class JobApplicantsListView(generics.ListAPIView):
@@ -139,7 +139,7 @@ class JobApplicantsListView(generics.ListAPIView):
         # 1. Filter applications for this specific job
         # 2. Ensure the logged-in recruiter actually posted this job
         # 3. Order candidates by AI resume score (highest first)
-        return Application.objects.filter(
+        return Application.objects.select_related('job__recruiter', 'candidate__user').filter(
             job_id=job_id,
             job__recruiter=self.request.user
         ).order_by('-resume_score')

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, User, Menu, X } from "lucide-react";
@@ -10,6 +10,8 @@ const Navigation = () => {
     const { auth, logout } = useAuth();
     const [scrolled, setScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [navHeight, setNavHeight] = useState(72);
+    const navRef = useRef(null);
     const location = useLocation();
 
     const handleLogout = () => {
@@ -32,6 +34,17 @@ const Navigation = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    // Keep the mobile drawer's offset in sync with the real header height
+    // (it changes between scrolled / not-scrolled states).
+    useEffect(() => {
+        const measure = () => {
+            if (navRef.current) setNavHeight(navRef.current.offsetHeight);
+        };
+        measure();
+        window.addEventListener("resize", measure);
+        return () => window.removeEventListener("resize", measure);
+    }, [scrolled]);
+
     // Close menu when route changes
     useEffect(() => {
         const timeoutId = setTimeout(() => setIsMobileMenuOpen(false), 0);
@@ -41,7 +54,7 @@ const Navigation = () => {
     // Close menu when resizing to desktop view
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth >= 768) {
+            if (window.innerWidth >= 1280) {
                 setIsMobileMenuOpen(false);
             }
         };
@@ -51,12 +64,7 @@ const Navigation = () => {
 
     // Lock body scroll when mobile menu is open
     useEffect(() => {
-        if (isMobileMenuOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "unset";
-        }
-
+        document.body.style.overflow = isMobileMenuOpen ? "hidden" : "unset";
         return () => {
             document.body.style.overflow = "unset";
         };
@@ -67,6 +75,7 @@ const Navigation = () => {
 
     return (
         <nav
+            ref={navRef}
             className={`sticky top-0 z-[100] w-full transition-all duration-300 ${scrolled ? "py-2 shadow-sm" : "py-4"
                 }`}
             style={{
@@ -78,13 +87,13 @@ const Navigation = () => {
         >
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 {/* Logo */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
                     <Link
                         to="/"
                         onClick={closeMobileMenu}
-                        className="flex items-center gap-2 no-underline"
+                        className="flex items-center gap-2 no-underline min-w-0"
                     >
-                        <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight flex items-center">
+                        <span className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight flex items-center whitespace-nowrap">
                             <i className="bi bi-robot me-2" style={{ color: T.primary }}></i>
                             <span className="text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                                 AI
@@ -93,13 +102,14 @@ const Navigation = () => {
                     </Link>
                 </div>
 
-                {/* Desktop Navigation */}
-                <div className="hidden items-center gap-8 text-base font-medium text-slate-600 md:flex">
+                {/* Desktop Navigation — only from xl (1280px) up, where there's actually room for
+                    5 links + Jobs + Dashboard + user badge + logout without wrapping */}
+                <div className="hidden items-center gap-6 xl:gap-8 text-base font-medium text-slate-600 xl:flex">
                     {navItems.map((item, index) => (
                         <Link
                             key={`${item.name}-${index}`}
                             to={item.path}
-                            className={`transition-colors no-underline ${location.pathname === item.path
+                            className={`transition-colors no-underline whitespace-nowrap ${location.pathname === item.path
                                 ? "text-indigo-600 font-semibold"
                                 : "text-slate-700 hover:text-indigo-600"
                                 }`}
@@ -110,34 +120,34 @@ const Navigation = () => {
                 </div>
 
                 {/* Desktop Actions */}
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden xl:flex items-center gap-3 xl:gap-4 flex-shrink-0">
                     {auth.isAuthenticated ? (
                         <>
-                            <Link to="/findjobs" className="text-base no-underline font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                            <Link to="/findjobs" className="text-base no-underline font-semibold text-indigo-600 hover:text-indigo-800 transition-colors whitespace-nowrap">
                                 Jobs
                             </Link>
-                            <Link to="/dashboard" className="text-base no-underline font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                            <Link to="/dashboard" className="text-base no-underline font-semibold text-indigo-600 hover:text-indigo-800 transition-colors whitespace-nowrap">
                                 Dashboard
                             </Link>
                             <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 shadow-sm border border-slate-200">
-                                <User size={18} className="text-indigo-600" />
-                                <span className="max-w-[90px] sm:max-w-[120px] lg:max-w-[150px] truncate text-sm font-semibold">
+                                <User size={18} className="text-indigo-600 flex-shrink-0" />
+                                <span className="max-w-[110px] 2xl:max-w-[150px] truncate text-sm font-semibold">
                                     {auth.username}
                                 </span>
                             </div>
-                            <button onClick={handleLogout} className="rounded-lg border border-red-500 px-4 py-2 text-base font-medium text-red-600 hover:bg-red-50 transition-colors">
+                            <button onClick={handleLogout} className="rounded-lg border border-red-500 px-4 py-2 text-base font-medium text-red-600 hover:bg-red-50 transition-colors whitespace-nowrap">
                                 Logout
                             </button>
                         </>
                     ) : (
-                        <PrimaryButton className="px-4 py-2.5 text-sm rounded-xl" onClick={() => navigate("/login")}>
+                        <PrimaryButton className="px-4 py-2.5 text-sm rounded-xl whitespace-nowrap" onClick={() => navigate("/login")}>
                             Log in <ArrowRight size={16} />
                         </PrimaryButton>
                     )}
                 </div>
 
-                {/* Mobile Menu Button */}
-                <div className="flex md:hidden items-center gap-3">
+                {/* Mobile / Tablet Menu Button — shown up to xl (1280px) */}
+                <div className="flex xl:hidden items-center gap-3 flex-shrink-0">
                     <button
                         onClick={toggleMobileMenu}
                         className="text-slate-600 hover:text-slate-900 focus:outline-none p-2 rounded-md hover:bg-slate-100 transition-colors"
@@ -148,10 +158,11 @@ const Navigation = () => {
                 </div>
             </div>
 
-            {/* Mobile Navigation Menu */}
+            {/* Mobile / Tablet Navigation Menu */}
             {isMobileMenuOpen && (
                 <div
-                    className="fixed inset-x-0 top-[60px] h-[calc(100vh-60px)] bg-white z-[100] md:hidden flex flex-col px-6 py-6 overflow-y-auto transition-all duration-300 border-t border-slate-100"
+                    className="fixed inset-x-0 bg-white z-[100] xl:hidden flex flex-col px-6 py-6 overflow-y-auto transition-all duration-300 border-t border-slate-100"
+                    style={{ top: `${navHeight}px`, height: `calc(100vh - ${navHeight}px)` }}
                 >
                     <div className="flex flex-col gap-2">
                         {navItems.map((item, index) => (

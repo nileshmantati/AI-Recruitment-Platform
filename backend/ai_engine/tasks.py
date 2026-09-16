@@ -6,36 +6,46 @@ from .services import extract_text_from_pdf, evaluate_candidate_resume
 from applications.models import Application
 
 
-@shared_task
-def process_resume_scoring(application_id):
-    # 1. Fetch the application and job
-    application = Application.objects.get(id=application_id)
-    job = application.job
+@shared_task(bind=True, max_retries=3)
+def process_resume_scoring(self, application_id):
+    try:
+        # 1. Fetch the application and job
+        application = Application.objects.get(id=application_id)
+        job = application.job
 
-    # 2. Extract Text
-    resume_path = application.candidate.resume.path
-    resume_text = extract_text_from_pdf(resume_path)
+        # 2. Extract Text
+        resume_path = application.candidate.resume.path
+        resume_text = extract_text_from_pdf(resume_path)
 
-    if not resume_text:
-        application.status = 'ERROR'
+        if not resume_text:
+            application.status = 'ERROR'
+            application.save()
+            return
+
+        # 3. Call AI Service
+        ai_results = evaluate_candidate_resume(resume_text, job.description)
+
+        # 4. Update Database
+        application.resume_score = ai_results.get('score', 0)
+        # You could also save missing_skills and strengths to a JSONField on the model
+        application.ai_feedback = ai_results
+        application.status = 'EVALUATED'
         application.save()
-        return
 
-    # 3. Call AI Service
-    ai_results = evaluate_candidate_resume(resume_text, job.description)
-
-    # 4. Update Database
-    application.resume_score = ai_results.get('score', 0)
-    # You could also save missing_skills and strengths to a JSONField on the model
-    application.ai_feedback = ai_results
-    application.status = 'EVALUATED'
-    application.save()
-
-    return f"Processed Application {application_id} with score {application.resume_score}"
+        return f"Processed Application {application_id} with score {application.resume_score}"
+    except Exception as exc:
+        # Fallback to update status if possible, then retry
+        try:
+            app = Application.objects.get(id=application_id)
+            app.status = 'ERROR'
+            app.save()
+        except Exception:
+            pass
+        raise self.retry(exc=exc, countdown=60)
 
 
-@shared_task
-def send_status_update_email(application_id, new_status):
+@shared_task(bind=True, max_retries=3)
+def send_status_update_email(self, application_id, new_status):
     try:
         application = Application.objects.get(id=application_id)
         candidate_email = application.candidate.user.email
@@ -61,13 +71,13 @@ def send_status_update_email(application_id, new_status):
         )
         return f"Email sent successfully to {candidate_email}"
 
-    except Exception as e:
-        print(f"Error sending email: {e}")
-        return str(e)
+    except Exception as exc:
+        print(f"Error sending email: {exc}")
+        raise self.retry(exc=exc, countdown=60)
 
 
-@shared_task
-def send_interview_invitation(application_id, interview_datetime, meeting_link):
+@shared_task(bind=True, max_retries=3)
+def send_interview_invitation(self, application_id, interview_datetime, meeting_link):
     try:
         application = Application.objects.get(id=application_id)
         candidate_email = application.candidate.user.email
@@ -99,6 +109,6 @@ AI Recruitment Team
         )
         return f"Interview invite sent to {candidate_email}"
 
-    except Exception as e:
-        print(f"Error sending interview email: {e}")
-        return str(e)
+    except Exception as exc:
+        print(f"Error sending interview email: {exc}")
+        raise self.retry(exc=exc, countdown=60)

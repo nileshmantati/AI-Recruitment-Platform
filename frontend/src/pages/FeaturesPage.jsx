@@ -1,32 +1,29 @@
-import FeaturesHero from '../components/Features/FeaturesHero';
-import ResumeAnalyzerFeature from '../components/Features/ResumeAnalyzerFeature';
-import CandidateMatchingFeature from '../components/Features/CandidateMatchingFeature';
-import AIEvaluationSearchFeature from '../components/Features/AIEvaluationSearchFeature';
-import RecruitmentManagementFeature from '../components/Features/RecruitmentManagementFeature';
-import RecruitmentAnalyticsFeature from '../components/Features/RecruitmentAnalyticsFeature';
-import SecurityReliabilityFeature from '../components/Features/SecurityReliabilityFeature';
-import FeaturesCTA from '../components/Features/FeaturesCTA';
-import { motion } from 'framer-motion';
+import CompactIntro from '../components/Features/CompactIntro';
+import ResumeIntelligence from '../components/Features/ResumeIntelligence';
+import CandidateMatching from '../components/Features/CandidateMatching';
+import EvaluationSearch from '../components/Features/EvaluationSearch';
+import ConnectedWorkflow from '../components/Features/ConnectedWorkflow';
+import RecruiterWorkspace from '../components/Features/RecruiterWorkspace';
+import RecruitmentAnalytics from '../components/Features/RecruitmentAnalytics';
+import CandidateExperience from '../components/Features/CandidateExperience';
+import CompanyProfile from '../components/Features/CompanyProfile';
+import SecurityAccess from '../components/Features/SecurityAccess';
+import FinalWorkflowSummary from '../components/Features/FinalWorkflowSummary';
 
-const FeaturesPage = () => {
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full flex flex-col min-h-screen bg-slate-50"
-        >
-            <FeaturesHero />
-            <ResumeAnalyzerFeature />
-            <CandidateMatchingFeature />
-            <AIEvaluationSearchFeature />
-            <RecruitmentManagementFeature />
-            <RecruitmentAnalyticsFeature />
-            <SecurityReliabilityFeature />
-            <FeaturesCTA />
-        </motion.div>
-    );
-};
-
-export default FeaturesPage;
+export default function FeaturesPage() {
+  return (
+    <div className="w-full min-h-screen bg-slate-50">
+      <CompactIntro />
+      <ResumeIntelligence />
+      <CandidateMatching />
+      <EvaluationSearch />
+      <ConnectedWorkflow />
+      <RecruiterWorkspace />
+      <RecruitmentAnalytics />
+      <CandidateExperience />
+      <CompanyProfile />
+      <SecurityAccess />
+      <FinalWorkflowSummary />
+    </div>
+  );
+}

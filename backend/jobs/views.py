@@ -11,7 +11,7 @@ class JobListCreateView(generics.ListCreateAPIView):
     GET: Lists all active jobs (Available to anyone, even unauthenticated users)
     POST: Creates a new job (Requires JWT Token + RECRUITER role)
     """
-    queryset = Job.objects.filter(is_active=True).annotate(
+    queryset = Job.objects.select_related('recruiter').filter(is_active=True).annotate(
         applicants=Count('applications')).order_by('-created_at')
     serializer_class = JobSerializer
     # Allow read-only for anyone, but require auth for POST
@@ -33,7 +33,7 @@ class JobDetailView(generics.RetrieveUpdateDestroyAPIView):
     PUT/PATCH: Update job (Requires ownership)
     DELETE: Remove job (Requires ownership)
     """
-    queryset = Job.objects.annotate(applicants=Count('applications'))
+    queryset = Job.objects.select_related('recruiter').annotate(applicants=Count('applications'))
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -60,7 +60,7 @@ class MyJobsListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Job.objects.filter(
+        return Job.objects.select_related('recruiter').filter(
             recruiter=self.request.user,
             is_active=True
         ).annotate(applicants=Count('applications')).order_by('-created_at')

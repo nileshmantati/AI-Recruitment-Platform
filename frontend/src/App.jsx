@@ -1,4 +1,4 @@
-// frontend/src/App.jsx
+import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -6,16 +6,23 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster, ToastBar, toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
 
-import Home from './pages/Home';
 import Navigation from './components/Navigation';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ResumeAnalyzer from './pages/ResumeAnalyzer';
 import Footer from './components/Footer';
-import JobsPage from './pages/JobsPage';
-import Dashboard from './pages/Dashboard';
-import NotFoundPage from './pages/NotFoundPage';
-import FeaturesPage from './pages/FeaturesPage';
+
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ResumeAnalyzer = lazy(() => import('./pages/ResumeAnalyzer'));
+const JobsPage = lazy(() => import('./pages/JobsPage'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
+
+const PageLoader = () => (
+  <div className="flex min-h-[60vh] w-full items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600"></div>
+  </div>
+);
 
 const MainLayout = () => (
   <>
@@ -82,24 +89,26 @@ function App() {
           )}
         </Toaster>
         <div className="bg-slate-50 min-h-screen">
-          <Routes>
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/findjobs" element={<JobsPage />} />
-              <Route path="/features" element={<FeaturesPage />} />
-              <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
-            </Route>
-            <Route path="/dashboard/*" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route element={<MainLayout />}>
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route element={<MainLayout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/findjobs" element={<JobsPage />} />
+                <Route path="/features" element={<FeaturesPage />} />
+                <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
+              </Route>
+              <Route path="/dashboard/*" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route element={<MainLayout />}>
+                <Route path="*" element={<NotFoundPage />} />
+              </Route>
+            </Routes>
+          </Suspense>
         </div>
       </Router>
     </AuthProvider>
