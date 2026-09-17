@@ -17,6 +17,8 @@ const JobsPage = lazy(() => import('./pages/JobsPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
+const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'));
+const FAQPage = lazy(() => import('./pages/FAQPage'));
 
 const PageLoader = () => (
   <div className="flex min-h-[60vh] w-full items-center justify-center">
@@ -97,6 +99,8 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/findjobs" element={<JobsPage />} />
                 <Route path="/features" element={<FeaturesPage />} />
+                <Route path="/how-it-works" element={<HowItWorksPage />} />
+                <Route path="/faq" element={<FAQPage />} />
                 <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
               </Route>
               <Route path="/dashboard/*" element={

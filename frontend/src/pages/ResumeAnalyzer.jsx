@@ -8,6 +8,32 @@ import PageHeader, { AnalyzingSpinner } from '../components/ResumeAnalyzer/PageH
 import { glass, glowBorder } from '../components/ResumeAnalyzer/resumeStyles';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FileText,
+  ScanSearch,
+  Sparkles,
+  Brain,
+  ShieldCheck,
+  CheckCircle2,
+  Lightbulb,
+  Zap,
+  TrendingUp,
+  Target,
+  FileCheck2,
+  Lock,
+  Layers,
+} from 'lucide-react';
+
+/* ── Animation variants (reused across Features & How It Works) ── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+};
+
+const stagger = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } },
+};
 
 /* ── sessionStorage key ── */
 const SS_KEY = 'ra_last_result';
@@ -155,16 +181,127 @@ export default function ResumeAnalyzer() {
         <div className="absolute -bottom-20 -left-20 w-[340px] h-[340px] rounded-full blur-[90px]" style={{ background: `${T.secondary}18` }} />
       </div>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
         {/* ── Page header ── */}
-        <PageHeader />
+        <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+          <PageHeader />
+        </motion.div>
 
         <AnimatePresence mode="wait">
-          {/* ── Upload zone ── */}
+          {/* ── Upload state with scrolling animated feature sections ── */}
           {!done && !analyzing && (
-            <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.4 }}>
-              <UploadZone onFile={handleFile} />
+            <motion.div
+              key="upload"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-12"
+            >
+              {/* Upload zone */}
+              <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-40px' }}>
+                <UploadZone onFile={handleFile} />
+              </motion.div>
+
+              {/* ── Section 1: How AI Analysis Works (3-Step Animated Process) ── */}
+              <motion.section
+                variants={stagger}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: '-40px' }}
+                className="space-y-6 pt-4"
+              >
+                <motion.div variants={fadeUp} className="text-center space-y-2">
+                  <div
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                    style={{ background: `${T.primary}16`, color: T.primary }}
+                  >
+                    <Sparkles size={14} /> Evaluation Pipeline
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold" style={{ color: T.onSurface }}>
+                    How Gemini AI Evaluates Your Resume
+                  </h2>
+                  <p className="text-sm sm:text-base max-w-2xl mx-auto" style={{ color: T.onSurfaceVariant }}>
+                    Our neural pipeline inspects every dimension of your resume against competitive industry benchmarks in seconds.
+                  </p>
+                </motion.div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {[
+                    {
+                      step: '01',
+                      icon: ScanSearch,
+                      title: 'Smart Document Parsing',
+                      desc: 'Extracts unstructured text, sections, dates, and roles from PDF, DOCX, and TXT with zero data loss.',
+                      badges: ['Format Agnostic', 'ATS Clean Text', 'Sub-second'],
+                      color: T.primary,
+                    },
+                    {
+                      step: '02',
+                      icon: Brain,
+                      title: 'Competency & Relevancy Matching',
+                      desc: 'Maps hands-on experience and technical depth against current industry standards and target roles.',
+                      badges: ['Gemini 2.5 Flash', 'Semantic Reasoning', '0–100 Scoring'],
+                      color: T.secondary,
+                    },
+                    {
+                      step: '03',
+                      icon: Target,
+                      title: 'Skill Gap & Strategy Audit',
+                      desc: 'Surfaces verified competencies alongside high-value missing skills and tailored action steps.',
+                      badges: ['Gap Detection', 'Action Plan', 'Printable PDF'],
+                      color: '#10B981',
+                    },
+                  ].map((item, idx) => {
+                    const Icon = item.icon;
+                    return (
+                      <motion.div
+                        key={idx}
+                        variants={fadeUp}
+                        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                        className="rounded-3xl p-6 relative overflow-hidden transition-all duration-300"
+                        style={glass}
+                      >
+                        {/* Top step number badge */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div
+                            className="w-11 h-11 rounded-2xl flex items-center justify-center"
+                            style={{ background: `${item.color}18`, color: item.color }}
+                          >
+                            <Icon size={22} />
+                          </div>
+                          <span
+                            className="text-xs font-black px-2.5 py-1 rounded-lg"
+                            style={{ background: `${item.color}15`, color: item.color }}
+                          >
+                            STEP {item.step}
+                          </span>
+                        </div>
+
+                        <h3 className="text-base sm:text-lg font-bold mb-2" style={{ color: T.onSurface }}>
+                          {item.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm leading-relaxed mb-4" style={{ color: T.onSurfaceVariant }}>
+                          {item.desc}
+                        </p>
+
+                        <div className="flex flex-wrap gap-1.5 pt-2 border-t border-slate-200/50">
+                          {item.badges.map((b, bIdx) => (
+                            <span
+                              key={bIdx}
+                              className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
+                              style={{ background: 'rgba(0,0,0,0.04)', color: T.onSurfaceVariant }}
+                            >
+                              {b}
+                            </span>
+                          ))}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.section>
             </motion.div>
           )}
 
@@ -177,51 +314,93 @@ export default function ResumeAnalyzer() {
 
           {/* ══════════ RESULTS ══════════ */}
           {done && result && (
-            <motion.div key="results" className="space-y-5" initial={{ opacity: 0, scale: 0.98, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.5, ease: "easeOut" }}>
+            <motion.div
+              key="results"
+              className="space-y-6"
+              initial={{ opacity: 0, scale: 0.98, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
 
               {/* success badge */}
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                  style={{ background: 'rgba(16,185,129,0.14)', color: '#10B981', border: '1px solid rgba(16,185,129,0.28)' }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                className="flex flex-wrap items-center justify-between gap-2"
+              >
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ background: 'rgba(16,185,129,0.14)', color: '#10B981', border: '1px solid rgba(16,185,129,0.28)' }}
+                >
+                  <CheckCircle2 size={14} />
                   {(file?.name ?? savedFileName ?? 'resume.pdf')} — Analysis Complete
                 </span>
-                <button onClick={handleReset}
+                <button
+                  onClick={handleReset}
                   className="flex-1 sm:flex-none py-2 px-6 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-black hover:text-white transition-all duration-400"
-                  style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0)', color: T.onSurfaceVariant }}>
+                  style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0)', color: T.onSurfaceVariant }}
+                >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
                   </svg>
                   New Analysis
                 </button>
-              </div>
+              </motion.div>
 
-              {/* ── TOP ROW: 4 stat cards ── */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* ── TOP ROW: 4 stat cards with scroll and hover micro-animations ── */}
+              <motion.div
+                variants={stagger}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: '-30px' }}
+                className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4"
+              >
                 {/* AI Score */}
-                <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 hover:scale-105 transition-all duration-200" style={glowBorder(T.primary, T.secondary)}>
+                <motion.div
+                  variants={fadeUp}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 transition-shadow duration-200"
+                  style={glowBorder(T.primary, T.secondary)}
+                >
                   <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>AI Score</span>
                   <ScoreRing score={result.ai_score} size={72} />
-                </div>
+                </motion.div>
                 {/* Match % */}
-                <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-all duration-200" style={glass}>
+                <motion.div
+                  variants={fadeUp}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 transition-shadow duration-200"
+                  style={glass}
+                >
                   <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>Match %</span>
                   <span className="text-3xl sm:text-4xl font-bold" style={{ color: T.secondary }}>{result.match_percentage}%</span>
                   <span className="text-[10px] text-center leading-tight" style={{ color: T.onSurfaceVariant }}>{result.job_role}</span>
-                </div>
+                </motion.div>
                 {/* Experience */}
-                <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-all duration-200" style={glass}>
+                <motion.div
+                  variants={fadeUp}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 transition-shadow duration-200"
+                  style={glass}
+                >
                   <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>Experience</span>
                   <span className="text-3xl sm:text-4xl font-bold" style={{ color: T.primary }}>{result.experience_relevancy}%</span>
                   <span className="text-[10px]" style={{ color: T.onSurfaceVariant }}>{relevTag(result.experience_relevancy)}</span>
-                </div>
+                </motion.div>
                 {/* Skills owned */}
-                <div className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-all duration-200" style={glass}>
+                <motion.div
+                  variants={fadeUp}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-1 transition-shadow duration-200"
+                  style={glass}
+                >
                   <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.onSurfaceVariant }}>Skills Found</span>
                   <span className="text-3xl sm:text-4xl font-bold" style={{ color: T.onSurface }}>{result.owned_skills?.length ?? 0}</span>
                   <span className="text-[10px]" style={{ color: T.onSurfaceVariant }}>{result.missing_skills?.length ?? 0} gaps</span>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
               {/* ── MAIN 2-col layout (stack on mobile) ── */}
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
@@ -230,7 +409,14 @@ export default function ResumeAnalyzer() {
                 <div className="lg:col-span-3 space-y-5">
 
                   {/* AI Insights */}
-                  <div className="rounded-2xl p-5 sm:p-6 space-y-4" style={glass}>
+                  <motion.div
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, margin: '-30px' }}
+                    className="rounded-2xl p-5 sm:p-6 space-y-4"
+                    style={glass}
+                  >
                     <div className="flex items-center gap-2">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill={T.primary} stroke="none">
                         <path d="M12 2l2.09 6.26L20.18 9l-5 3.64L16.82 19 12 15.77 7.18 19l1.64-6.36-5-3.64 6.09-.74z" />
@@ -268,10 +454,17 @@ export default function ResumeAnalyzer() {
                         ))}
                       </div>
                     )}
-                  </div>
+                  </motion.div>
 
                   {/* Skills Gap */}
-                  <div className="rounded-2xl p-5 sm:p-6 space-y-4" style={glass}>
+                  <motion.div
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, margin: '-30px' }}
+                    className="rounded-2xl p-5 sm:p-6 space-y-4"
+                    style={glass}
+                  >
                     <h2 className="text-base sm:text-lg font-bold" style={{ color: T.onSurface }}>Skills Gap</h2>
                     <div className="flex flex-wrap gap-2">
                       {result.owned_skills?.map(s => <SkillPill key={s} name={s} owned />)}
@@ -282,10 +475,17 @@ export default function ResumeAnalyzer() {
                         💡 Acquiring <strong>{result.missing_skills[0]}</strong> could significantly boost your score.
                       </p>
                     )}
-                  </div>
+                  </motion.div>
 
                   {/* AI Strategy */}
-                  <div className="rounded-2xl p-5 sm:p-6 space-y-4" style={{ background: T.primary, boxShadow: `0 16px 48px -8px ${T.primary}66` }}>
+                  <motion.div
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, margin: '-30px' }}
+                    className="rounded-2xl p-5 sm:p-6 space-y-4"
+                    style={{ background: T.primary, boxShadow: `0 16px 48px -8px ${T.primary}66` }}
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)' }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="white" stroke="none">
@@ -302,14 +502,21 @@ export default function ResumeAnalyzer() {
                     >
                       Apply AI Suggestions
                     </button>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* RIGHT column — 2/5 */}
                 <div className="lg:col-span-2 space-y-5">
 
                   {/* Resume Preview */}
-                  <div className="rounded-2xl p-5 space-y-3" style={glass}>
+                  <motion.div
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, margin: '-30px' }}
+                    className="rounded-2xl p-5 space-y-3"
+                    style={glass}
+                  >
                     <div className="flex items-center justify-between">
                       <h2 className="text-base font-bold" style={{ color: T.onSurface }}>Resume Preview</h2>
                       {previewUrl && (
@@ -359,10 +566,16 @@ export default function ResumeAnalyzer() {
                         </a>
                       </div>
                     )}
-                  </div>
+                  </motion.div>
 
                   {/* Action buttons */}
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <motion.div
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, margin: '-30px' }}
+                    className="flex flex-col sm:flex-row gap-3"
+                  >
                     <PrimaryButton
                       onClick={handleDownloadReport}
                       className="flex-1 py-3 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-2"
@@ -372,7 +585,7 @@ export default function ResumeAnalyzer() {
                       </svg>
                       Download Report
                     </PrimaryButton>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>

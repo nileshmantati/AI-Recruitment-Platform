@@ -1,29 +1,23 @@
 import CompactIntro from '../components/Features/CompactIntro';
-import ResumeIntelligence from '../components/Features/ResumeIntelligence';
-import CandidateMatching from '../components/Features/CandidateMatching';
-import EvaluationSearch from '../components/Features/EvaluationSearch';
-import ConnectedWorkflow from '../components/Features/ConnectedWorkflow';
+import AIEngine from '../components/Features/AIEngine';
 import RecruiterWorkspace from '../components/Features/RecruiterWorkspace';
-import RecruitmentAnalytics from '../components/Features/RecruitmentAnalytics';
-import CandidateExperience from '../components/Features/CandidateExperience';
 import CompanyProfile from '../components/Features/CompanyProfile';
+import CandidateExperience from '../components/Features/CandidateExperience';
+import StandaloneTools from '../components/Features/StandaloneTools';
 import SecurityAccess from '../components/Features/SecurityAccess';
-import FinalWorkflowSummary from '../components/Features/FinalWorkflowSummary';
+import ProcessCTA from '../components/Features/ProcessCTA';
 
 export default function FeaturesPage() {
   return (
     <div className="w-full min-h-screen bg-slate-50">
       <CompactIntro />
-      <ResumeIntelligence />
-      <CandidateMatching />
-      <EvaluationSearch />
-      <ConnectedWorkflow />
+      <AIEngine />
       <RecruiterWorkspace />
-      <RecruitmentAnalytics />
-      <CandidateExperience />
       <CompanyProfile />
+      <CandidateExperience />
+      <StandaloneTools />
       <SecurityAccess />
-      <FinalWorkflowSummary />
+      <ProcessCTA />
     </div>
   );
 }

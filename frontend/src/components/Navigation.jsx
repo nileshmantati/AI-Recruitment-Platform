@@ -24,8 +24,8 @@ const Navigation = () => {
         { name: "Home", path: "/" },
         { name: "Resume Analyzer", path: "/resume-analyzer" },
         { name: "Features", path: "/features" },
-        { name: "How it Works", path: "#" },
-        { name: "FAQ", path: "#" },
+        { name: "How it Works", path: "/how-it-works" },
+        { name: "FAQ", path: "/faq" },
     ];
 
     useEffect(() => {
