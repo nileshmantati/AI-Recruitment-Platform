@@ -1,50 +1,73 @@
-version: '3.8'
-
 services:
   redis:
     image: redis:7-alpine
+    container_name: ai_recruiter_redis
+    restart: unless-stopped
     ports:
-      # Expose Redis port (optional, useful for debugging)
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: ai_recruiter_backend
+    restart: unless-stopped
     command: python manage.py runserver 0.0.0.0:8000
     ports:
-      # Expose Django port to the host
       - "8000:8000"
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - ./backend/.env
     volumes:
-      # Mount the backend directory to allow hot-reloading and accessing the sqlite db
       - ./backend:/app
+      - media_data:/app/media
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
 
   celery:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: celery -A backend worker -l info
+    container_name: ai_recruiter_celery
+    restart: unless-stopped
+    command: celery -A backend worker -l INFO
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - ./backend/.env
     volumes:
       - ./backend:/app
+      - media_data:/app/media
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: ai_recruiter_frontend
+    restart: unless-stopped
     ports:
       - "5173:5173"
-    volumes:
-      # Mount the frontend directory to allow hot-reloading
-      - ./frontend:/app
-      # Exclude node_modules from being overwritten by the host directory
-      - /app/node_modules
     environment:
       - VITE_API_BASE_URL=http://localhost:8000/api/
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  media_data:

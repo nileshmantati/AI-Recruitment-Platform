@@ -2,17 +2,17 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package files first for optimal Docker caching
 COPY package*.json ./
 
-# Install dependencies
+# Clean install dependencies
 RUN npm install
 
-# Copy the rest of the frontend source code
+# Copy source files
 COPY . .
 
-# Expose Vite's default dev port
+# Expose Vite dev port
 EXPOSE 5173
 
-# Start the Vite dev server
-CMD ["npm", "run", "dev", "--", "--host"]
+# Start Vite with 0.0.0.0 host binding so it is accessible outside container
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
