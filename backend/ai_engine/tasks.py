@@ -41,7 +41,9 @@ def process_resume_scoring(self, application_id):
             app.save()
         except Exception:
             pass
-        raise self.retry(exc=exc, countdown=60)
+        if getattr(self.request, 'id', None):
+            raise self.retry(exc=exc, countdown=60)
+        raise exc
 
 
 @shared_task(bind=True, max_retries=3)
@@ -49,6 +51,8 @@ def send_status_update_email(self, application_id, new_status):
     try:
         application = Application.objects.get(id=application_id)
         candidate_email = application.candidate.user.email
+        if not candidate_email:
+            return f"Application {application_id} candidate has no email, skipping status notification."
         candidate_name = application.candidate.first_name or application.candidate.user.username or "Candidate"
         job_title = application.job.title
 
@@ -73,7 +77,9 @@ def send_status_update_email(self, application_id, new_status):
 
     except Exception as exc:
         print(f"Error sending email: {exc}")
-        raise self.retry(exc=exc, countdown=60)
+        if getattr(self.request, 'id', None):
+            raise self.retry(exc=exc, countdown=60)
+        raise exc
 
 
 @shared_task(bind=True, max_retries=3)
@@ -81,6 +87,8 @@ def send_interview_invitation(self, application_id, interview_datetime, meeting_
     try:
         application = Application.objects.get(id=application_id)
         candidate_email = application.candidate.user.email
+        if not candidate_email:
+            return f"Application {application_id} candidate has no email, skipping interview invitation."
         job_title = application.job.title
         candidate_name = application.candidate.first_name or application.candidate.user.username or "Candidate"
 
@@ -111,4 +119,6 @@ AI Recruitment Team
 
     except Exception as exc:
         print(f"Error sending interview email: {exc}")
-        raise self.retry(exc=exc, countdown=60)
+        if getattr(self.request, 'id', None):
+            raise self.retry(exc=exc, countdown=60)
+        raise exc

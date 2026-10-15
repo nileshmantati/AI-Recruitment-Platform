@@ -20,9 +20,11 @@ const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
 const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 
+
 const PageLoader = () => (
-  <div className="flex min-h-[60vh] w-full items-center justify-center">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600"></div>
+  <div className="flex min-h-[90vh] w-full flex-col items-center justify-center gap-2">
+    <div className="h-11 w-11 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600"></div>
+    <p className="text-lg text-slate-600">Loading...</p>
   </div>
 );
 

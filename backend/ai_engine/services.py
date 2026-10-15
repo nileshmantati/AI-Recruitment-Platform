@@ -216,3 +216,137 @@ def generate_interview_questions(job_title, job_description, candidate_feedback)
     except Exception as e:
         print(f"Error generating questions: {e}")
         return {"questions": ["Could not generate questions at this time. Please try again later."]}
+
+
+def generate_mock_interview_questions(role: str, experience_level: str = "Mid-Level", interview_type: str = "technical") -> dict:
+    """
+    Generates 4 tailored mock interview questions with hints and expected focus areas.
+    """
+    model = genai.GenerativeModel('gemini-2.5-flash')
+
+    prompt = f"""
+    You are an elite hiring manager conducting a mock interview for the role of "{role}" ({experience_level} level, {interview_type} focus).
+    Generate 4 realistic, high-impact interview questions.
+    
+    You must respond ONLY with a valid JSON object matching this exact schema:
+    {{
+      "role": "{role}",
+      "interview_type": "{interview_type}",
+      "questions": [
+        {{
+          "id": 1,
+          "question": "Clear and realistic question...",
+          "category": "Architecture / Coding / Problem Solving / Behavioral",
+          "hint": "Brief hint on what good candidates focus on...",
+          "expected_keywords": ["keyword1", "keyword2", "keyword3"]
+        }}
+      ]
+    }}
+    """
+
+    try:
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.GenerationConfig(
+                response_mime_type="application/json"
+            )
+        )
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"Error generating mock interview questions: {e}")
+        return {
+            "role": role,
+            "interview_type": interview_type,
+            "questions": [
+                {
+                    "id": 1,
+                    "question": f"Can you explain your approach and core tools when building solutions for a {role} role?",
+                    "category": "Core Knowledge",
+                    "hint": "Explain practical experience, challenges faced, and trade-offs made.",
+                    "expected_keywords": ["architecture", "best practices", "scalability"]
+                },
+                {
+                    "id": 2,
+                    "question": "Describe a difficult bug or complex challenge you solved in a previous project. What was your debugging methodology?",
+                    "category": "Problem Solving",
+                    "hint": "Use the STAR framework (Situation, Task, Action, Result).",
+                    "expected_keywords": ["root cause", "testing", "resolution"]
+                },
+                {
+                    "id": 3,
+                    "question": "How do you ensure security, performance, and code quality in your daily workflow?",
+                    "category": "Best Practices",
+                    "hint": "Mention code reviews, automated CI/CD, and monitoring.",
+                    "expected_keywords": ["CI/CD", "code review", "optimization"]
+                },
+                {
+                    "id": 4,
+                    "question": "Tell me about a time you had to align with stakeholders or team members who had conflicting technical priorities.",
+                    "category": "Collaboration",
+                    "hint": "Focus on communication, empathy, and data-driven decisions.",
+                    "expected_keywords": ["communication", "consensus", "impact"]
+                }
+            ]
+        }
+
+
+def evaluate_mock_interview_answer(question: str, answer: str, role: str, interview_type: str = 'technical') -> dict:
+    """
+    Evaluates a candidate's answer to a mock interview question.
+    """
+    model = genai.GenerativeModel('gemini-2.5-flash')
+
+    prompt = f"""
+    You are an expert interviewer evaluating a candidate for the role of "{role}" in a {interview_type} interview.
+    
+    Question:
+    {question}
+    
+    Candidate Answer:
+    {answer}
+    
+    Evaluate the response thoroughly and objectively.
+    You must respond ONLY with a valid JSON object matching this exact schema:
+    {{
+      "score": <integer 0-100>,
+      "clarity_score": <integer 0-100>,
+      "technical_depth_score": <integer 0-100>,
+      "verdict": "<'Excellent' | 'Good' | 'Needs Improvement'>",
+      "strengths": [
+        "<one key positive point of the answer>",
+        "<second positive point if applicable>"
+      ],
+      "improvements": [
+        "<concrete recommendation to improve>",
+        "<specific concept or keyword they should have mentioned>"
+      ],
+      "sample_ideal_answer": "<2-4 sentences providing a model answer a top candidate would give>"
+    }}
+    """
+
+    try:
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.GenerationConfig(
+                response_mime_type="application/json"
+            )
+        )
+        data = json.loads(response.text)
+        data["score"] = max(0, min(100, int(data.get("score", 70))))
+        data["clarity_score"] = max(0, min(100, int(data.get("clarity_score", 70))))
+        data["technical_depth_score"] = max(0, min(100, int(data.get("technical_depth_score", 70))))
+        return data
+    except Exception as e:
+        print(f"Error evaluating mock interview answer: {e}")
+        word_count = len(answer.split())
+        est_score = min(85, max(45, word_count * 2))
+        return {
+            "score": est_score,
+            "clarity_score": est_score,
+            "technical_depth_score": est_score,
+            "verdict": "Good" if est_score >= 65 else "Needs Improvement",
+            "strengths": ["You provided a clear response and addressed the question."],
+            "improvements": ["Try to provide more concrete examples and quantitative metrics to back your claims."],
+            "sample_ideal_answer": "A top-tier answer addresses the core concept directly, gives a specific production scenario using the STAR framework, and mentions performance and trade-offs."
+        }
+

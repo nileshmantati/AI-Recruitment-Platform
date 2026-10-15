@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.db.models import Q
 from .models import User, CandidateProfile, RecruiterProfile
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -78,13 +79,39 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     role = serializers.CharField(write_only=True, required=False)
 
     def validate(self, attrs):
+        # Allow case-insensitive login with either username or email
+        username_or_email = attrs.get(self.username_field, '').strip()
+        matched_user = None
+        if username_or_email:
+            matched_user = User.objects.filter(
+                Q(username__iexact=username_or_email) | Q(email__iexact=username_or_email)
+            ).first()
+            if matched_user:
+                attrs[self.username_field] = matched_user.username
+
         provided_role = attrs.get('role')
-        data = super().validate(attrs)
+
+        try:
+            data = super().validate(attrs)
+        except AuthenticationFailed as exc:
+            if matched_user:
+                if not matched_user.is_active:
+                    raise AuthenticationFailed("This account has been deactivated. Please contact support.")
+                if not matched_user.check_password(attrs.get('password')):
+                    raise AuthenticationFailed(
+                        f"Incorrect password for user '{matched_user.username}'. Please check your password or reset it."
+                    )
+            else:
+                raise AuthenticationFailed(
+                    f"No account found with username or email '{username_or_email}'. Please register or check your spelling."
+                )
+            raise exc
 
         # Enforce that the role selected on the frontend matches the user's actual role
         if provided_role and self.user.role != provided_role:
             raise AuthenticationFailed(
-                "Invalid role selected. Please select your correct role to log in.")
+                f"Invalid role selected. This account is registered as a {self.user.role.title()}. Please switch to the {self.user.role.title()} tab to log in."
+            )
 
         # Add extra fields to the response (not the token itself)
         data['role'] = self.user.role

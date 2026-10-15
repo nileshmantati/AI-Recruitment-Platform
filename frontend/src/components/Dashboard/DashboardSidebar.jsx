@@ -29,6 +29,7 @@ const CandidateSidebarItems = [
     { icon: FileText, label: "Applications" },
     { icon: Bookmark, label: "Saved Jobs" },
     { icon: Sparkles, label: "Resume AI" },
+    { icon: Bot, label: "AI Mock Interview" },
     { icon: Activity, label: "Activity" },
     { icon: Calendar, label: "Interviews" },
     { icon: Settings, label: "Settings" },

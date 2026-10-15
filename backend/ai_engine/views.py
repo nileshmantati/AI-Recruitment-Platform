@@ -6,7 +6,12 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from .services import extract_text_from_file, analyze_resume_standalone
+from .services import (
+    extract_text_from_file,
+    analyze_resume_standalone,
+    generate_mock_interview_questions,
+    evaluate_mock_interview_answer
+)
 from .models import ResumeAnalysis
 
 
@@ -79,3 +84,41 @@ def analyze_resume(request):
             os.unlink(tmp_path)
         except OSError:
             pass
+
+
+@api_view(['POST'])
+def generate_mock_questions(request):
+    """
+    POST /api/ai/mock-interview/generate-questions/
+    Payload: { "role": str, "experience_level": str, "interview_type": str }
+    """
+    role = request.data.get('role', '').strip()
+    if not role:
+        return JsonResponse({'error': 'Role title is required.'}, status=400)
+
+    experience_level = request.data.get('experience_level', 'Mid-Level')
+    interview_type = request.data.get('interview_type', 'technical')
+
+    result = generate_mock_interview_questions(role, experience_level, interview_type)
+    return JsonResponse(result, status=200)
+
+
+@api_view(['POST'])
+def evaluate_mock_answer(request):
+    """
+    POST /api/ai/mock-interview/evaluate-answer/
+    Payload: { "question": str, "answer": str, "role": str }
+    """
+    question = request.data.get('question', '').strip()
+    answer = request.data.get('answer', '').strip()
+    role = request.data.get('role', 'Candidate').strip()
+    interview_type = request.data.get('interview_type', 'technical').strip()
+
+    if not question:
+        return JsonResponse({'error': 'Question is required.'}, status=400)
+    if not answer:
+        return JsonResponse({'error': 'Please provide an answer.'}, status=400)
+
+    evaluation = evaluate_mock_interview_answer(question, answer, role, interview_type)
+    return JsonResponse(evaluation, status=200)
+

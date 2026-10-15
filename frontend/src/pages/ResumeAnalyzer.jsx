@@ -9,19 +9,11 @@ import { glass, glowBorder } from '../components/ResumeAnalyzer/resumeStyles';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FileText,
   ScanSearch,
   Sparkles,
   Brain,
-  ShieldCheck,
   CheckCircle2,
-  Lightbulb,
-  Zap,
-  TrendingUp,
   Target,
-  FileCheck2,
-  Lock,
-  Layers,
 } from 'lucide-react';
 
 /* ── Animation variants (reused across Features & How It Works) ── */

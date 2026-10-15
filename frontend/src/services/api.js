@@ -97,4 +97,61 @@ export const analyzeResume = async (file) => {
     return response.data;
 };
 
+/**
+ * Generate 4 tailored mock interview questions for a specific role and format.
+ */
+export const generateMockQuestions = async (role, experienceLevel = 'Mid-Level', interviewType = 'technical') => {
+    const response = await api.post('ai/mock-interview/generate-questions/', {
+        role,
+        experience_level: experienceLevel,
+        interview_type: interviewType,
+    });
+    return response.data;
+};
+
+/**
+ * Evaluates candidate answer to an interview question using Gemini AI.
+ */
+export const evaluateMockAnswer = async (question, answer, role) => {
+    const response = await api.post('ai/mock-interview/evaluate-answer/', {
+        question,
+        answer,
+        role,
+    });
+    return response.data;
+};
+
+/**
+ * Requests a 6-digit password reset OTP sent to the user's email.
+ */
+export const requestPasswordResetOTP = async (usernameOrEmail) => {
+    const response = await api.post('users/forgot-password/', {
+        username_or_email: usernameOrEmail,
+    });
+    return response.data;
+};
+
+/**
+ * Verifies the 6-digit password reset OTP.
+ */
+export const verifyPasswordResetOTP = async (usernameOrEmail, otp) => {
+    const response = await api.post('users/verify-reset-otp/', {
+        username_or_email: usernameOrEmail,
+        otp,
+    });
+    return response.data;
+};
+
+/**
+ * Resets user password using verified OTP.
+ */
+export const resetPassword = async (usernameOrEmail, otp, newPassword) => {
+    const response = await api.post('users/reset-password/', {
+        username_or_email: usernameOrEmail,
+        otp,
+        new_password: newPassword,
+    });
+    return response.data;
+};
+
 export default api;

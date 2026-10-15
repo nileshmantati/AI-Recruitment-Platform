@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Video, Clock, Search, Briefcase, CheckCircle, AlertCircle, User } from 'lucide-react';
+import { Calendar, Video, Clock, Search, Briefcase, CheckCircle, AlertCircle, User, Sparkles, Bot, ArrowRight } from 'lucide-react';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
 import { T } from '../../../Js/theme';
 import { KpiCard } from '../../../ui/DashboardUI';
+import MockInterviewCoach from '../../Interview/MockInterviewCoach.jsx';
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
@@ -19,11 +20,13 @@ const TIPS = [
     { icon: '💡', tip: 'Review your resume and be ready to discuss every point on it.' },
 ];
 
-const CandidateInterviewsPage = () => {
+const CandidateInterviewsPage = ({ openMockImmediately = false }) => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [now] = useState(() => Date.now());
+    const [mockCoachOpen, setMockCoachOpen] = useState(openMockImmediately);
+    const [mockInitialRole, setMockInitialRole] = useState('');
 
     useEffect(() => {
         (async () => {
@@ -76,6 +79,52 @@ const CandidateInterviewsPage = () => {
                 </div>
             </motion.div>
 
+            {/* AI Mock Interview Coach Banner */}
+            <motion.div variants={fadeUp} className="relative overflow-hidden rounded-3xl border border-indigo-100 shadow-md p-6 sm:p-7"
+                style={{
+                    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(6, 182, 212, 0.08) 50%, rgba(244, 63, 94, 0.03) 100%)',
+                }}
+            >
+                <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+                <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="space-y-2 max-w-2xl">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-indigo-600 text-white shadow-sm">
+                            <Sparkles size={13} className="text-amber-300" />
+                            AI-Powered Interview Simulation
+                        </div>
+                        <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                            AI Mock Interview Coach
+                        </h2>
+                        <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
+                            Practice real-time technical, system design, and behavioral questions. Answer using voice or typing, hear questions read aloud, and get instant 0-100 scoring with expert model answers.
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-600 font-semibold">
+                            <span className="flex items-center gap-1 text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg">
+                                <CheckCircle size={13} /> Voice & Audio TTS
+                            </span>
+                            <span className="flex items-center gap-1 text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg">
+                                <CheckCircle size={13} /> Real-time Scoring
+                            </span>
+                            <span className="flex items-center gap-1 text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg">
+                                <CheckCircle size={13} /> Model Staff Answers
+                            </span>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => {
+                            setMockInitialRole('');
+                            setMockCoachOpen(true);
+                        }}
+                        className="inline-flex items-center gap-2.5 px-5 py-3.5 rounded-2xl text-white font-extrabold text-sm sm:text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shrink-0"
+                        style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
+                    >
+                        <Bot size={20} />
+                        Start Mock Interview
+                        <ArrowRight size={18} />
+                    </button>
+                </div>
+            </motion.div>
+
             {/* Stats */}
             <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
@@ -97,7 +146,7 @@ const CandidateInterviewsPage = () => {
             {/* Interviews List */}
             <motion.div variants={container} className="space-y-4">
                 {filtered.length === 0 ? (
-                    <motion.div variants={fadeUp} className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-20 text-center">
+                    <motion.div variants={fadeUp} className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-16 text-center">
                         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: `${T.primary}10` }}>
                             <Calendar size={28} style={{ color: T.primary }} />
                         </div>
@@ -105,6 +154,17 @@ const CandidateInterviewsPage = () => {
                         <p className="mt-2 max-w-sm text-sm sm:text-base text-slate-500">
                             {search ? 'Try a different search.' : 'When a recruiter shortlists you and schedules an interview, it will appear here.'}
                         </p>
+                        <button
+                            onClick={() => {
+                                setMockInitialRole('');
+                                setMockCoachOpen(true);
+                            }}
+                            className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-bold text-sm shadow-sm hover:shadow transition-all"
+                            style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
+                        >
+                            <Bot size={16} />
+                            Practice with AI Coach Anyway
+                        </button>
                     </motion.div>
                 ) : filtered.map(app => (
                     <motion.div key={app.id} variants={fadeUp}
@@ -134,9 +194,19 @@ const CandidateInterviewsPage = () => {
                                     <span className="flex items-center gap-1"><User size={13} />Recruiter: {app.recruiter_name || 'Hiring Team'}</span>
                                 </div>
                             </div>
-                            {/* Mode badge */}
-                            <div className="flex flex-col items-end gap-2 shrink-0">
-                                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs sm:text-sm font-bold text-indigo-700">
+                            {/* Mode badge & Practice action */}
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 shrink-0">
+                                <button
+                                    onClick={() => {
+                                        setMockInitialRole(app.job_details?.title || '');
+                                        setMockCoachOpen(true);
+                                    }}
+                                    className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 px-3 py-1.5 text-xs sm:text-sm font-bold text-indigo-700 transition-colors cursor-pointer shadow-xs"
+                                    title="Practice an AI mock interview tailored for this role"
+                                >
+                                    <Sparkles size={13} /> Practice for this Role
+                                </button>
+                                <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 border border-slate-200 px-3 py-1 text-xs sm:text-sm font-semibold text-slate-600">
                                     <Video size={13} /> Video Call
                                 </span>
                             </div>
@@ -168,6 +238,13 @@ const CandidateInterviewsPage = () => {
                     ))}
                 </div>
             </motion.div>
+
+            {/* AI Mock Interview Coach Modal */}
+            <MockInterviewCoach
+                isOpen={mockCoachOpen}
+                onClose={() => setMockCoachOpen(false)}
+                initialRole={mockInitialRole}
+            />
         </motion.main>
     );
 };

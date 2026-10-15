@@ -30,7 +30,7 @@ const Dashboard = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
-    const [role] = useState(auth.role.toLowerCase());
+    const role = auth?.role ? auth.role.toLowerCase() : '';
 
     // Onboarding state for recruiters
     const [isProfileCompleted, setIsProfileCompleted] = useState(() => {
@@ -149,6 +149,7 @@ const Dashboard = () => {
         if (active === "Applications") return <CandidateApplicationsPage />;
         if (active === "Saved Jobs") return <CandidateSavedJobsPage />;
         if (active === "Resume AI") return <CandidateResumeAIPage />;
+        if (active === "AI Mock Interview" || active === "Mock Interview") return <CandidateInterviewsPage openMockImmediately={true} />;
         if (active === "Activity") return <CandidateActivityPage />;
         if (active === "Interviews" || active === "Interview") return <CandidateInterviewsPage />;
         if (active === "Settings") return <CandidateSettingsPage />;
