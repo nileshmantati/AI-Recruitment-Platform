@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import Q
 from django.core.mail import send_mail
 from django.conf import settings
-from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -103,7 +102,7 @@ class RegisterView(APIView):
             message = (
                 f"Verification code sent! Please check {mask_email(unverified_user.email)} to verify your account."
                 if email_sent else
-                f"Account updated! However, email delivery failed. Please click 'Resend code' to retry."
+                "Account updated! However, email delivery failed. Please click 'Resend code' to retry."
             )
 
             return Response({
@@ -129,7 +128,7 @@ class RegisterView(APIView):
         message = (
             f"Account created! A 6-digit verification code has been sent to {mask_email(user.email)}."
             if email_sent else
-            f"Account created! However, email delivery failed. Please click 'Resend code' on the verification page."
+            "Account created! However, email delivery failed. Please click 'Resend code' on the verification page."
         )
 
         return Response({

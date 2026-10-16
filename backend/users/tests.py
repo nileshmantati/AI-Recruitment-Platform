@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password
 from users.models import User, EmailVerificationOTP
 
 
@@ -40,7 +40,7 @@ class EmailVerificationTests(APITestCase):
 
     def test_02_unverified_user_cannot_login(self):
         """Unverified user cannot obtain JWT tokens."""
-        user = User.objects.create_user(
+        User.objects.create_user(
             username='unverified_user',
             email='unverified@test.com',
             password='Password123!',
@@ -131,7 +131,7 @@ class EmailVerificationTests(APITestCase):
             role='CANDIDATE',
             is_email_verified=False
         )
-        otp_record = EmailVerificationOTP.objects.create(
+        EmailVerificationOTP.objects.create(
             user=user,
             otp_hash=make_password('654321'),
             expires_at=timezone.now() + timedelta(minutes=5),

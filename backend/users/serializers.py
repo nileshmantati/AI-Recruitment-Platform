@@ -109,7 +109,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         try:
             data = super().validate(attrs)
-        except AuthenticationFailed as exc:
+        except AuthenticationFailed:
             if matched_user and not matched_user.is_active and matched_user.check_password(attrs.get('password')):
                 raise AuthenticationFailed("This account has been deactivated. Please contact support.")
             raise AuthenticationFailed("Invalid username, email, or password. Please check your credentials.")
