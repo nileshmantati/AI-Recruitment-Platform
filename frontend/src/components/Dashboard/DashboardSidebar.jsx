@@ -182,7 +182,7 @@ const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive, role }) 
             </nav>
 
             <div className="border-t border-slate-100 p-3">
-                <button onClick={() => logout(navigate('/login'))} className="flex w-full items-center gap-3 !rounded-xl px-3 py-2.5 text-md font-medium text-slate-600 hover:bg-slate-50">
+                <button onClick={() => logout(navigate('/login'))} className="flex w-full items-center gap-3 !rounded-xl cursor-pointer px-3 py-2.5 text-md font-medium text-slate-600 hover:bg-slate-50">
                     <LogOut size={18} className="shrink-0" />
                     {!collapsed && <span className="truncate">Logout</span>}
                 </button>

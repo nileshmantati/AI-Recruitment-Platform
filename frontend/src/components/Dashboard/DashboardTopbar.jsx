@@ -28,10 +28,10 @@ const DashboardTopbar = ({ role }) => {
                 </button> */}
                 <div className="flex items-center gap-2 pl-2">
                     <button
-                        className="mb-1 me-3 flex items-center border border-slate-400 hover:border-slate-400! text-white gap-3 rounded-xl! px-4 py-2.5 text-md font-medium transition-all shadow-md"
+                        className="mb-1 me-3 flex items-center border border-slate-400 hover:border-slate-400! text-white gap-3 rounded-xl! px-4 py-2.5 text-md font-medium transition-all shadow-md cursor-pointer"
                         style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
                         onClick={() => navigate("/")}
-                    ><span>Home</span>
+                    >Home
                     </button>
                     <div className="flex h-10 w-10 items-center justify-center rounded-full text-md font-bold text-white" style={{ background: T.primary }}>{getInitials(auth.username)}</div>
                     <div className="hidden sm:block">

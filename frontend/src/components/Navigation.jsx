@@ -140,7 +140,7 @@ const Navigation = () => {
                             </button>
                         </>
                     ) : (
-                        <PrimaryButton className="px-4 py-2.5 text-sm rounded-xl whitespace-nowrap" onClick={() => navigate("/login")}>
+                        <PrimaryButton className="px-4 py-2.5 text-sm rounded-xl whitespace-nowrap cursor-pointer" onClick={() => navigate("/login")}>
                             Log in <ArrowRight size={16} />
                         </PrimaryButton>
                     )}
