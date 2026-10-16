@@ -12,6 +12,7 @@ import Footer from './components/Footer';
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const ResumeAnalyzer = lazy(() => import('./pages/ResumeAnalyzer'));
 const JobsPage = lazy(() => import('./pages/JobsPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -99,6 +100,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/findjobs" element={<JobsPage />} />
                 <Route path="/features" element={<FeaturesPage />} />
                 <Route path="/how-it-works" element={<HowItWorksPage />} />

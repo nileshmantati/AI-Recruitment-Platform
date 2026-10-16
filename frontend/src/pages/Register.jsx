@@ -60,9 +60,15 @@ const Register = () => {
 
     const onSubmit = async (data) => {
         try {
-            await api.post('users/register/', data);
-            toast.success('Registration successful! Please log in.');
-            navigate('/login');
+            const res = await api.post('users/register/', data);
+            toast.success(res.data?.message || 'Verification code sent! Please check your email.');
+            navigate('/verify-email', {
+                state: {
+                    email: data.email,
+                    username: data.username,
+                    role: data.role
+                }
+            });
         } catch (err) {
             console.error("Registration error:", err);
 

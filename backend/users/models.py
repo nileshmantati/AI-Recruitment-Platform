@@ -11,6 +11,7 @@ class User(AbstractUser):
 
     role = models.CharField(
         max_length=20, choices=Role.choices, default=Role.CANDIDATE)
+    is_email_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.username} - {self.role}"
@@ -18,6 +19,7 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         if self.is_superuser:
             self.role = self.Role.ADMIN
+            self.is_email_verified = True
         super().save(*args, **kwargs)
 
 
@@ -73,4 +75,30 @@ class PasswordResetOTP(models.Model):
 
     def __str__(self):
         return f"Reset OTP for {self.user.username} ({self.otp})"
+
+
+class EmailVerificationOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_verification_otps')
+    otp_hash = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempts = models.IntegerField(default=0)
+    is_used = models.BooleanField(default=False)
+
+    def is_expired(self):
+        from django.utils import timezone
+        return timezone.now() > self.expires_at
+
+    def is_valid(self):
+        return not self.is_used and not self.is_expired() and self.attempts < 5
+
+    def verify(self, plain_otp):
+        from django.contrib.auth.hashers import check_password
+        if not self.is_valid():
+            return False
+        return check_password(plain_otp, self.otp_hash)
+
+    def __str__(self):
+        return f"Email Verification OTP for {self.user.username} (Used: {self.is_used}, Attempts: {self.attempts})"
+
 

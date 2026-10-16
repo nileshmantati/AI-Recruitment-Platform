@@ -6,9 +6,18 @@ from rest_framework.exceptions import AuthenticationFailed
 
 
 class UserSerializer(serializers.ModelSerializer):
+    phone = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'role', 'phone')
+        fields = ('id', 'username', 'email', 'role', 'phone', 'is_email_verified')
+
+    def get_phone(self, obj):
+        if hasattr(obj, 'candidate_profile') and obj.candidate_profile.phone:
+            return obj.candidate_profile.phone
+        if hasattr(obj, 'recruiter_profile') and obj.recruiter_profile.phone:
+            return obj.recruiter_profile.phone
+        return None
 
 
 class CandidateProfileSerializer(serializers.ModelSerializer):
@@ -56,20 +65,27 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     # Ensures password isn't returned in JSON
     password = serializers.CharField(write_only=True)
+    phone = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model = User
         fields = ('username', 'email', 'password', 'role', 'phone')
 
     def create(self, validated_data):
-        # Create the user securely, hashing the password
+        phone = validated_data.pop('phone', '')
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
             password=validated_data['password'],
-            role=validated_data.get('role', 'CANDIDATE'),
-            phone=validated_data.get('phone', '')
+            role=validated_data.get('role', 'CANDIDATE')
         )
+        if phone:
+            if user.role == User.Role.CANDIDATE and hasattr(user, 'candidate_profile'):
+                user.candidate_profile.phone = phone
+                user.candidate_profile.save()
+            elif user.role == User.Role.RECRUITER and hasattr(user, 'recruiter_profile'):
+                user.recruiter_profile.phone = phone
+                user.recruiter_profile.save()
 
         return user
 
@@ -113,8 +129,18 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 f"Invalid role selected. This account is registered as a {self.user.role.title()}. Please switch to the {self.user.role.title()} tab to log in."
             )
 
+        # Enforce email verification before issuing JWT tokens
+        if not self.user.is_email_verified:
+            raise AuthenticationFailed({
+                'detail': 'Your email address is not verified. Please verify your email to log in.',
+                'code': 'email_not_verified',
+                'email': self.user.email,
+                'username': self.user.username
+            })
+
         # Add extra fields to the response (not the token itself)
         data['role'] = self.user.role
         data['username'] = self.user.username
         data['user_id'] = self.user.id
+        data['is_email_verified'] = self.user.is_email_verified
         return data

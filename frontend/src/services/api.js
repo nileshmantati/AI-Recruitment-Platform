@@ -154,4 +154,25 @@ export const resetPassword = async (usernameOrEmail, otp, newPassword) => {
     return response.data;
 };
 
+/**
+ * Verifies email address using the 6-digit OTP code.
+ */
+export const verifyEmailOTP = async (emailOrUsername, otp) => {
+    const response = await api.post('users/verify-email/', {
+        email_or_username: emailOrUsername,
+        otp,
+    });
+    return response.data;
+};
+
+/**
+ * Resends a new 6-digit email verification OTP code.
+ */
+export const resendVerificationOTP = async (emailOrUsername) => {
+    const response = await api.post('users/resend-otp/', {
+        email_or_username: emailOrUsername,
+    });
+    return response.data;
+};
+
 export default api;

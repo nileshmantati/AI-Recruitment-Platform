@@ -24,6 +24,7 @@ from users.views import CandidateProfileView, RecruiterProfileView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('users.urls')),  # Include user-related URLs
+    path('api/auth/', include('users.urls')),   # Auth route alias as requested
     path('api/candidate/profile/', CandidateProfileView.as_view(),
          name='candidate-profile'),
     path('api/recruiter/profile/', RecruiterProfileView.as_view(),
