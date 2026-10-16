@@ -110,23 +110,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         try:
             data = super().validate(attrs)
         except AuthenticationFailed as exc:
-            if matched_user:
-                if not matched_user.is_active:
-                    raise AuthenticationFailed("This account has been deactivated. Please contact support.")
-                if not matched_user.check_password(attrs.get('password')):
-                    raise AuthenticationFailed(
-                        f"Incorrect password for user '{matched_user.username}'. Please check your password or reset it."
-                    )
-            else:
-                raise AuthenticationFailed(
-                    f"No account found with username or email '{username_or_email}'. Please register or check your spelling."
-                )
-            raise exc
+            if matched_user and not matched_user.is_active and matched_user.check_password(attrs.get('password')):
+                raise AuthenticationFailed("This account has been deactivated. Please contact support.")
+            raise AuthenticationFailed("Invalid username, email, or password. Please check your credentials.")
 
-        # Enforce that the role selected on the frontend matches the user's actual role
+        # Enforce that the role selected on the frontend matches the user's actual role without leaking account details
         if provided_role and self.user.role != provided_role:
             raise AuthenticationFailed(
-                f"Invalid role selected. This account is registered as a {self.user.role.title()}. Please switch to the {self.user.role.title()} tab to log in."
+                "Invalid credentials or role selected. Please check your login details and account type."
             )
 
         # Enforce email verification before issuing JWT tokens
