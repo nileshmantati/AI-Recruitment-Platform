@@ -7,7 +7,7 @@ const NotFoundPage = () => {
     return (
         <div className="relative min-h-screen flex items-center justify-center bg-slate-50 px-4">
             {/* Ambient background decoration */}
-            <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-white via-slate-50 to-blue-50"></div>
+            <div className="absolute inset-0 pointer-events-none overflow-hidden bg-gradient-to-br from-white via-slate-50 to-blue-50"></div>
 
             <div className="relative z-10 max-w-lg w-full text-center">
                 {/* Visual Icon Badge */}

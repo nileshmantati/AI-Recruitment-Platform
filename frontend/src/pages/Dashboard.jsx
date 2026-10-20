@@ -51,6 +51,7 @@ const Dashboard = () => {
     else if (normalizedPath === '/dashboard/profile') active = "Profile";
     else if (normalizedPath === '/dashboard/saved-jobs') active = "Saved Jobs";
     else if (normalizedPath === '/dashboard/activity') active = "Activity";
+    else if (normalizedPath === '/dashboard/ai-mock-interview' || normalizedPath === '/dashboard/mock-interview') active = "AI Mock Interview";
     else if (normalizedPath === '/dashboard/settings') active = "Settings";
     else if (normalizedPath !== '/dashboard') active = "NotFound";
 

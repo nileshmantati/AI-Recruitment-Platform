@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import api from '../services/api.js';
 import { T } from '../Js/theme.js';
 import {
-    Briefcase, Search, Filter, Clock, Users, IndianRupee, ChevronDown, Building2
+    Briefcase, Search, Filter, Clock, Users, IndianRupee, ChevronDown, Building2, Bookmark
 } from 'lucide-react';
 import ApplyJobModal from '../components/Modals/ApplyJobModal.jsx';
 import toast from 'react-hot-toast';
@@ -23,7 +23,7 @@ const getTimeAgo = (date) => {
 };
 
 // ─── JobCard — defined OUTSIDE parent to prevent remounting on every render ───
-const JobCard = ({ job, onApply }) => {
+const JobCard = ({ job, onApply, isSaved, onToggleSave }) => {
     const skills = Array.isArray(job.required_skills)
         ? job.required_skills
         : (job.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -112,26 +112,38 @@ const JobCard = ({ job, onApply }) => {
                     )}
                 </div>
 
-                {/* Apply Button — fixed: rounded-lg! → !rounded-lg (Tailwind v4 prefix syntax) */}
-                <button
-                    onClick={() => onApply(job)}
-                    disabled={job.isApplied}
-                    className="mt-3 w-full !rounded-lg border-2 px-6 py-2.5 text-sm font-medium transition-all hover:scale-95 disabled:cursor-not-allowed"
-                    style={{
-                        borderColor: job.isApplied ? '#d1d5db' : T.primary,
-                        color: job.isApplied ? '#9ca3af' : 'white',
-                        background: job.isApplied ? '#f9fafb' : `linear-gradient(135deg, ${T.primary}, ${T.accent})`,
-                    }}
-                >
-                    {job.isApplied ? 'Applied ✓' : 'Apply Now'}
-                </button>
+                {/* Action Buttons */}
+                <div className="mt-3 flex items-center gap-2">
+                    <button
+                        onClick={() => onApply(job)}
+                        disabled={job.isApplied}
+                        className="flex-1 !rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all hover:scale-95 disabled:cursor-not-allowed"
+                        style={{
+                            borderColor: job.isApplied ? '#d1d5db' : T.primary,
+                            color: job.isApplied ? '#9ca3af' : 'white',
+                            background: job.isApplied ? '#f9fafb' : `linear-gradient(135deg, ${T.primary}, ${T.accent})`,
+                        }}
+                    >
+                        {job.isApplied ? 'Applied ✓' : 'Apply Now'}
+                    </button>
+                    {onToggleSave && (
+                        <button
+                            onClick={() => onToggleSave(job)}
+                            className={`flex items-center justify-center h-10 w-10 !rounded-lg border transition-all cursor-pointer ${isSaved ? 'bg-indigo-50 border-indigo-300 text-indigo-600' : 'border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                            title={isSaved ? 'Remove from saved jobs' : 'Save job'}
+                            aria-label="Save job"
+                        >
+                            <Bookmark size={17} className={isSaved ? 'fill-indigo-600' : ''} />
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
 };
 
 // ─── JobRow — also defined OUTSIDE parent ──────────────────────────────────
-const JobRow = ({ job, onApply }) => {
+const JobRow = ({ job, onApply, isSaved, onToggleSave }) => {
     const skills = Array.isArray(job.required_skills)
         ? job.required_skills
         : (job.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -181,17 +193,29 @@ const JobRow = ({ job, onApply }) => {
                 {job.applicants ?? 0}
             </div>
 
-            {/* Apply button — fixed: rounded-lg! → !rounded-lg */}
-            <button
-                onClick={() => onApply(job)}
-                disabled={job.isApplied}
-                className="!rounded-lg px-4 py-1.5 text-xs font-medium text-white transition hover:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
-                style={{
-                    background: job.isApplied ? '#d1d5db' : `linear-gradient(135deg, ${T.primary}, ${T.accent})`,
-                }}
-            >
-                {job.isApplied ? 'Applied' : 'Apply'}
-            </button>
+            {/* Action buttons */}
+            <div className="flex items-center gap-2">
+                {onToggleSave && (
+                    <button
+                        onClick={() => onToggleSave(job)}
+                        className={`flex items-center justify-center h-8 w-8 !rounded-lg border transition-all cursor-pointer ${isSaved ? 'bg-indigo-50 border-indigo-300 text-indigo-600' : 'border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                        title={isSaved ? 'Remove from saved jobs' : 'Save job'}
+                        aria-label="Save job"
+                    >
+                        <Bookmark size={15} className={isSaved ? 'fill-indigo-600' : ''} />
+                    </button>
+                )}
+                <button
+                    onClick={() => onApply(job)}
+                    disabled={job.isApplied}
+                    className="!rounded-lg px-4 py-1.5 text-xs font-medium text-white transition hover:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                    style={{
+                        background: job.isApplied ? '#d1d5db' : `linear-gradient(135deg, ${T.primary}, ${T.accent})`,
+                    }}
+                >
+                    {job.isApplied ? 'Applied' : 'Apply'}
+                </button>
+            </div>
         </div>
     );
 };
@@ -200,6 +224,15 @@ const JobRow = ({ job, onApply }) => {
 const JobsPage = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [savedJobIds, setSavedJobIds] = useState(() => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('candidate_saved_jobs') || '[]');
+            return new Set(saved.map(j => j.id));
+        } catch {
+            return new Set();
+        }
+    });
 
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('All');
@@ -258,9 +291,27 @@ const JobsPage = () => {
         setShowModal(true);
     }, []);
 
+    const handleToggleSave = useCallback((job) => {
+        try {
+            const current = JSON.parse(localStorage.getItem('candidate_saved_jobs') || '[]');
+            const exists = current.some(j => j.id === job.id);
+            let updated;
+            if (exists) {
+                updated = current.filter(j => j.id !== job.id);
+                toast.success('Job removed from saved list.');
+            } else {
+                updated = [...current, job];
+                toast.success('Job saved to your bookmarks!');
+            }
+            localStorage.setItem('candidate_saved_jobs', JSON.stringify(updated));
+            setSavedJobIds(new Set(updated.map(j => j.id)));
+        } catch {
+            toast.error('Failed to update bookmarks.');
+        }
+    }, []);
+
     const filteredJobs = useMemo(() => {
         let result = [...jobs];
-        const isSearchingOrFiltering = searchQuery.trim() !== '' || activeFilter !== 'All';
 
         if (searchQuery) {
             const q = searchQuery.toLowerCase();
@@ -287,10 +338,6 @@ const JobsPage = () => {
                 break;
             default:
                 result.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-        }
-
-        if (!isSearchingOrFiltering) {
-            return result.slice(0, 5);
         }
 
         return result;
@@ -461,7 +508,12 @@ const JobsPage = () => {
                                         key={job.id}
                                         variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
                                     >
-                                        <JobCard job={job} onApply={handleApplyClick} />
+                                        <JobCard
+                                            job={job}
+                                            onApply={handleApplyClick}
+                                            isSaved={savedJobIds.has(job.id)}
+                                            onToggleSave={handleToggleSave}
+                                        />
                                     </motion.div>
                                 ))}
                             </motion.div>
@@ -480,7 +532,12 @@ const JobsPage = () => {
                                         key={job.id}
                                         variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}
                                     >
-                                        <JobRow job={job} onApply={handleApplyClick} />
+                                        <JobRow
+                                            job={job}
+                                            onApply={handleApplyClick}
+                                            isSaved={savedJobIds.has(job.id)}
+                                            onToggleSave={handleToggleSave}
+                                        />
                                     </motion.div>
                                 ))}
                             </motion.div>

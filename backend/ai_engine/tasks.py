@@ -1,8 +1,9 @@
+import os
 # pyrefly: ignore [missing-import]
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
-from .services import extract_text_from_pdf, evaluate_candidate_resume
+from .services import extract_text_from_file, extract_text_from_pdf, evaluate_candidate_resume
 from applications.models import Application
 
 
@@ -14,11 +15,24 @@ def process_resume_scoring(self, application_id):
         job = application.job
 
         # 2. Extract Text
+        if not hasattr(application.candidate, 'resume') or not application.candidate.resume:
+            application.status = 'ERROR'
+            application.ai_feedback = {"error": "No resume attached to candidate profile."}
+            application.save()
+            return
+
         resume_path = application.candidate.resume.path
-        resume_text = extract_text_from_pdf(resume_path)
+        if not os.path.exists(resume_path):
+            application.status = 'ERROR'
+            application.ai_feedback = {"error": "Resume file not found on disk."}
+            application.save()
+            return
+
+        resume_text = extract_text_from_file(resume_path) or extract_text_from_pdf(resume_path)
 
         if not resume_text:
             application.status = 'ERROR'
+            application.ai_feedback = {"error": "Could not extract text from the resume file."}
             application.save()
             return
 

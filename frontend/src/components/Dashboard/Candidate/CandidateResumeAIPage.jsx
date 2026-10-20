@@ -4,7 +4,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, UploadCloud, FileText, CheckCircle, AlertCircle, Loader2, Star, TrendingUp, X } from 'lucide-react';
-import api from '../../../services/api';
+import { analyzeResume } from '../../../services/api';
 import toast from 'react-hot-toast';
 import { T } from '../../../Js/theme';
 
@@ -48,14 +48,12 @@ const CandidateResumeAIPage = () => {
     const handleAnalyze = async () => {
         if (!file) { toast.error('Please upload a resume first.'); return; }
         setLoading(true);
-        const fd = new FormData();
-        fd.append('resume', file);
         try {
-            const res = await api.post('resume/analyze/', fd);
-            setResult(res.data);
+            const data = await analyzeResume(file);
+            setResult(data);
             toast.success('Resume analyzed successfully!');
         } catch (e) {
-            toast.error(e.response?.data?.error || 'Analysis failed. Please try again.');
+            toast.error(e?.error || e?.detail || e.response?.data?.error || 'Analysis failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -112,82 +110,91 @@ const CandidateResumeAIPage = () => {
             </motion.div>
 
             {/* Results */}
-            {result && (
-                <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
-                    {/* Score */}
-                    <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-                        <ScoreRing score={result.score || 0} />
-                        <div className="flex-1 text-center sm:text-left">
-                            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">Overall Resume Score</h3>
-                            <p className="mt-1 text-sm sm:text-base text-slate-500 max-w-md">
-                                {result.score >= 80 ? 'Excellent! Your resume is highly competitive.' : result.score >= 60 ? 'Good resume with room for improvement.' : 'Your resume needs significant improvements to be competitive.'}
-                            </p>
-                            {result.job_match_percent && (
-                                <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-3.5 py-1 text-xs sm:text-sm font-bold text-indigo-700">
-                                    <Star size={14} /> {result.job_match_percent}% average job match
-                                </div>
+            {result && (() => {
+                const score = result.ai_score ?? result.score ?? 0;
+                const matchPct = result.match_percentage ?? result.job_match_percent;
+                const strengthsList = result.strengths || [];
+                const areasToImprove = result.weaknesses || result.improvements || [];
+                const missingSkills = result.missing_skills || [];
+                const strategy = result.ai_strategy || result.summary || '';
+
+                return (
+                    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
+                        {/* Score */}
+                        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                            <ScoreRing score={score} />
+                            <div className="flex-1 text-center sm:text-left">
+                                <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">Overall Resume Score</h3>
+                                <p className="mt-1 text-sm sm:text-base text-slate-500 max-w-md">
+                                    {score >= 80 ? 'Excellent! Your resume is highly competitive.' : score >= 60 ? 'Good resume with room for improvement.' : 'Your resume needs significant improvements to be competitive.'}
+                                </p>
+                                {matchPct !== undefined && matchPct !== null && (
+                                    <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-3.5 py-1 text-xs sm:text-sm font-bold text-indigo-700">
+                                        <Star size={14} /> {matchPct}% role match index
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+
+                        {/* Strengths & Improvements */}
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            {strengthsList.length > 0 && (
+                                <motion.div variants={fadeUp} className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <CheckCircle size={18} className="text-emerald-500" />
+                                        <h4 className="font-extrabold text-slate-800 text-base sm:text-lg">Strengths</h4>
+                                    </div>
+                                    <ul className="space-y-2">
+                                        {strengthsList.map((s, i) => (
+                                            <li key={i} className="flex items-start gap-2 text-sm sm:text-base text-slate-700 font-medium leading-relaxed">
+                                                <span className="mt-2 h-1.5 w-1.5 rounded-full shrink-0 bg-emerald-500" />{s}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </motion.div>
+                            )}
+                            {areasToImprove.length > 0 && (
+                                <motion.div variants={fadeUp} className="rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <TrendingUp size={18} className="text-rose-500" />
+                                        <h4 className="font-extrabold text-slate-800 text-base sm:text-lg">Areas to Improve</h4>
+                                    </div>
+                                    <ul className="space-y-2">
+                                        {areasToImprove.map((s, i) => (
+                                            <li key={i} className="flex items-start gap-2 text-sm sm:text-base text-slate-700 font-medium leading-relaxed">
+                                                <span className="mt-2 h-1.5 w-1.5 rounded-full shrink-0 bg-rose-500" />{s}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </motion.div>
                             )}
                         </div>
+
+                        {/* Missing Skills */}
+                        {missingSkills.length > 0 && (
+                            <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <AlertCircle size={18} className="text-amber-500" />
+                                    <h4 className="font-extrabold text-slate-800 text-base sm:text-lg">Missing Skills to Add</h4>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {missingSkills.map((s, i) => (
+                                        <span key={i} className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-1 text-xs sm:text-sm font-semibold text-amber-700">{s}</span>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* Summary / Strategy */}
+                        {strategy && (
+                            <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-gradient-to-br p-5 shadow-sm" style={{ background: `linear-gradient(135deg, ${T.primary}05, ${T.accent}05)` }}>
+                                <h4 className="font-extrabold text-slate-800 text-base sm:text-lg mb-2">AI Strategy &amp; Next Steps</h4>
+                                <p className="text-sm sm:text-base text-slate-700 font-medium leading-relaxed">{strategy}</p>
+                            </motion.div>
+                        )}
                     </motion.div>
-
-                    {/* Strengths & Improvements */}
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        {result.strengths?.length > 0 && (
-                            <motion.div variants={fadeUp} className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <CheckCircle size={18} className="text-emerald-500" />
-                                    <h4 className="font-extrabold text-slate-800 text-base sm:text-lg">Strengths</h4>
-                                </div>
-                                <ul className="space-y-2">
-                                    {result.strengths.map((s, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-sm sm:text-base text-slate-700 font-medium leading-relaxed">
-                                            <span className="mt-2 h-1.5 w-1.5 rounded-full shrink-0 bg-emerald-500" />{s}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </motion.div>
-                        )}
-                        {result.improvements?.length > 0 && (
-                            <motion.div variants={fadeUp} className="rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <TrendingUp size={18} className="text-rose-500" />
-                                    <h4 className="font-extrabold text-slate-800 text-base sm:text-lg">Areas to Improve</h4>
-                                </div>
-                                <ul className="space-y-2">
-                                    {result.improvements.map((s, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-sm sm:text-base text-slate-700 font-medium leading-relaxed">
-                                            <span className="mt-2 h-1.5 w-1.5 rounded-full shrink-0 bg-rose-500" />{s}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </motion.div>
-                        )}
-                    </div>
-
-                    {/* Missing Skills */}
-                    {result.missing_skills?.length > 0 && (
-                        <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                            <div className="flex items-center gap-2 mb-3">
-                                <AlertCircle size={18} className="text-amber-500" />
-                                <h4 className="font-extrabold text-slate-800 text-base sm:text-lg">Missing Skills to Add</h4>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {result.missing_skills.map((s, i) => (
-                                    <span key={i} className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-1 text-xs sm:text-sm font-semibold text-amber-700">{s}</span>
-                                ))}
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* Summary */}
-                    {result.summary && (
-                        <motion.div variants={fadeUp} className="rounded-2xl border border-slate-100 bg-gradient-to-br p-5 shadow-sm" style={{ background: `linear-gradient(135deg, ${T.primary}05, ${T.accent}05)` }}>
-                            <h4 className="font-extrabold text-slate-800 text-base sm:text-lg mb-2">AI Summary</h4>
-                            <p className="text-sm sm:text-base text-slate-700 font-medium leading-relaxed">{result.summary}</p>
-                        </motion.div>
-                    )}
-                </motion.div>
-            )}
+                );
+            })()}
         </motion.main>
     );
 };

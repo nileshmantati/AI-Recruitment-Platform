@@ -356,6 +356,17 @@ class ForgotPasswordView(APIView):
                 'error': f"User '{user.username}' does not have a registered email address. Please verify your email or change your email."
             }, status=400)
 
+        # Enforce 60s cooldown to prevent reset OTP spam / flooding
+        latest_otp = PasswordResetOTP.objects.filter(user=user).order_by('-created_at').first()
+        if latest_otp:
+            elapsed = (timezone.now() - latest_otp.created_at).total_seconds()
+            if elapsed < 60:
+                cooldown_left = int(60 - elapsed)
+                return Response({
+                    'error': f"A password reset code was recently requested. Please wait {cooldown_left}s before requesting a new code.",
+                    'cooldown': cooldown_left
+                }, status=429)
+
         # Generate 6-digit OTP
         otp = f"{secrets.randbelow(900000) + 100000}"
 

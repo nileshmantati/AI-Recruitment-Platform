@@ -48,16 +48,17 @@ const CandidateProfilePage = () => {
             try {
                 const res = await api.get('candidate/profile/');
                 const d = res.data;
+                const fetchedName = [d.first_name, d.last_name].filter(Boolean).join(' ') || d.full_name || auth.username || '';
                 setProfile({
-                    full_name: d.full_name || auth.username || '',
-                    email: d.email || '',
+                    full_name: fetchedName,
+                    email: d.email || auth.email || '',
                     phone: d.phone || '',
                     location: d.location || '',
-                    website: d.website || '',
-                    linkedin: d.linkedin || '',
+                    website: d.portfolio_url || d.website || '',
+                    linkedin: d.github_url || d.linkedin || '',
                     bio: d.bio || '',
                     current_role: d.current_role || '',
-                    experience_years: d.experience_years || ''
+                    experience_years: d.experience || d.experience_years || ''
                 });
                 setSkills(d.skills || []);
                 setEducation(d.education || []);
@@ -73,7 +74,20 @@ const CandidateProfilePage = () => {
     const handleSave = async () => {
         setSaving(true);
         try {
-            await api.patch('candidate/profile/', { ...profile, skills, education });
+            const nameParts = (profile.full_name || '').trim().split(/\s+/);
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ');
+
+            await api.patch('candidate/profile/', {
+                first_name: firstName,
+                last_name: lastName,
+                phone: profile.phone,
+                portfolio_url: profile.website || null,
+                github_url: profile.linkedin || null,
+                bio: profile.bio,
+                experience: profile.experience_years || profile.current_role || '',
+                skills,
+            });
             toast.success('Profile updated!');
             setEditMode(false);
         } catch {

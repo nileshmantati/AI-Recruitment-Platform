@@ -230,8 +230,12 @@ class ScheduleInterviewView(APIView):
         if not interview_datetime or not meeting_link:
             return Response({"error": "Date, time, and meeting link are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Update application status
+        # Update application status and persist interview schedule details
         application.status = 'INTERVIEW_SCHEDULED'
+        feedback = application.ai_feedback if isinstance(application.ai_feedback, dict) else {}
+        feedback['interview_datetime'] = interview_datetime
+        feedback['meeting_link'] = meeting_link
+        application.ai_feedback = feedback
         application.save()
 
         # Send email in background thread (non-blocking)

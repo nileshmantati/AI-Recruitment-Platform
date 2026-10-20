@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { T } from '../Js/theme';
 import { ScoreRing, InsightBar, SkillPill } from '../ui/ResumeAnalyzerExternal';
 import PrimaryButton from '../components/PrimaryButton';
@@ -46,8 +46,15 @@ export default function ResumeAnalyzer() {
 
 
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
   const handleFile = async f => {
     setFile(f); setAnalyzing(true); setDone(false); setResult(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     const url = URL.createObjectURL(f);
     setPreviewUrl(url);
     if (f.name.toLowerCase().endsWith('.txt')) {
@@ -67,6 +74,7 @@ export default function ResumeAnalyzer() {
   };
 
   const handleReset = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setFile(null); setDone(false); setAnalyzing(false);
     setResult(null); setSavedFileName(null); setPreviewUrl(null); setTxtContent(null);
     sessionStorage.removeItem(SS_KEY); // clear persisted result
