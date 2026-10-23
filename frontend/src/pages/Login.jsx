@@ -69,7 +69,7 @@ const Login = () => {
                 response.data.role
             );
             toast.success('Login successful');
-            navigate('/');
+            navigate('/dashboard');
         } catch (err) {
             if (err.response?.data?.code === 'email_not_verified') {
                 const unverifiedEmail = err.response.data.email || '';

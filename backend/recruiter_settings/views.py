@@ -146,7 +146,10 @@ class SecuritySettingsView(BaseSettingsView):
         if 'current_password' in data and 'new_password' in data:
             if not user.check_password(data['current_password']):
                 return Response({"error": "Current password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
-            user.set_password(data['new_password'])
+            new_password = str(data.get('new_password', '')).strip()
+            if len(new_password) < 6:
+                return Response({"error": "New password must be at least 6 characters long."}, status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(new_password)
             user.save()
             return Response({"message": "Password changed successfully"})
 

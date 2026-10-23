@@ -237,14 +237,27 @@ const RecruiterInterviewsPage = () => {
                                             </span>
                                         </div>
                                         <p className="text-sm mb-0 font-medium text-slate-600 truncate flex items-center gap-2">
-                                            Applied for <span className="text-indigo-600 font-semibold">{app.job_details.title}</span>
+                                            Applied for <span className="text-indigo-600 font-semibold">{app.job_details?.title || app.job_title || 'Position'}</span>
                                         </p>
                                     </div>
 
                                     <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
                                         <div className="flex flex-col sm:items-end text-sm">
-                                            <span className="font-medium text-slate-700">TBD / Invited via Email</span>
-                                            <span className="text-slate-400 text-xs">Waiting for confirmation</span>
+                                            {app.interview_date ? (
+                                                <>
+                                                    <span className="font-bold text-slate-800">
+                                                        {new Date(app.interview_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} · {new Date(app.interview_date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                    <span className="text-emerald-600 text-xs font-semibold">
+                                                        {app.duration_minutes || 45} mins · Scheduled
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="font-medium text-slate-700">TBD / Invited via Email</span>
+                                                    <span className="text-slate-400 text-xs">Waiting for schedule</span>
+                                                </>
+                                            )}
                                         </div>
 
                                         <button

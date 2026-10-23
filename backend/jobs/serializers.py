@@ -7,13 +7,21 @@ class JobSerializer(serializers.ModelSerializer):
     recruiter_name = serializers.CharField(
         source='recruiter.username', read_only=True)
     applicants = serializers.IntegerField(read_only=True)
+    company = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
         fields = [
             'id', 'title', 'description', 'required_skills',
-            'salary', 'recruiter', 'recruiter_name',
+            'salary', 'recruiter', 'recruiter_name', 'company',
             'applicants', 'created_at', 'is_active'
         ]
         # We make recruiter read-only because we will set it automatically from the requested user
         read_only_fields = ['recruiter', 'created_at']
+
+    def get_company(self, obj):
+        if hasattr(obj.recruiter, 'company') and obj.recruiter.company and obj.recruiter.company.name:
+            return obj.recruiter.company.name
+        if hasattr(obj.recruiter, 'recruiter_profile') and obj.recruiter.recruiter_profile and obj.recruiter.recruiter_profile.company:
+            return obj.recruiter.recruiter_profile.company
+        return obj.recruiter.username

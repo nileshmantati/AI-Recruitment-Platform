@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.hashers import make_password
-from users.models import User, EmailVerificationOTP
+from users.models import User, EmailVerificationOTP, PasswordResetOTP
 
 
 class EmailVerificationTests(APITestCase):
@@ -342,4 +342,57 @@ class EmailVerificationTests(APITestCase):
             })
             self.assertEqual(res.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
             self.assertFalse(res.data.get('email_sent'))
+
+    def test_15_password_reset_otp_brute_force_lockout(self):
+        """Entering incorrect OTP 5 times invalidates the OTP and returns 429 Too Many Requests."""
+        user = User.objects.create_user(
+            username='reset_target_user',
+            email='target@test.com',
+            password='TargetPassword123!',
+            is_email_verified=True
+        )
+        otp_rec = PasswordResetOTP.objects.create(
+            user=user,
+            otp='999888'
+        )
+        verify_url = reverse('verify-reset-otp')
+
+        # First 4 incorrect attempts return 400 with attempts remaining
+        for i in range(1, 5):
+            res = self.client.post(verify_url, {
+                'username_or_email': user.username,
+                'otp': '000000'
+            })
+            self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn(f"{5 - i} attempt(s) remaining", res.data.get('error', ''))
+
+        # 5th incorrect attempt triggers lockout (429)
+        res5 = self.client.post(verify_url, {
+            'username_or_email': user.username,
+            'otp': '000000'
+        })
+        self.assertEqual(res5.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+        # Ensure OTP record is now marked as used/invalidated in database
+        otp_rec.refresh_from_db()
+        self.assertTrue(otp_rec.is_used)
+
+    def test_16_recruiter_settings_password_validation(self):
+        """Updating password with less than 6 characters returns 400 Bad Request."""
+        user = User.objects.create_user(
+            username='recruiter_pwd_test',
+            email='rec_pwd@test.com',
+            password='OldSecurePassword123!',
+            role='RECRUITER',
+            is_email_verified=True
+        )
+        self.client.force_authenticate(user=user)
+        url = reverse('security_settings')
+
+        res = self.client.put(url, {
+            'current_password': 'OldSecurePassword123!',
+            'new_password': '123'  # Too short
+        })
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('at least 6 characters', res.data.get('error', ''))
 

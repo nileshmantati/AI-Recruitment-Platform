@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Bookmark, Briefcase, Clock, IndianRupee, Search, BookmarkX } from 'lucide-react';
 import { T } from '../../../Js/theme';
 import toast from 'react-hot-toast';
+import ApplyJobModal from '../../Modals/ApplyJobModal';
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
@@ -23,6 +24,8 @@ const CandidateSavedJobsPage = () => {
         catch { return []; }
     });
     const [search, setSearch] = useState('');
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [showApplyModal, setShowApplyModal] = useState(false);
 
     const removeSaved = (id) => {
         const updated = savedJobs.filter(j => j.id !== id);
@@ -125,8 +128,14 @@ const CandidateSavedJobsPage = () => {
                                                 style={{ background: `${T.accent}15`, color: T.accent }}>{job.type}</span>
                                         )}
                                     </div>
-                                    <button className="mt-3 w-full !rounded-xl py-2.5 text-xs sm:text-sm font-bold text-white transition hover:scale-95 shadow-sm"
-                                        style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedJob(job);
+                                            setShowApplyModal(true);
+                                        }}
+                                        className="mt-3 w-full !rounded-xl py-2.5 text-xs sm:text-sm font-bold text-white transition hover:scale-95 shadow-sm cursor-pointer"
+                                        style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
+                                    >
                                         Apply Now
                                     </button>
                                 </div>
@@ -134,6 +143,14 @@ const CandidateSavedJobsPage = () => {
                         );
                     })}
                 </motion.div>
+            )}
+
+            {showApplyModal && selectedJob && (
+                <ApplyJobModal
+                    show={showApplyModal}
+                    handleClose={() => setShowApplyModal(false)}
+                    job={selectedJob}
+                />
             )}
         </motion.main>
     );

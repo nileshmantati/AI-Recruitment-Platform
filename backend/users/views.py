@@ -6,6 +6,7 @@ from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from django.db.models import Q
 from django.core.mail import send_mail
+from django.core.cache import cache
 from django.conf import settings
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -409,13 +410,30 @@ class VerifyResetOTPView(APIView):
         if not user:
             return Response({'error': 'Account not found.'}, status=404)
 
+        cache_key = f"otp_verify_attempts_{user.id}"
+        attempts = cache.get(cache_key, 0)
+        if attempts >= 5:
+            PasswordResetOTP.objects.filter(user=user, is_used=False).update(is_used=True)
+            return Response({
+                'error': 'Too many failed verification attempts. This verification code has been invalidated for security. Please request a new code.'
+            }, status=429)
+
         otp_record = PasswordResetOTP.objects.filter(
             user=user, otp=otp, is_used=False
         ).order_by('-created_at').first()
 
         if not otp_record or not otp_record.is_valid():
-            return Response({'error': 'Invalid or expired verification code.'}, status=400)
+            new_attempts = attempts + 1
+            cache.set(cache_key, new_attempts, timeout=600)
+            if new_attempts >= 5:
+                PasswordResetOTP.objects.filter(user=user, is_used=False).update(is_used=True)
+                return Response({
+                    'error': 'Too many failed verification attempts. This verification code has been invalidated for security. Please request a new code.'
+                }, status=429)
+            remaining = 5 - new_attempts
+            return Response({'error': f'Invalid or expired verification code. {remaining} attempt(s) remaining.'}, status=400)
 
+        cache.delete(cache_key)
         return Response({'success': True, 'message': 'Verification code confirmed.'}, status=200)
 
 
@@ -440,12 +458,30 @@ class ResetPasswordView(APIView):
         if not user:
             return Response({'error': 'Account not found.'}, status=404)
 
+        cache_key = f"otp_verify_attempts_{user.id}"
+        attempts = cache.get(cache_key, 0)
+        if attempts >= 5:
+            PasswordResetOTP.objects.filter(user=user, is_used=False).update(is_used=True)
+            return Response({
+                'error': 'Too many failed verification attempts. This verification code has been invalidated for security. Please request a new code.'
+            }, status=429)
+
         otp_record = PasswordResetOTP.objects.filter(
             user=user, otp=otp, is_used=False
         ).order_by('-created_at').first()
 
         if not otp_record or not otp_record.is_valid():
-            return Response({'error': 'Invalid or expired verification code.'}, status=400)
+            new_attempts = attempts + 1
+            cache.set(cache_key, new_attempts, timeout=600)
+            if new_attempts >= 5:
+                PasswordResetOTP.objects.filter(user=user, is_used=False).update(is_used=True)
+                return Response({
+                    'error': 'Too many failed verification attempts. This verification code has been invalidated for security. Please request a new code.'
+                }, status=429)
+            remaining = 5 - new_attempts
+            return Response({'error': f'Invalid or expired verification code. {remaining} attempt(s) remaining.'}, status=400)
+
+        cache.delete(cache_key)
 
         # Set new password
         user.set_password(new_password)
