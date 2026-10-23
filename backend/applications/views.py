@@ -2,6 +2,7 @@
 import logging
 import threading
 from django.db import connection
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Application
 from .serializers import ApplicationSerializer
+from .utils import generate_ics_calendar
 from ai_engine.tasks import process_resume_scoring, send_status_update_email, send_interview_invitation
 from ai_engine.services import generate_interview_questions
 
@@ -216,7 +218,9 @@ class ScheduleInterviewView(APIView):
 
     def post(self, request, application_id):
         try:
-            application = Application.objects.get(id=application_id)
+            application = Application.objects.select_related(
+                'job__recruiter', 'candidate__user'
+            ).get(id=application_id)
         except Application.DoesNotExist:
             return Response({"error": "Application not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -226,6 +230,13 @@ class ScheduleInterviewView(APIView):
 
         interview_datetime = request.data.get('interview_datetime')
         meeting_link = request.data.get('meeting_link')
+        raw_duration = request.data.get('duration_minutes', 45)
+        try:
+            duration_minutes = int(raw_duration)
+            if duration_minutes <= 0:
+                duration_minutes = 45
+        except (ValueError, TypeError):
+            duration_minutes = 45
 
         if not interview_datetime or not meeting_link:
             return Response({"error": "Date, time, and meeting link are required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -235,14 +246,105 @@ class ScheduleInterviewView(APIView):
         feedback = application.ai_feedback if isinstance(application.ai_feedback, dict) else {}
         feedback['interview_datetime'] = interview_datetime
         feedback['meeting_link'] = meeting_link
+        feedback['duration_minutes'] = duration_minutes
+        feedback['interview_sequence'] = feedback.get('interview_sequence', -1) + 1
         application.ai_feedback = feedback
         application.save()
 
         # Send email in background thread (non-blocking)
-        _run_in_thread(send_interview_invitation, application.id,
-                       interview_datetime, meeting_link)
+        _run_in_thread(
+            send_interview_invitation,
+            application.id,
+            interview_datetime,
+            meeting_link,
+            duration_minutes
+        )
 
         return Response({
             "message": "Interview scheduled successfully! Invitation email is being sent.",
-            "status": application.status
+            "status": application.status,
+            "interview_date": interview_datetime,
+            "meeting_link": meeting_link,
+            "duration_minutes": duration_minutes,
         }, status=status.HTTP_200_OK)
+
+
+class InterviewCalendarInviteView(APIView):
+    """
+    GET: Downloads RFC 5545 compliant .ics calendar invitation file.
+    Accessible only to the candidate who applied or the recruiter who posted the job.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, application_id):
+        try:
+            application = Application.objects.select_related(
+                'job__recruiter', 'candidate__user'
+            ).get(id=application_id)
+        except Application.DoesNotExist:
+            return Response({"error": "Application not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Authorization: Candidate owner or job recruiter only
+        is_candidate_owner = (
+            hasattr(request.user, 'candidate_profile') and
+            application.candidate_id == request.user.candidate_profile.id
+        )
+        is_recruiter_owner = (application.job.recruiter_id == request.user.id)
+
+        if not (is_candidate_owner or is_recruiter_owner):
+            return Response(
+                {"error": "You do not have permission to access this calendar invite."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        feedback = application.ai_feedback if isinstance(application.ai_feedback, dict) else {}
+        interview_datetime = feedback.get('interview_datetime')
+        if not interview_datetime:
+            return Response(
+                {"error": "No interview has been scheduled for this application."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        meeting_link = feedback.get('meeting_link', '')
+        duration_minutes = feedback.get('duration_minutes', 45)
+        sequence = feedback.get('interview_sequence', 0)
+
+        # Recruiter details
+        recruiter = application.job.recruiter
+        recruiter_name = recruiter.get_full_name() or recruiter.username or "Hiring Team"
+        recruiter_email = recruiter.email or ""
+        company_name = "AI Recruitment Platform"
+        if hasattr(recruiter, 'recruiter_profile') and recruiter.recruiter_profile.company:
+            company_name = recruiter.recruiter_profile.company
+
+        # Candidate details
+        candidate_user = application.candidate.user
+        candidate_name = application.candidate.first_name or candidate_user.username or "Candidate"
+        candidate_email = candidate_user.email or ""
+
+        try:
+            ics_content = generate_ics_calendar(
+                application_id=application.id,
+                job_title=application.job.title,
+                candidate_name=candidate_name,
+                candidate_email=candidate_email,
+                recruiter_name=recruiter_name,
+                recruiter_email=recruiter_email,
+                interview_datetime=interview_datetime,
+                duration_minutes=duration_minutes,
+                meeting_link=meeting_link,
+                company_name=company_name,
+                sequence=sequence,
+            )
+        except Exception as e:
+            logger.error(f"Error generating .ics calendar for application {application_id}: {e}")
+            return Response(
+                {"error": "Failed to generate calendar invite."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        response = HttpResponse(ics_content, content_type='text/calendar; charset=utf-8')
+        response['Content-Disposition'] = f'attachment; filename="interview-{application.id}.ics"'
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        return response
+

@@ -1,12 +1,87 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import api from '../../../services/api';
+import api, { downloadCalendarInvite } from '../../../services/api';
 import toast from 'react-hot-toast';
 import { T } from '../../../Js/theme';
 import {
     FileText, Search, Filter, ChevronDown, Eye, Briefcase, Calendar,
-    ArrowLeft, CheckCircle, XCircle, Sparkles, MapPin, IndianRupee
+    ArrowLeft, CheckCircle, XCircle, Sparkles, MapPin, IndianRupee,
+    Video, Download, ExternalLink, CalendarPlus, Clock, Loader2, Lock
 } from 'lucide-react';
+
+const formatInterviewDate = (d) => {
+    if (!d) return 'TBD';
+    try {
+        const dt = new Date(d);
+        if (isNaN(dt.getTime())) return d;
+        return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch {
+        return 'TBD';
+    }
+};
+
+const formatInterviewTime = (d) => {
+    if (!d) return 'TBD';
+    try {
+        const dt = new Date(d);
+        if (isNaN(dt.getTime())) return 'TBD';
+        return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+        return 'TBD';
+    }
+};
+
+const safeMeetingUrl = (link) => {
+    if (!link) return '';
+    return link.startsWith('http://') || link.startsWith('https://') ? link : `https://${link}`;
+};
+
+const checkInterviewDateStatus = (dateStr) => {
+    if (!dateStr) return { isToday: true, isEarly: false, isPast: false };
+    try {
+        const sched = new Date(dateStr);
+        if (isNaN(sched.getTime())) return { isToday: true, isEarly: false, isPast: false };
+        const now = new Date();
+        const schedDay = new Date(sched.getFullYear(), sched.getMonth(), sched.getDate()).getTime();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+        if (today < schedDay) {
+            return { isToday: false, isEarly: true, isPast: false };
+        } else if (today > schedDay) {
+            return { isToday: false, isEarly: false, isPast: true };
+        } else {
+            return { isToday: true, isEarly: false, isPast: false };
+        }
+    } catch {
+        return { isToday: true, isEarly: false, isPast: false };
+    }
+};
+
+const buildGoogleCalendarUrl = (app) => {
+    if (!app?.interview_date) return null;
+    try {
+        const start = new Date(app.interview_date);
+        if (isNaN(start.getTime())) return null;
+        const duration = app.duration_minutes || 45;
+        const end = new Date(start.getTime() + duration * 60 * 1000);
+
+        const formatGDate = (dt) => dt.toISOString().replace(/-|:|\.\d\d\d/g, '');
+        const title = `Interview: ${app.job_details?.title || 'Job Interview'}`;
+        const location = app.meeting_link || 'Online Video Meeting';
+        const details = [
+            `Interview for the ${app.job_details?.title || 'Job'} position.`,
+            `Company: ${app.job_details?.company || 'AI Recruitment Platform'}`,
+            `Interviewer: ${app.recruiter_name || 'Hiring Team'}`,
+            app.meeting_link ? `Meeting Link: ${app.meeting_link}` : null,
+            'Please join 5 minutes early.',
+        ].filter(Boolean).join('\n');
+
+        const dates = `${formatGDate(start)}/${formatGDate(end)}`;
+        return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${dates}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}`;
+    } catch {
+        return null;
+    }
+};
 
 const STATUS_OPTIONS = ['All', 'PENDING', 'EVALUATED', 'SHORTLISTED', 'REJECTED', 'INTERVIEW_SCHEDULED'];
 
@@ -58,6 +133,44 @@ const formatStatus = (status) => {
 };
 
 const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
+    const [downloadingIcs, setDownloadingIcs] = useState(false);
+
+    const handleDownloadIcs = async () => {
+        if (downloadingIcs) return;
+        setDownloadingIcs(true);
+        try {
+            await downloadCalendarInvite(app.id);
+            toast.success('Calendar invitation (.ics) downloaded!');
+        } catch (err) {
+            toast.error(err?.error || 'Failed to download calendar invitation.');
+        } finally {
+            setDownloadingIcs(false);
+        }
+    };
+
+    const handleJoinCall = () => {
+        if (!app?.meeting_link) return;
+        const { isEarly, isPast } = checkInterviewDateStatus(app.interview_date);
+        if (isEarly) {
+            toast.error(
+                `Interview is scheduled for ${formatInterviewDate(app.interview_date)} at ${formatInterviewTime(app.interview_date)}. The video call link will only open on the scheduled interview date.`,
+                { icon: '⏳', duration: 5000 }
+            );
+            return;
+        }
+        if (isPast) {
+            toast.error(
+                `This interview was scheduled for ${formatInterviewDate(app.interview_date)} and the date has passed.`,
+                { icon: '⚠️', duration: 5000 }
+            );
+            return;
+        }
+        const url = safeMeetingUrl(app.meeting_link);
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
+
+    const googleCalUrl = buildGoogleCalendarUrl(app);
+
     return (
         <motion.main
             variants={containerVariants}
@@ -105,6 +218,110 @@ const CandidateApplicationDetails = ({ app, setSelectedApp }) => {
                                 </span>
                             </div>
                         </div>
+
+                        {/* Scheduled Interview Banner */}
+                        {app.status === 'INTERVIEW_SCHEDULED' && app.interview_date && (
+                            <div className="mb-8 rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-blue-50/40 p-6 shadow-sm">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md">
+                                            <Video size={22} />
+                                        </div>
+                                        <div>
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-indigo-700 bg-indigo-100/80 px-2.5 py-0.5 rounded-full mb-1">
+                                                Interview Scheduled
+                                            </span>
+                                            <h4 className="text-lg font-black text-slate-900">Official Interview Scheduled</h4>
+                                        </div>
+                                    </div>
+                                    {app.meeting_link && (() => {
+                                        const { isToday, isEarly } = checkInterviewDateStatus(app.interview_date);
+                                        return (
+                                            <button
+                                                type="button"
+                                                onClick={handleJoinCall}
+                                                title={
+                                                    isToday
+                                                        ? 'Join the video call now'
+                                                        : isEarly
+                                                            ? `Interview scheduled for ${formatInterviewDate(app.interview_date)}. Opens on interview date.`
+                                                            : `Interview date (${formatInterviewDate(app.interview_date)}) has passed.`
+                                                }
+                                                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer shrink-0 ${isToday
+                                                    ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-500/20'
+                                                    : isEarly
+                                                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                                                        : 'bg-slate-100 hover:bg-slate-200 text-slate-500 border border-slate-200'
+                                                    }`}
+                                            >
+                                                {isToday ? (
+                                                    <>
+                                                        <Video size={14} /> Join Video Call <ExternalLink size={12} />
+                                                    </>
+                                                ) : isEarly ? (
+                                                    <>
+                                                        <Lock size={14} className="text-amber-600" />
+                                                        Join Video Call
+                                                        <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                                            Opens {formatInterviewDate(app.interview_date)}
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Lock size={14} className="text-slate-400" /> Join Video Call
+                                                    </>
+                                                )}
+                                            </button>
+                                        );
+                                    })()}
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                                    <div className="rounded-xl bg-white border border-slate-200/80 p-3 shadow-2xs">
+                                        <p className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-0.5">Date</p>
+                                        <p className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+                                            <Calendar size={14} className="text-indigo-600" />
+                                            {formatInterviewDate(app.interview_date)}
+                                        </p>
+                                    </div>
+                                    <div className="rounded-xl bg-white border border-slate-200/80 p-3 shadow-2xs">
+                                        <p className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-0.5">Time</p>
+                                        <p className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+                                            <Clock size={14} className="text-amber-600" />
+                                            {formatInterviewTime(app.interview_date)}
+                                        </p>
+                                    </div>
+                                    <div className="rounded-xl bg-white border border-slate-200/80 p-3 shadow-2xs">
+                                        <p className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-0.5">Duration</p>
+                                        <p className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+                                            <Clock size={14} className="text-blue-600" />
+                                            {app.duration_minutes || 45} minutes
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-indigo-100/70">
+                                    {googleCalUrl && (
+                                        <a
+                                            href={googleCalUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-blue-600 hover:bg-slate-50 text-xs font-bold shadow-2xs transition-all cursor-pointer"
+                                        >
+                                            <CalendarPlus size={14} className="text-blue-600" /> Add to Google Calendar
+                                        </a>
+                                    )}
+                                    <button
+                                        onClick={handleDownloadIcs}
+                                        disabled={downloadingIcs}
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:bg-slate-50 text-xs font-bold shadow-2xs transition-all cursor-pointer disabled:opacity-50"
+                                    >
+                                        {downloadingIcs ? <Loader2 size={14} className="animate-spin text-indigo-600" /> : <Download size={14} className="text-indigo-600" />}
+                                        Download Invite (.ics)
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Overview Stats */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">

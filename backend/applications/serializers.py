@@ -14,12 +14,13 @@ class ApplicationSerializer(serializers.ModelSerializer):
         source='candidate', read_only=True)
     interview_date = serializers.SerializerMethodField()
     meeting_link = serializers.SerializerMethodField()
+    duration_minutes = serializers.SerializerMethodField()
 
     class Meta:
         model = Application
         fields = [
             'id', 'job', 'job_title', 'job_details', 'candidate', 'candidate_name', 'candidate_details',
-            'resume_score', 'ai_feedback', 'status', 'applied_at', 'interview_date', 'meeting_link'
+            'resume_score', 'ai_feedback', 'status', 'applied_at', 'interview_date', 'meeting_link', 'duration_minutes'
         ]
         # These fields are managed by the backend/AI, not the user submitting the form
         read_only_fields = ['candidate',
@@ -34,4 +35,10 @@ class ApplicationSerializer(serializers.ModelSerializer):
         if obj.ai_feedback and isinstance(obj.ai_feedback, dict):
             return obj.ai_feedback.get('meeting_link')
         return None
+
+    def get_duration_minutes(self, obj):
+        if obj.ai_feedback and isinstance(obj.ai_feedback, dict):
+            return obj.ai_feedback.get('duration_minutes', 45)
+        return 45
+
 

@@ -7,6 +7,7 @@ import { Loader2, X, Calendar } from 'lucide-react';
 const ScheduleInterviewModal = ({ show, handleClose, application }) => {
     const [datetime, setDatetime] = useState('');
     const [link, setLink] = useState('');
+    const [duration, setDuration] = useState('45');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -22,16 +23,18 @@ const ScheduleInterviewModal = ({ show, handleClose, application }) => {
         try {
             await scheduleInterview(application.id, {
                 interview_datetime: datetime,
-                meeting_link: link
+                meeting_link: link,
+                duration_minutes: parseInt(duration, 10) || 45,
             });
 
-            toast.success('Interview scheduled and email sent!');
+            toast.success('Interview scheduled! Calendar invite (.ics) sent to candidate.');
 
             setTimeout(() => {
                 handleClose();
                 setDatetime('');
                 setLink('');
-            }, 2000);
+                setDuration('45');
+            }, 1800);
 
         } catch (error) {
             toast.error(error.error || 'Failed to schedule interview.');
@@ -74,14 +77,29 @@ const ScheduleInterviewModal = ({ show, handleClose, application }) => {
                             </p>
 
                             <form onSubmit={handleSubmit} className="space-y-5">
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Date & Time</label>
-                                    <input
-                                        type="datetime-local"
-                                        value={datetime}
-                                        onChange={(e) => setDatetime(e.target.value)}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-                                    />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Date & Time</label>
+                                        <input
+                                            type="datetime-local"
+                                            value={datetime}
+                                            onChange={(e) => setDatetime(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Duration</label>
+                                        <select
+                                            value={duration}
+                                            onChange={(e) => setDuration(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm font-medium"
+                                        >
+                                            <option value="30">30 minutes</option>
+                                            <option value="45">45 minutes</option>
+                                            <option value="60">60 minutes (1 hr)</option>
+                                            <option value="90">90 minutes (1.5 hrs)</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -91,8 +109,15 @@ const ScheduleInterviewModal = ({ show, handleClose, application }) => {
                                         placeholder="https://meet.google.com/xyz-abcd-efg"
                                         value={link}
                                         onChange={(e) => setLink(e.target.value)}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm"
                                     />
+                                </div>
+
+                                <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-3.5 flex items-start gap-2.5 text-xs text-blue-800">
+                                    <Calendar size={16} className="text-blue-600 shrink-0 mt-0.5" />
+                                    <span>
+                                        An email with an attached <strong>.ics calendar invitation</strong> will be sent to the candidate. They can directly add this to Google Calendar, Apple Calendar, or Outlook.
+                                    </span>
                                 </div>
 
                                 {/* Footer buttons */}

@@ -83,6 +83,29 @@ export const scheduleInterview = async (applicationId, scheduleData) => {
         throw error.response?.data || error.message;
     }
 };
+
+/**
+ * Downloads standard RFC 5545 .ics calendar invitation for an interview.
+ */
+export const downloadCalendarInvite = async (applicationId) => {
+    try {
+        const response = await api.get(`applications/${applicationId}/calendar-invite/`, {
+            responseType: 'blob',
+        });
+        const blob = new Blob([response.data], { type: 'text/calendar;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `interview-${applicationId}.ics`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
 /**
  * Uploads a resume file to the AI analysis endpoint.
  * @param {File} file - The resume file (PDF / DOCX / TXT)

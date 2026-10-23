@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Video, Clock, Search, Briefcase, CheckCircle, AlertCircle, User, Sparkles, Bot, ArrowRight } from 'lucide-react';
-import api from '../../../services/api';
+import {
+    Calendar, Video, Clock, Search, Briefcase, CheckCircle, AlertCircle,
+    User, Sparkles, Bot, ArrowRight, Download, ExternalLink, CalendarPlus, Loader2, Lock
+} from 'lucide-react';
+import api, { downloadCalendarInvite } from '../../../services/api';
 import toast from 'react-hot-toast';
 import { T } from '../../../Js/theme';
 import { KpiCard } from '../../../ui/DashboardUI';
@@ -10,7 +13,82 @@ import MockInterviewCoach from '../../Interview/MockInterviewCoach.jsx';
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'TBD';
+const formatDate = (d) => {
+    if (!d) return 'TBD';
+    try {
+        const dt = new Date(d);
+        if (isNaN(dt.getTime())) return d;
+        return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch {
+        return 'TBD';
+    }
+};
+
+const formatInterviewTime = (d) => {
+    if (!d) return 'TBD';
+    try {
+        const dt = new Date(d);
+        if (isNaN(dt.getTime())) return 'TBD';
+        return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+        return 'TBD';
+    }
+};
+
+const safeMeetingUrl = (link) => {
+    if (!link) return '';
+    return link.startsWith('http://') || link.startsWith('https://') ? link : `https://${link}`;
+};
+
+const checkInterviewDateStatus = (dateStr) => {
+    if (!dateStr) return { isToday: true, isEarly: false, isPast: false };
+    try {
+        const sched = new Date(dateStr);
+        if (isNaN(sched.getTime())) return { isToday: true, isEarly: false, isPast: false };
+        const now = new Date();
+        const schedDay = new Date(sched.getFullYear(), sched.getMonth(), sched.getDate()).getTime();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+        if (today < schedDay) {
+            return { isToday: false, isEarly: true, isPast: false };
+        } else if (today > schedDay) {
+            return { isToday: false, isEarly: false, isPast: true };
+        } else {
+            return { isToday: true, isEarly: false, isPast: false };
+        }
+    } catch {
+        return { isToday: true, isEarly: false, isPast: false };
+    }
+};
+
+const formatGoogleCalendarDate = (dt) => {
+    return dt.toISOString().replace(/-|:|\.\d\d\d/g, '');
+};
+
+const buildGoogleCalendarUrl = (app) => {
+    if (!app?.interview_date) return null;
+    try {
+        const start = new Date(app.interview_date);
+        if (isNaN(start.getTime())) return null;
+        const duration = app.duration_minutes || 45;
+        const end = new Date(start.getTime() + duration * 60 * 1000);
+
+        const title = `Interview: ${app.job_details?.title || 'Job Interview'}`;
+        const location = app.meeting_link || 'Online Video Meeting';
+        const details = [
+            `Interview for the ${app.job_details?.title || 'Job'} position.`,
+            `Company: ${app.job_details?.company || 'AI Recruitment Platform'}`,
+            `Interviewer: ${app.recruiter_name || 'Hiring Team'}`,
+            app.meeting_link ? `Meeting Link: ${app.meeting_link}` : null,
+            'Please join 5 minutes early.',
+        ].filter(Boolean).join('\n');
+
+        const dates = `${formatGoogleCalendarDate(start)}/${formatGoogleCalendarDate(end)}`;
+        return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${dates}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}`;
+    } catch {
+        return null;
+    }
+};
 
 const TIPS = [
     { icon: '📋', tip: 'Research the company and role thoroughly before the interview.' },
@@ -24,6 +102,7 @@ const CandidateInterviewsPage = ({ openMockImmediately = false }) => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [downloadingIcsId, setDownloadingIcsId] = useState(null);
     const [now] = useState(() => Date.now());
     const [mockCoachOpen, setMockCoachOpen] = useState(openMockImmediately);
     const [mockInitialRole, setMockInitialRole] = useState('');
@@ -46,6 +125,40 @@ const CandidateInterviewsPage = ({ openMockImmediately = false }) => {
         const q = search.toLowerCase();
         return interviews.filter(a => a.job_details?.title?.toLowerCase().includes(q));
     }, [interviews, search]);
+
+    const handleDownloadIcs = async (app) => {
+        if (downloadingIcsId) return;
+        setDownloadingIcsId(app.id);
+        try {
+            await downloadCalendarInvite(app.id);
+            toast.success('Calendar invitation (.ics) downloaded!');
+        } catch (err) {
+            toast.error(err?.error || 'Failed to download calendar invitation.');
+        } finally {
+            setDownloadingIcsId(null);
+        }
+    };
+
+    const handleJoinCall = (appToJoin) => {
+        if (!appToJoin?.meeting_link) return;
+        const { isEarly, isPast } = checkInterviewDateStatus(appToJoin.interview_date);
+        if (isEarly) {
+            toast.error(
+                `Interview is scheduled for ${formatDate(appToJoin.interview_date)} at ${formatInterviewTime(appToJoin.interview_date)}. The video call link will only open on the scheduled interview date.`,
+                { icon: '⏳', duration: 5000 }
+            );
+            return;
+        }
+        if (isPast) {
+            toast.error(
+                `This interview was scheduled for ${formatDate(appToJoin.interview_date)} and the date has passed.`,
+                { icon: '⚠️', duration: 5000 }
+            );
+            return;
+        }
+        const url = safeMeetingUrl(appToJoin.meeting_link);
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
 
     const scoreColor = (s) => s >= 85 ? 'text-green-700 bg-green-50 border-green-200' : s >= 65 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200';
 
@@ -72,7 +185,7 @@ const CandidateInterviewsPage = ({ openMockImmediately = false }) => {
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="flex-1">
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900">My Interviews</h1>
-                    <p className="mt-1 text-sm sm:text-base text-slate-500">Track your scheduled interviews and prepare to ace them</p>
+                    <p className="mt-1 text-sm sm:text-base text-slate-500">Track your scheduled interviews, sync to your calendar, and prepare to ace them</p>
                 </div>
                 <div className="flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-sm sm:text-base font-bold text-indigo-700 shadow-sm">
                     <Video size={16} /> {interviews.length} scheduled
@@ -129,7 +242,7 @@ const CandidateInterviewsPage = ({ openMockImmediately = false }) => {
             <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                     { label: 'Scheduled', value: interviews.length, color: '#6366F1', icon: Calendar },
-                    { label: 'This Week', value: interviews.filter(a => { const d = Math.floor((new Date(a.updated_at) - now) / 864e5); return d >= 0 && d <= 7; }).length, color: '#F59E0B', icon: Clock },
+                    { label: 'This Week', value: interviews.filter(a => { const d = Math.floor((new Date(a.updated_at || a.interview_date) - now) / 864e5); return d >= 0 && d <= 7; }).length, color: '#F59E0B', icon: Clock },
                     { label: 'Completed', value: 0, color: '#22C55E', icon: CheckCircle },
                 ].map((s, i) => <KpiCard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />)}
             </motion.div>
@@ -166,61 +279,140 @@ const CandidateInterviewsPage = ({ openMockImmediately = false }) => {
                             Practice with AI Coach Anyway
                         </button>
                     </motion.div>
-                ) : filtered.map(app => (
-                    <motion.div key={app.id} variants={fadeUp}
-                        className="group rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden hover:shadow-md hover:border-indigo-200 transition-all">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5">
-                            {/* Avatar */}
-                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white font-extrabold text-xl sm:text-2xl shadow-md"
-                                style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
-                                {(app.job_details?.title || 'J')[0].toUpperCase()}
-                            </div>
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex flex-wrap items-center gap-2 mb-1">
-                                    <h4 className="text-base sm:text-lg font-bold text-slate-900 capitalize truncate">{app.job_details?.title}</h4>
-                                    <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-xs sm:text-sm font-bold text-indigo-700">
-                                        <Video size={13} className="mr-1" /> Interview Scheduled
-                                    </span>
-                                    {app.resume_score > 0 && (
-                                        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs sm:text-sm font-bold ${scoreColor(app.resume_score)}`}>
-                                            {app.resume_score}% match
+                ) : filtered.map(app => {
+                    const googleCalUrl = buildGoogleCalendarUrl(app);
+
+                    return (
+                        <motion.div key={app.id} variants={fadeUp}
+                            className="group rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden hover:shadow-md hover:border-indigo-200 transition-all">
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-4 p-5">
+                                {/* Avatar */}
+                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white font-extrabold text-xl sm:text-2xl shadow-md"
+                                    style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
+                                    {(app.job_details?.title || 'J')[0].toUpperCase()}
+                                </div>
+                                {/* Info */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                                        <h4 className="text-base sm:text-lg font-bold text-slate-900 capitalize truncate">{app.job_details?.title}</h4>
+                                        <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-xs sm:text-sm font-bold text-indigo-700">
+                                            <Video size={13} className="mr-1" /> Interview Scheduled
                                         </span>
-                                    )}
-                                </div>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs sm:text-sm text-slate-600 font-medium">
-                                    <span className="flex items-center gap-1"><Calendar size={13} />Date: {formatDate(app.interview_date)}</span>
-                                    <span className="flex items-center gap-1"><Clock size={13} />Time: TBD / Via Email</span>
-                                    <span className="flex items-center gap-1"><User size={13} />Recruiter: {app.recruiter_name || 'Hiring Team'}</span>
+                                        {app.resume_score > 0 && (
+                                            <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs sm:text-sm font-bold ${scoreColor(app.resume_score)}`}>
+                                                {app.resume_score}% match
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs sm:text-sm text-slate-600 font-medium mb-3">
+                                        <span className="flex items-center gap-1 font-semibold text-slate-800">
+                                            <Calendar size={13} className="text-indigo-600" />
+                                            Date: {formatDate(app.interview_date)}
+                                        </span>
+                                        <span className="flex items-center gap-1 font-semibold text-slate-800">
+                                            <Clock size={13} className="text-amber-600" />
+                                            Time: {formatInterviewTime(app.interview_date)} ({app.duration_minutes || 45} mins)
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                            <User size={13} className="text-slate-400" />
+                                            Interviewer: {app.recruiter_name || app.job_details?.company || 'Hiring Team'}
+                                        </span>
+                                    </div>
+
+                                    {/* Action Buttons: Calendar Sync, Meeting Link & Mock Prep */}
+                                    <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+                                        {app.meeting_link && (() => {
+                                            const { isToday, isEarly } = checkInterviewDateStatus(app.interview_date);
+                                            return (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleJoinCall(app)}
+                                                    title={
+                                                        isToday
+                                                            ? 'Join the video call now'
+                                                            : isEarly
+                                                                ? `Interview scheduled for ${formatDate(app.interview_date)}. Opens on interview date.`
+                                                                : `Interview date (${formatDate(app.interview_date)}) has passed.`
+                                                    }
+                                                    className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold shadow-xs transition-all cursor-pointer ${isToday
+                                                        ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-500/20'
+                                                        : isEarly
+                                                            ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                                                            : 'bg-slate-100 hover:bg-slate-200 text-slate-500 border border-slate-200'
+                                                        }`}
+                                                >
+                                                    {isToday ? (
+                                                        <>
+                                                            <Video size={13} />
+                                                            Join Video Call
+                                                            <ExternalLink size={11} className="opacity-80" />
+                                                        </>
+                                                    ) : isEarly ? (
+                                                        <>
+                                                            <Lock size={13} className="text-amber-600" />
+                                                            Join Video Call
+                                                            <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                                                Opens {formatDate(app.interview_date)}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Lock size={13} className="text-slate-400" />
+                                                            Join Video Call
+                                                        </>
+                                                    )}
+                                                </button>
+                                            );
+                                        })()}
+                                        {googleCalUrl && (
+                                            <a
+                                                href={googleCalUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 px-3 py-1.5 text-xs font-bold shadow-2xs transition-all cursor-pointer"
+                                                title="Add this scheduled interview to your Google Calendar"
+                                            >
+                                                <CalendarPlus size={13} className="text-blue-600" />
+                                                Add to Google Calendar
+                                            </a>
+                                        )}
+                                        <button
+                                            onClick={() => handleDownloadIcs(app)}
+                                            disabled={downloadingIcsId === app.id}
+                                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 px-3 py-1.5 text-xs font-bold shadow-2xs transition-all cursor-pointer disabled:opacity-50"
+                                            title="Download standard .ics file for Apple Calendar, Outlook, and other calendar apps"
+                                        >
+                                            {downloadingIcsId === app.id ? (
+                                                <Loader2 size={13} className="animate-spin text-indigo-600" />
+                                            ) : (
+                                                <Download size={13} className="text-indigo-600" />
+                                            )}
+                                            Download Invite (.ics)
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setMockInitialRole(app.job_details?.title || '');
+                                                setMockCoachOpen(true);
+                                            }}
+                                            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 text-xs font-bold shadow-2xs transition-all cursor-pointer ml-auto"
+                                            title="Practice an AI mock interview tailored for this role"
+                                        >
+                                            <Sparkles size={13} /> Practice with AI Coach
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            {/* Mode badge & Practice action */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 shrink-0">
-                                <button
-                                    onClick={() => {
-                                        setMockInitialRole(app.job_details?.title || '');
-                                        setMockCoachOpen(true);
-                                    }}
-                                    className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 px-3 py-1.5 text-xs sm:text-sm font-bold text-indigo-700 transition-colors cursor-pointer shadow-xs"
-                                    title="Practice an AI mock interview tailored for this role"
-                                >
-                                    <Sparkles size={13} /> Practice for this Role
-                                </button>
-                                <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 border border-slate-200 px-3 py-1 text-xs sm:text-sm font-semibold text-slate-600">
-                                    <Video size={13} /> Video Call
-                                </span>
+                            {/* Prep tip */}
+                            <div className="border-t border-slate-100 bg-slate-50 px-5 py-3 flex items-start gap-2">
+                                <AlertCircle size={15} className="shrink-0 mt-0.5 text-amber-500" />
+                                <p className="text-xs sm:text-sm text-slate-600">
+                                    <span className="font-semibold text-slate-800">Prep tip: </span>
+                                    {TIPS[Math.abs(app.id % TIPS.length)]?.tip}
+                                </p>
                             </div>
-                        </div>
-                        {/* Prep tip */}
-                        <div className="border-t border-slate-100 bg-slate-50 px-5 py-3 flex items-start gap-2">
-                            <AlertCircle size={15} className="shrink-0 mt-0.5 text-amber-500" />
-                            <p className="text-xs sm:text-sm text-slate-600">
-                                <span className="font-semibold text-slate-800">Prep tip: </span>
-                                {TIPS[Math.abs(app.id % TIPS.length)]?.tip}
-                            </p>
-                        </div>
-                    </motion.div>
-                ))}
+                        </motion.div>
+                    );
+                })}
             </motion.div>
 
             {/* Interview Tips */}

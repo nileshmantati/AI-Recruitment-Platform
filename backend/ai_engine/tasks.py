@@ -1,10 +1,11 @@
 import os
 # pyrefly: ignore [missing-import]
 from celery import shared_task
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
 from .services import extract_text_from_file, extract_text_from_pdf, evaluate_candidate_resume
 from applications.models import Application
+from applications.utils import generate_ics_calendar
 
 
 @shared_task(bind=True, max_retries=3)
@@ -97,42 +98,87 @@ def send_status_update_email(self, application_id, new_status):
 
 
 @shared_task(bind=True, max_retries=3)
-def send_interview_invitation(self, application_id, interview_datetime, meeting_link):
+def send_interview_invitation(self, application_id, interview_datetime, meeting_link, duration_minutes=45):
     try:
-        application = Application.objects.get(id=application_id)
+        application = Application.objects.select_related(
+            'job__recruiter', 'candidate__user'
+        ).get(id=application_id)
         candidate_email = application.candidate.user.email
         if not candidate_email:
             return f"Application {application_id} candidate has no email, skipping interview invitation."
         job_title = application.job.title
         candidate_name = application.candidate.first_name or application.candidate.user.username or "Candidate"
 
-        subject = f"Interview Invitation: {job_title} at AI Recruitment Platform"
+        recruiter = application.job.recruiter
+        recruiter_name = recruiter.get_full_name() or recruiter.username or "Hiring Team"
+        recruiter_email = recruiter.email or ""
+        company_name = "AI Recruitment Platform"
+        if hasattr(recruiter, 'recruiter_profile') and recruiter.recruiter_profile.company:
+            company_name = recruiter.recruiter_profile.company
+
+        sequence = 0
+        if isinstance(application.ai_feedback, dict):
+            sequence = application.ai_feedback.get('interview_sequence', 0)
+
+        subject = f"Interview Invitation: {job_title} at {company_name}"
 
         message = f"""Hello {candidate_name},
 
-Congratulations! We would like to invite you for an interview for the {job_title} role.
+Congratulations! We would like to invite you for an interview for the {job_title} role at {company_name}.
 
-Your interview is scheduled for: {interview_datetime}
+Interview Schedule Details:
+• Date & Time: {interview_datetime}
+• Duration: {duration_minutes} minutes
+• Meeting Link: {meeting_link}
+• Interviewer: {recruiter_name} ({recruiter_email if recruiter_email else 'Hiring Team'})
 
-Meeting Link: {meeting_link}
+We have attached an official calendar invite (.ics) to this email. You can open and add it directly to your Google Calendar, Apple Calendar, or Microsoft Outlook with one click.
 
-Please ensure you join 5 minutes early. Our AI has matched your profile strongly with this role, and we are excited to speak with you!
+Please ensure you join 5 minutes early. We are excited to speak with you!
 
 Best Regards,
-AI Recruitment Team
+{company_name} Recruitment Team
 """
 
-        send_mail(
+        # Generate standard RFC 5545 .ics calendar attachment
+        ics_content = None
+        try:
+            ics_content = generate_ics_calendar(
+                application_id=application.id,
+                job_title=job_title,
+                candidate_name=candidate_name,
+                candidate_email=candidate_email,
+                recruiter_name=recruiter_name,
+                recruiter_email=recruiter_email,
+                interview_datetime=interview_datetime,
+                duration_minutes=duration_minutes,
+                meeting_link=meeting_link,
+                company_name=company_name,
+                sequence=sequence,
+            )
+        except Exception as ics_err:
+            print(f"Warning: Failed to generate .ics attachment for email: {ics_err}")
+
+        email = EmailMessage(
             subject=subject,
-            message=message,
+            body=message,
             from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[candidate_email],
-            fail_silently=False,
+            to=[candidate_email],
         )
-        return f"Interview invite sent to {candidate_email}"
+
+        if ics_content:
+            email.attach(
+                filename='interview-invitation.ics',
+                content=ics_content,
+                mimetype='text/calendar; charset=utf-8; method=REQUEST',
+            )
+
+        email.send(fail_silently=False)
+        return f"Interview invite with calendar attachment sent to {candidate_email}"
 
     except Exception as exc:
         print(f"Error sending interview email: {exc}")
         if getattr(self.request, 'id', None):
             raise self.retry(exc=exc, countdown=60)
         raise exc
+

@@ -1,5 +1,9 @@
 from django.urls import path
-from .views import ApplyJobView, GenerateInterviewQuestionsView, JobApplicantsListView, UpdateApplicationStatusView, ScheduleInterviewView, MyApplicationsListView, LatestApplicationsView, AllRecruiterApplicationsView
+from .views import (
+    ApplyJobView, GenerateInterviewQuestionsView, JobApplicantsListView,
+    UpdateApplicationStatusView, ScheduleInterviewView, MyApplicationsListView,
+    LatestApplicationsView, AllRecruiterApplicationsView, InterviewCalendarInviteView
+)
 
 urlpatterns = [
     path('apply/', ApplyJobView.as_view(), name='apply-job'),
@@ -14,4 +18,7 @@ urlpatterns = [
          UpdateApplicationStatusView.as_view(), name='update-status'),
     path('<int:application_id>/schedule/',
          ScheduleInterviewView.as_view(), name='schedule-interview'),
+    path('<int:application_id>/calendar-invite/',
+         InterviewCalendarInviteView.as_view(), name='interview-calendar-invite'),
 ]
+
