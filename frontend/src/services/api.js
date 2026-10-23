@@ -198,4 +198,39 @@ export const resendVerificationOTP = async (emailOrUsername) => {
     return response.data;
 };
 
+/**
+ * Fetch paginated list of notifications for the authenticated user.
+ */
+export const getNotifications = async ({ page = 1, unreadOnly = false } = {}) => {
+    const params = new URLSearchParams();
+    if (page) params.append('page', page);
+    if (unreadOnly) params.append('unread_only', 'true');
+    const response = await api.get(`notifications/?${params.toString()}`);
+    return response.data;
+};
+
+/**
+ * Fetch the unread notification count for the authenticated user.
+ */
+export const getUnreadNotificationCount = async () => {
+    const response = await api.get('notifications/unread-count/');
+    return response.data;
+};
+
+/**
+ * Mark a single notification as read.
+ */
+export const markNotificationAsRead = async (notificationId) => {
+    const response = await api.patch(`notifications/${notificationId}/read/`);
+    return response.data;
+};
+
+/**
+ * Mark all notifications as read for the authenticated user.
+ */
+export const markAllNotificationsAsRead = async () => {
+    const response = await api.post('notifications/mark-all-read/');
+    return response.data;
+};
+
 export default api;

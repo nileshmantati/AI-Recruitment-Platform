@@ -13,6 +13,7 @@ from .serializers import ApplicationSerializer
 from .utils import generate_ics_calendar
 from ai_engine.tasks import process_resume_scoring, send_status_update_email, send_interview_invitation
 from ai_engine.services import generate_interview_questions
+from notifications.services import create_notification
 
 
 logger = logging.getLogger(__name__)
@@ -77,6 +78,33 @@ class ApplyJobView(generics.CreateAPIView):
         application = Application.objects.create(
             candidate=user.candidate_profile,
             job=job
+        )
+
+        # Create in-app notifications
+        company_name = (
+            job.recruiter.recruiter_profile.company
+            if hasattr(job.recruiter, 'recruiter_profile') and job.recruiter.recruiter_profile.company
+            else "the company"
+        )
+        create_notification(
+            recipient=user,
+            actor=None,
+            event_type='APPLICATION_SUBMITTED',
+            title='Application Submitted',
+            message=f"You successfully submitted your application for {job.title} at {company_name}.",
+            target_type='APPLICATION',
+            target_id=application.id
+        )
+
+        candidate_name = user.get_full_name() or user.username
+        create_notification(
+            recipient=job.recruiter,
+            actor=user,
+            event_type='NEW_APPLICATION',
+            title='New Candidate Application',
+            message=f"{candidate_name} applied for your job posting '{job.title}'.",
+            target_type='APPLICATION',
+            target_id=application.id
         )
 
         # TRIGGER THE AI ENGINE: Send task to Celery queue so the user doesn't wait
@@ -204,6 +232,41 @@ class UpdateApplicationStatusView(APIView):
         application.status = new_status
         application.save()
 
+        # Send in-app notification to candidate
+        candidate_user = application.candidate.user
+        job_title = application.job.title
+        if new_status == 'SHORTLISTED':
+            create_notification(
+                recipient=candidate_user,
+                actor=request.user,
+                event_type='APPLICATION_SHORTLISTED',
+                title='Application Shortlisted!',
+                message=f"Congratulations! Your application for {job_title} has been shortlisted.",
+                target_type='APPLICATION',
+                target_id=application.id
+            )
+        elif new_status == 'REJECTED':
+            create_notification(
+                recipient=candidate_user,
+                actor=request.user,
+                event_type='APPLICATION_REJECTED',
+                title='Application Update',
+                message=f"Your application status for {job_title} has been updated to Rejected.",
+                target_type='APPLICATION',
+                target_id=application.id
+            )
+        else:
+            status_display = dict(Application.STATUS_CHOICES).get(new_status, new_status)
+            create_notification(
+                recipient=candidate_user,
+                actor=request.user,
+                event_type='APPLICATION_STATUS_UPDATED',
+                title='Application Status Updated',
+                message=f"Your application status for {job_title} has been updated to {status_display}.",
+                target_type='APPLICATION',
+                target_id=application.id
+            )
+
         # Send email in background thread (non-blocking)
         _run_in_thread(send_status_update_email, application.id, new_status)
 
@@ -241,15 +304,42 @@ class ScheduleInterviewView(APIView):
         if not interview_datetime or not meeting_link:
             return Response({"error": "Date, time, and meeting link are required."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Check whether this is an initial schedule or reschedule
+        feedback = application.ai_feedback if isinstance(application.ai_feedback, dict) else {}
+        is_reschedule = feedback.get('interview_sequence', -1) >= 0
+
         # Update application status and persist interview schedule details
         application.status = 'INTERVIEW_SCHEDULED'
-        feedback = application.ai_feedback if isinstance(application.ai_feedback, dict) else {}
         feedback['interview_datetime'] = interview_datetime
         feedback['meeting_link'] = meeting_link
         feedback['duration_minutes'] = duration_minutes
         feedback['interview_sequence'] = feedback.get('interview_sequence', -1) + 1
         application.ai_feedback = feedback
         application.save()
+
+        # Send in-app notification to candidate
+        candidate_user = application.candidate.user
+        job_title = application.job.title
+        if is_reschedule:
+            create_notification(
+                recipient=candidate_user,
+                actor=request.user,
+                event_type='INTERVIEW_RESCHEDULED',
+                title='Interview Rescheduled',
+                message=f"Your interview for {job_title} has been rescheduled to {interview_datetime}.",
+                target_type='APPLICATION',
+                target_id=application.id
+            )
+        else:
+            create_notification(
+                recipient=candidate_user,
+                actor=request.user,
+                event_type='INTERVIEW_SCHEDULED',
+                title='Interview Scheduled',
+                message=f"An interview for {job_title} has been scheduled for {interview_datetime}.",
+                target_type='APPLICATION',
+                target_id=application.id
+            )
 
         # Send email in background thread (non-blocking)
         _run_in_thread(
