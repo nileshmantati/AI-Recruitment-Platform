@@ -89,7 +89,7 @@ const getEventVisuals = (eventType) => {
     }
 };
 
-const NotificationCenter = ({ role = '', className = '' }) => {
+const NotificationCenter = ({ className = '' }) => {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -136,7 +136,7 @@ const NotificationCenter = ({ role = '', className = '' }) => {
             setNotifications(prev => append ? [...prev, ...results] : results);
             setHasMore(Boolean(data.next));
             setNextPage(page + 1);
-        } catch (err) {
+        } catch {
             setError('Could not load notifications. Please try again.');
         } finally {
             setIsLoading(false);
@@ -146,6 +146,7 @@ const NotificationCenter = ({ role = '', className = '' }) => {
 
     // Set up polling (every 30 seconds) and tab visibility listeners
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchUnreadCount();
 
         const pollInterval = setInterval(() => {

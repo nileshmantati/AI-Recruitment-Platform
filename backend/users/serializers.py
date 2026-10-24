@@ -129,6 +129,35 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 'username': self.user.username
             })
 
+        # Record LoginHistory entry safely
+        request = self.context.get('request')
+        if request and self.user:
+            try:
+                from recruiter_settings.models import LoginHistory
+                user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown')
+                ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
+                if ip and ',' in ip:
+                    ip = ip.split(',')[0].strip()
+                device_type = 'Mobile' if any(m in user_agent for m in ('Mobile', 'Android', 'iPhone', 'iPad')) else 'Desktop'
+                browser_name = 'Other'
+                if 'Chrome' in user_agent and 'Edg' not in user_agent:
+                    browser_name = 'Chrome'
+                elif 'Firefox' in user_agent:
+                    browser_name = 'Firefox'
+                elif 'Safari' in user_agent and 'Chrome' not in user_agent:
+                    browser_name = 'Safari'
+                elif 'Edg' in user_agent:
+                    browser_name = 'Edge'
+
+                LoginHistory.objects.create(
+                    user=self.user,
+                    device=device_type,
+                    browser=browser_name,
+                    ip_address=ip or '127.0.0.1'
+                )
+            except Exception:
+                pass
+
         # Add extra fields to the response (not the token itself)
         data['role'] = self.user.role
         data['username'] = self.user.username

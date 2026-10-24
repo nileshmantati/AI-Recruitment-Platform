@@ -58,14 +58,14 @@ const JobCard = ({ job, onApply, isSaved, onToggleSave }) => {
                         {/* Recruiter — replaced Bootstrap `bi bi-building` with lucide Building2 icon */}
                         <p className="mt-0.5 flex items-center gap-1 text-sm text-gray-500">
                             <Building2 size={13} className="shrink-0 text-slate-400" />
-                            Posted by {job.recruiter_name}
+                            Posted by {job.company || job.recruiter_name}
                         </p>
                     </div>
                 </div>
 
                 {/* Description */}
                 <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-slate-500">
-                    {job.description || 'No description provided for this role.'}
+                    {job.description ? job.description.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim() : 'No description provided for this role.'}
                 </p>
 
                 {/* Skills Tags */}

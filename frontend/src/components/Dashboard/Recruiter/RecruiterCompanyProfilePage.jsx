@@ -32,6 +32,7 @@ const RecruiterCompanyProfilePage = ({ isProfileCompleted, setIsProfileCompleted
                 setCompany(data);
                 if (data && setIsProfileCompleted) {
                     setIsProfileCompleted(true);
+                    localStorage.setItem('profile_completed', 'true');
                     setIsEditing(false);
                 }
             } catch (error) {

@@ -98,7 +98,7 @@ const CandidateSavedJobsPage = () => {
                                     </div>
                                     {/* Description */}
                                     <p className="mb-3 line-clamp-2 text-xs sm:text-sm leading-relaxed text-slate-600">
-                                        {job.description || 'No description provided.'}
+                                        {job.description ? job.description.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim() : 'No description provided.'}
                                     </p>
                                     {/* Skills */}
                                     {skills.length > 0 && (

@@ -1,7 +1,7 @@
 
 import logging
 import threading
-from django.db import connection
+from django.db import connection, transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
@@ -19,16 +19,37 @@ from notifications.services import create_notification
 logger = logging.getLogger(__name__)
 
 
-def _run_in_thread(task_func, *args):
-    """Wrapper that ensures each thread gets its own Django DB connection."""
-    def wrapper():
+def dispatch_async_task(task_func, *args):
+    """
+    Safely dispatches an async task after the database transaction commits.
+    Prefers Celery delay(); falls back to background thread if Celery/broker is unavailable.
+    Using transaction.on_commit guarantees the database record is saved and SQLite is unlocked.
+    """
+    def _execute():
+        # 1. Attempt Celery worker queue first
         try:
-            task_func(*args)
+            if hasattr(task_func, 'delay'):
+                task_func.delay(*args)
+                return
         except Exception as e:
-            logger.error(f"Background email task failed: {e}")
-        finally:
-            connection.close()
-    threading.Thread(target=wrapper, daemon=True).start()
+            logger.warning(f"Celery dispatch failed for {getattr(task_func, '__name__', str(task_func))}, using fallback thread: {e}")
+
+        # 2. Fallback to background thread with its own DB connection
+        def _thread_target():
+            try:
+                task_func(*args)
+            except Exception as exc:
+                logger.error(f"Background task {getattr(task_func, '__name__', str(task_func))} failed: {exc}")
+            finally:
+                connection.close()
+
+        threading.Thread(target=_thread_target, daemon=True).start()
+
+    transaction.on_commit(_execute)
+
+
+# Backward-compatibility alias
+_run_in_thread = dispatch_async_task
 
 
 class ApplyJobView(generics.CreateAPIView):
@@ -109,7 +130,7 @@ class ApplyJobView(generics.CreateAPIView):
 
         # TRIGGER THE AI ENGINE: Send task to Celery queue so the user doesn't wait
         try:
-            _run_in_thread(process_resume_scoring, application.id)
+            dispatch_async_task(process_resume_scoring, application.id)
         except Exception as e:
             # Don't let a broker/Redis failure crash the entire application submission
             logger.error(
@@ -267,8 +288,8 @@ class UpdateApplicationStatusView(APIView):
                 target_id=application.id
             )
 
-        # Send email in background thread (non-blocking)
-        _run_in_thread(send_status_update_email, application.id, new_status)
+        # Send email asynchronously (non-blocking)
+        dispatch_async_task(send_status_update_email, application.id, new_status)
 
         return Response({
             "message": f"Application marked as {new_status}. Email notification is being sent.",
@@ -341,8 +362,8 @@ class ScheduleInterviewView(APIView):
                 target_id=application.id
             )
 
-        # Send email in background thread (non-blocking)
-        _run_in_thread(
+        # Send email asynchronously (non-blocking)
+        dispatch_async_task(
             send_interview_invitation,
             application.id,
             interview_datetime,

@@ -110,7 +110,21 @@ const RecruiterEditJob = ({
                                 </div>
                                 <div className="rounded-xl bg-slate-50 p-3">
                                     <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Type</p>
-                                    <p className="mt-1 text-sm font-bold text-slate-800">{job.type || 'Full-time'}</p>
+                                    {isEditing ? (
+                                        <select
+                                            value={editForm.type || 'Full-time'}
+                                            onChange={e => setEditForm({ ...editForm, type: e.target.value })}
+                                            className="mt-1 w-full rounded-md border border-slate-200 bg-white p-1 text-xs font-bold text-slate-800 outline-none focus:border-indigo-400"
+                                        >
+                                            <option value="Full-time">Full-time</option>
+                                            <option value="Part-time">Part-time</option>
+                                            <option value="Contract">Contract</option>
+                                            <option value="Internship">Internship</option>
+                                            <option value="Remote">Remote</option>
+                                        </select>
+                                    ) : (
+                                        <p className="mt-1 text-sm font-bold text-slate-800">{job.type || 'Full-time'}</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -120,12 +134,13 @@ const RecruiterEditJob = ({
                                 {isEditing ? (
                                     <textarea value={editForm.description}
                                         onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                                        rows={6}
-                                        className="w-full rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 resize-none" />
+                                        rows={8}
+                                        className="w-full rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 resize-none font-mono" />
                                 ) : (
-                                    <div className="rounded-xl bg-slate-50 p-4 text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
-                                        {job.description || 'No description provided.'}
-                                    </div>
+                                    <div
+                                        className="rounded-xl bg-slate-50 p-4 text-sm leading-relaxed text-slate-700 whitespace-pre-line [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-slate-800 [&_h2]:mt-3 [&_h2]:mb-1.5 [&_h3]:text-sm [&_h3]:font-bold [&_h3]:text-slate-800 [&_h3]:mt-3 [&_h3]:mb-1.5 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_li]:mb-1 [&_strong]:font-semibold [&_strong]:text-slate-900"
+                                        dangerouslySetInnerHTML={{ __html: job.description || 'No description provided.' }}
+                                    />
                                 )}
                             </div>
 

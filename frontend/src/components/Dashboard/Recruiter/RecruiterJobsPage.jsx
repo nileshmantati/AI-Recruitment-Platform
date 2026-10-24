@@ -73,6 +73,7 @@ const RecruiterJobsPage = () => {
             title: job.title || '',
             description: job.description || '',
             salary: job.salary || '',
+            type: job.type || 'Full-time',
             required_skills: Array.isArray(job.required_skills)
                 ? job.required_skills.join(', ')
                 : (job.required_skills || ''),

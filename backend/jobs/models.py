@@ -8,6 +8,7 @@ class Job(models.Model):
     description = models.TextField()
     required_skills = models.JSONField(default=list)
     salary = models.CharField(max_length=100, blank=True)
+    type = models.CharField(max_length=50, default='Full-time', blank=True)
     recruiter = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posted_jobs')
     created_at = models.DateTimeField(auto_now_add=True)

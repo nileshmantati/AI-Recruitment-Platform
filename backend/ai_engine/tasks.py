@@ -81,10 +81,11 @@ def send_status_update_email(self, application_id, new_status):
         else:
             return "No email required for this status."
 
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', settings.EMAIL_HOST_USER) or 'noreply@airecruitment.com'
         send_mail(
             subject=subject,
             message=message,
-            from_email=settings.EMAIL_HOST_USER,
+            from_email=from_email,
             recipient_list=[candidate_email],
             fail_silently=False,
         )
@@ -159,10 +160,11 @@ Best Regards,
         except Exception as ics_err:
             print(f"Warning: Failed to generate .ics attachment for email: {ics_err}")
 
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', settings.EMAIL_HOST_USER) or 'noreply@airecruitment.com'
         email = EmailMessage(
             subject=subject,
             body=message,
-            from_email=settings.EMAIL_HOST_USER,
+            from_email=from_email,
             to=[candidate_email],
         )
 

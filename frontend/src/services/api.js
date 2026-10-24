@@ -233,4 +233,22 @@ export const markAllNotificationsAsRead = async () => {
     return response.data;
 };
 
+/**
+ * Generates an AI-powered job description with structured schema and bias analysis.
+ * @param {Object} payload - { job_title, experience_level, location, employment_type, industry, notes, currency }
+ */
+export const generateJobDescription = async (payload) => {
+    const response = await api.post('ai/job-description/generate/', payload);
+    return response.data;
+};
+
+/**
+ * Analyzes an existing or recruiter-edited job description for inclusivity and bias.
+ * @param {Object} payload - { content, job_title }
+ */
+export const analyzeJobDescriptionBias = async (payload) => {
+    const response = await api.post('ai/job-description/analyze-bias/', payload);
+    return response.data;
+};
+
 export default api;
