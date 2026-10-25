@@ -1,3 +1,4 @@
+import os
 import secrets
 import logging
 from datetime import timedelta
@@ -248,17 +249,125 @@ def send_otp_email(user, otp):
         </p>
     </div>
     """
+def deliver_email(subject, message, recipient_list, html_message=None):
+    """
+    Sends email via HTTP API (Brevo / Resend) if configured, or falls back to Django SMTP send_mail.
+    Render Free Tier blocks raw SMTP ports (25, 465, 587), so HTTP APIs over HTTPS port 443 bypass the block.
+    """
+    brevo_api_key = os.environ.get('BREVO_API_KEY')
+    resend_api_key = os.environ.get('RESEND_API_KEY')
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or settings.EMAIL_HOST_USER or 'noreply@airecruitment.com'
+
+    if brevo_api_key:
+        try:
+            import requests
+            sender_name = os.environ.get('EMAIL_SENDER_NAME', 'AI Recruiter')
+            sender_email = os.environ.get('BREVO_SENDER_EMAIL') or from_email
+            payload = {
+                "sender": {"name": sender_name, "email": sender_email},
+                "to": [{"email": email} for email in recipient_list],
+                "subject": subject,
+                "htmlContent": html_message or f"<p>{message}</p>",
+                "textContent": message
+            }
+            resp = requests.post(
+                "https://api.brevo.com/v3/smtp/email",
+                headers={
+                    "api-key": brevo_api_key,
+                    "Content-Type": "application/json"
+                },
+                json=payload,
+                timeout=5
+            )
+            if resp.status_code in (200, 201, 202):
+                print(f"[EMAIL SUCCESS] Delivered via Brevo HTTPS API to {recipient_list}")
+                return True
+            else:
+                logger.error("Brevo API error %s: %s", resp.status_code, resp.text)
+                print(f"[BREVO ERROR] Status: {resp.status_code}, Body: {resp.text}")
+        except Exception as e:
+            logger.error("Brevo API exception: %s", e)
+            print(f"[BREVO EXCEPTION] {e}")
+
+    if resend_api_key:
+        try:
+            import requests
+            sender_email = os.environ.get('RESEND_FROM_EMAIL', 'onboarding@resend.dev')
+            payload = {
+                "from": sender_email,
+                "to": recipient_list,
+                "subject": subject,
+                "html": html_message or f"<p>{message}</p>",
+                "text": message
+            }
+            resp = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {resend_api_key}",
+                    "Content-Type": "application/json"
+                },
+                json=payload,
+                timeout=5
+            )
+            if resp.status_code in (200, 201, 202):
+                print(f"[EMAIL SUCCESS] Delivered via Resend HTTPS API to {recipient_list}")
+                return True
+            else:
+                logger.error("Resend API error %s: %s", resp.status_code, resp.text)
+                print(f"[RESEND ERROR] Status: {resp.status_code}, Body: {resp.text}")
+        except Exception as e:
+            logger.error("Resend API exception: %s", e)
+            print(f"[RESEND EXCEPTION] {e}")
+
+    # Standard Django send_mail (SMTP)
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=from_email,
+        recipient_list=recipient_list,
+        html_message=html_message,
+        fail_silently=False,
+    )
+    return True
+
+
+def send_otp_email(user, otp):
+    subject = "AI Recruiter - Password Reset Verification Code"
+    message = (
+        f"Hello {user.username},\n\n"
+        f"Your password reset verification code is: {otp}\n\n"
+        f"This code will expire in 10 minutes.\n"
+        f"If you did not request this, please ignore this email.\n\n"
+        f"Best regards,\nAI Recruiter Team"
+    )
+    html_message = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #06b6d4); color: white; padding: 12px 20px; border-radius: 12px; font-weight: bold; font-size: 18px;">
+                AI Recruiter
+            </div>
+        </div>
+        <h2 style="color: #1e293b; text-align: center; margin-bottom: 8px;">Password Reset Code</h2>
+        <p style="color: #64748b; font-size: 14px; text-align: center; margin-bottom: 24px;">
+            Use the verification code below to reset your password. This code will expire in <strong>10 minutes</strong>.
+        </p>
+        <div style="text-align: center; margin: 28px 0;">
+            <span style="display: inline-block; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #4f46e5; background: #eef2ff; padding: 16px 28px; border-radius: 14px; border: 2px dashed #c7d2fe;">
+                {otp}
+            </span>
+        </div>
+        <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 24px;">
+            If you did not request a password reset, you can safely ignore this email. Your account remains secure.
+        </p>
+    </div>
+    """
     try:
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or settings.EMAIL_HOST_USER or 'noreply@airecruitment.com'
-        send_mail(
+        return deliver_email(
             subject=subject,
             message=message,
-            from_email=from_email,
             recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
+            html_message=html_message
         )
-        return True
     except Exception as e:
         logger.error("Failed to send password reset OTP: %s", e)
         print(f"[EMAIL ERROR] Failed to send password reset OTP to {user.email}: {e}")
@@ -298,16 +407,12 @@ def send_verification_email(user, otp):
     </div>
     """
     try:
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or settings.EMAIL_HOST_USER or 'noreply@airecruitment.com'
-        send_mail(
+        return deliver_email(
             subject=subject,
             message=message,
-            from_email=from_email,
             recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
+            html_message=html_message
         )
-        return True
     except Exception as e:
         logger.error("Failed to send email verification OTP: %s", e)
         print(f"[EMAIL ERROR] Failed to send verification OTP to {user.email}: {e}")
