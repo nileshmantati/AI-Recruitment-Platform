@@ -345,6 +345,15 @@ For additional Docker commands, container health checks, and production multi-co
 
 ---
 
+## 🚀 Deployment & Services
+
+- **Vercel** — Frontend deployment and hosting.
+- **Render** — Django REST API backend deployment and hosting.
+- **Neon** — Cloud-hosted PostgreSQL database.
+- **Brevo** — Transactional email service for email OTP verification.
+
+---
+
 ## 🤝 Contributing
 
 1. Fork the repository
