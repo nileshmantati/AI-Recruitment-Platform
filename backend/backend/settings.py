@@ -59,9 +59,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -181,6 +181,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:80",
     "http://127.0.0.1:80",
     "http://localhost",
+    "https://ai-recruitment-platform-fawn.vercel.app",
 ]
 if os.environ.get('CORS_ALLOWED_ORIGINS'):
     CORS_ALLOWED_ORIGINS.extend([
@@ -199,6 +200,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://*.onrender.com",
     "https://*.vercel.app",
+    "https://ai-recruitment-platform-fawn.vercel.app",
+    "https://ai-recruitment-backend-9gst.onrender.com",
 ]
 if os.environ.get('CSRF_TRUSTED_ORIGINS'):
     CSRF_TRUSTED_ORIGINS.extend([
@@ -207,9 +210,11 @@ if os.environ.get('CSRF_TRUSTED_ORIGINS'):
 
 # For Email Sending
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('true', '1')
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() in ('true', '1')
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', 5))  # Prevents Gunicorn 30s timeout crash on cloud networks
 
 # Apne .env file me ye credentials add karo
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
