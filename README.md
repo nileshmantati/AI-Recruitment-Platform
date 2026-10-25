@@ -351,6 +351,7 @@ For additional Docker commands, container health checks, and production multi-co
 - **Render** ([https://render.com](https://render.com)) — Django REST API backend deployment and hosting.
 - **Neon** ([https://neon.tech](https://neon.tech)) — Cloud-hosted PostgreSQL database.
 - **Brevo** ([https://www.brevo.com](https://www.brevo.com)) — Transactional email service for email OTP verification.
+- **Upstash** ([https://upstash.com](https://upstash.com)) — Redis for caching and rate limiting.
 
 ---
 
