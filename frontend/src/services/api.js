@@ -2,10 +2,11 @@
 import axios from 'axios';
 
 // Read from .env — must be prefixed VITE_ for Vite to expose it to client code
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-if (!API_BASE_URL) {
-    throw new Error('[api.js] VITE_API_BASE_URL is not set. Add it to frontend/.env');
+let rawBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/';
+if (!rawBaseUrl.endsWith('/')) {
+    rawBaseUrl += '/';
 }
+const API_BASE_URL = rawBaseUrl;
 
 const api = axios.create({
     baseURL: API_BASE_URL,
