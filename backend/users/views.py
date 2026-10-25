@@ -249,17 +249,19 @@ def send_otp_email(user, otp):
     </div>
     """
     try:
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or settings.EMAIL_HOST_USER or 'noreply@airecruitment.com'
         send_mail(
             subject=subject,
             message=message,
-            from_email=settings.EMAIL_HOST_USER,
+            from_email=from_email,
             recipient_list=[user.email],
             html_message=html_message,
             fail_silently=False,
         )
         return True
     except Exception as e:
-        print(f"[EMAIL ERROR] Failed to send OTP email: {e}")
+        logger.error("Failed to send password reset OTP: %s", e)
+        print(f"[EMAIL ERROR] Failed to send password reset OTP to {user.email}: {e}")
         return False
 
 
@@ -296,10 +298,11 @@ def send_verification_email(user, otp):
     </div>
     """
     try:
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or settings.EMAIL_HOST_USER or 'noreply@airecruitment.com'
         send_mail(
             subject=subject,
             message=message,
-            from_email=settings.EMAIL_HOST_USER,
+            from_email=from_email,
             recipient_list=[user.email],
             html_message=html_message,
             fail_silently=False,
@@ -307,6 +310,7 @@ def send_verification_email(user, otp):
         return True
     except Exception as e:
         logger.error("Failed to send email verification OTP: %s", e)
+        print(f"[EMAIL ERROR] Failed to send verification OTP to {user.email}: {e}")
         return False
 
 
@@ -327,6 +331,10 @@ def generate_and_send_verification_otp(user):
         )
 
     logger.info("Generated email verification OTP for user: %s", user.username)
+    print("\n=======================================================")
+    print(f"[EMAIL VERIFICATION OTP] User: {user.username} | Email: {user.email}")
+    print(f"VERIFICATION CODE: {otp}")
+    print("=======================================================\n")
     email_sent = send_verification_email(user, otp)
     return otp, email_sent
 
@@ -379,6 +387,10 @@ class ForgotPasswordView(APIView):
             PasswordResetOTP.objects.create(user=user, otp=otp)
 
         logger.info("Generated password reset OTP for user: %s", user.username)
+        print("\n=======================================================")
+        print(f"[PASSWORD RESET OTP] User: {user.username} | Email: {user.email}")
+        print(f"RESET CODE: {otp}")
+        print("=======================================================\n")
 
         # Send email
         email_sent = send_otp_email(user, otp)
