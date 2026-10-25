@@ -2,9 +2,13 @@
 import axios from 'axios';
 
 // Read from .env — must be prefixed VITE_ for Vite to expose it to client code
-let rawBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/';
+let rawBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/').trim();
 if (!rawBaseUrl.endsWith('/')) {
     rawBaseUrl += '/';
+}
+// Automatically append 'api/' if the user supplied only the root domain
+if (!rawBaseUrl.endsWith('/api/')) {
+    rawBaseUrl += 'api/';
 }
 const API_BASE_URL = rawBaseUrl;
 
