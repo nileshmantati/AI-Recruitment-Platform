@@ -254,15 +254,19 @@ def deliver_email(subject, message, recipient_list, html_message=None):
     Sends email via HTTP API (Brevo / Resend) if configured, or falls back to Django SMTP send_mail.
     Render Free Tier blocks raw SMTP ports (25, 465, 587), so HTTP APIs over HTTPS port 443 bypass the block.
     """
-    brevo_api_key = os.environ.get('BREVO_API_KEY')
-    resend_api_key = os.environ.get('RESEND_API_KEY')
+    brevo_api_key = (os.environ.get('BREVO_API_KEY') or '').strip().strip('"\'')
+    resend_api_key = (os.environ.get('RESEND_API_KEY') or '').strip().strip('"\'')
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or settings.EMAIL_HOST_USER or 'noreply@airecruitment.com'
 
     if brevo_api_key:
+        if '*' in brevo_api_key or '...' in brevo_api_key:
+            print("[BREVO CONFIG WARNING] The BREVO_API_KEY appears to be masked with asterisks/dots! In Brevo, you must copy the newly generated key immediately when creating it.")
+        if brevo_api_key.startswith('xsmtpsib'):
+            print("[BREVO CONFIG WARNING] The BREVO_API_KEY starts with 'xsmtpsib', which is an SMTP key! Brevo REST API requires an API key (starts with 'xkeysib-') from the 'API Keys' tab.")
         try:
             import requests
             sender_name = os.environ.get('EMAIL_SENDER_NAME', 'AI Recruiter')
-            sender_email = os.environ.get('BREVO_SENDER_EMAIL') or from_email
+            sender_email = (os.environ.get('BREVO_SENDER_EMAIL') or from_email).strip().strip('"\'')
             payload = {
                 "sender": {"name": sender_name, "email": sender_email},
                 "to": [{"email": email} for email in recipient_list],
@@ -292,7 +296,7 @@ def deliver_email(subject, message, recipient_list, html_message=None):
     if resend_api_key:
         try:
             import requests
-            sender_email = os.environ.get('RESEND_FROM_EMAIL', 'onboarding@resend.dev')
+            sender_email = (os.environ.get('RESEND_FROM_EMAIL') or 'onboarding@resend.dev').strip().strip('"\'')
             payload = {
                 "from": sender_email,
                 "to": recipient_list,
