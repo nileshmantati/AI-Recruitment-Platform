@@ -347,10 +347,10 @@ For additional Docker commands, container health checks, and production multi-co
 
 ## 🚀 Deployment & Services
 
-- **Vercel** — Frontend deployment and hosting.
-- **Render** — Django REST API backend deployment and hosting.
-- **Neon** — Cloud-hosted PostgreSQL database.
-- **Brevo** — Transactional email service for email OTP verification.
+- **Vercel** ([https://vercel.com](https://vercel.com)) — Frontend deployment and hosting.
+- **Render** ([https://render.com](https://render.com)) — Django REST API backend deployment and hosting.
+- **Neon** ([https://neon.tech](https://neon.tech)) — Cloud-hosted PostgreSQL database.
+- **Brevo** ([https://www.brevo.com](https://www.brevo.com)) — Transactional email service for email OTP verification.
 
 ---
 
