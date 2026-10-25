@@ -2,7 +2,8 @@
 # Exit immediately on error
 set -o errexit
 
-# Install python dependencies
+# Upgrade pip and install python dependencies
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 
 # Collect static files for WhiteNoise
