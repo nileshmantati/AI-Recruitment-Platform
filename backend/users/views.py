@@ -75,6 +75,32 @@ class RegisterView(APIView):
                     status=403
                 )
 
+            # Protect administrative and staff accounts from being targeted via public registration
+            if (
+                unverified_user.is_superuser
+                or unverified_user.is_staff
+                or unverified_user.role not in (User.Role.CANDIDATE, User.Role.RECRUITER)
+            ):
+                return Response(
+                    {'detail': 'An account with these credentials already exists. Please log in.'},
+                    status=400
+                )
+
+            # Restrict role: clients cannot alter role or assign admin/staff roles
+            requested_role = request.data.get('role')
+            if requested_role is not None:
+                requested_role_clean = str(requested_role).strip().upper()
+                if requested_role_clean not in (User.Role.CANDIDATE, User.Role.RECRUITER):
+                    return Response(
+                        {'role': ["Invalid role. Public registration only allows 'CANDIDATE' or 'RECRUITER'."]},
+                        status=400
+                    )
+                if requested_role_clean != unverified_user.role:
+                    return Response(
+                        {'role': ["Role cannot be altered for an existing unverified account."]},
+                        status=400
+                    )
+
             # Enforce 60s cooldown to prevent registration spam / OTP flood
             latest_otp = EmailVerificationOTP.objects.filter(user=unverified_user).order_by('-created_at').first()
             if latest_otp:
@@ -92,9 +118,6 @@ class RegisterView(APIView):
                 password = request.data.get('password')
                 if password:
                     unverified_user.set_password(password)
-                role = request.data.get('role')
-                if role:
-                    unverified_user.role = role
                 if email:
                     unverified_user.email = email
                 unverified_user.save()
@@ -705,7 +728,7 @@ class VerifyEmailView(APIView):
             otp_record.save()
 
             user.is_email_verified = True
-            user.save()
+            user.save(update_fields=['is_email_verified'])
 
         return Response({
             'success': True,

@@ -396,3 +396,208 @@ class EmailVerificationTests(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('at least 6 characters', res.data.get('error', ''))
 
+
+class RegistrationRoleSecurityTests(APITestCase):
+    """
+    Automated security tests for Phase 1: Preventing public role escalation.
+    Verifies that public registration and verification endpoints strictly reject
+    administrative role injection, staff roles, and unauthorized role alterations.
+    """
+
+    def setUp(self):
+        self.register_url = reverse('register')
+        self.verify_url = reverse('verify-email')
+
+    def test_01_registration_without_role_defaults_to_candidate(self):
+        """Registering without specifying a role automatically defaults to CANDIDATE."""
+        data = {
+            'username': 'norole_candidate',
+            'email': 'norole@example.com',
+            'password': 'StrongPassword123!'
+        }
+        res = self.client.post(self.register_url, data)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data.get('role'), 'CANDIDATE')
+
+        user = User.objects.get(username='norole_candidate')
+        self.assertEqual(user.role, User.Role.CANDIDATE)
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
+        self.assertTrue(hasattr(user, 'candidate_profile'))
+
+    def test_02_valid_candidate_registration(self):
+        """Explicitly specifying role 'CANDIDATE' is permitted."""
+        data = {
+            'username': 'explicit_cand',
+            'email': 'explicit_cand@example.com',
+            'password': 'StrongPassword123!',
+            'role': 'CANDIDATE'
+        }
+        res = self.client.post(self.register_url, data)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data.get('role'), 'CANDIDATE')
+
+        user = User.objects.get(username='explicit_cand')
+        self.assertEqual(user.role, User.Role.CANDIDATE)
+
+    def test_03_valid_recruiter_registration(self):
+        """Explicitly specifying role 'RECRUITER' is permitted and creates recruiter profile."""
+        data = {
+            'username': 'explicit_rec',
+            'email': 'explicit_rec@example.com',
+            'password': 'StrongPassword123!',
+            'role': 'RECRUITER'
+        }
+        res = self.client.post(self.register_url, data)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data.get('role'), 'RECRUITER')
+
+        user = User.objects.get(username='explicit_rec')
+        self.assertEqual(user.role, User.Role.RECRUITER)
+        self.assertTrue(hasattr(user, 'recruiter_profile'))
+
+    def test_04_registration_with_admin_role_rejected(self):
+        """Attempting to register with role 'ADMIN' is rejected with HTTP 400."""
+        data = {
+            'username': 'attacker_admin',
+            'email': 'attacker_admin@example.com',
+            'password': 'ExploitPassword123!',
+            'role': 'ADMIN'
+        }
+        res = self.client.post(self.register_url, data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('role', res.data)
+        self.assertFalse(User.objects.filter(username='attacker_admin').exists())
+
+    def test_05_registration_with_staff_admin_role_rejected(self):
+        """Attempting to register with any proposed staff admin role is rejected."""
+        for disallowed_role in ['STAFF_ADMIN', 'STAFF', 'SUPERUSER', 'MODERATOR']:
+            data = {
+                'username': f"attacker_{disallowed_role.lower()}",
+                'email': f"{disallowed_role.lower()}@example.com",
+                'password': 'ExploitPassword123!',
+                'role': disallowed_role
+            }
+            res = self.client.post(self.register_url, data)
+            self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn('role', res.data)
+            self.assertFalse(User.objects.filter(username=data['username']).exists())
+
+    def test_06_unverified_resubmission_with_admin_role_rejected(self):
+        """An unverified user attempting to alter role to 'ADMIN' during re-submission is blocked."""
+        user = User.objects.create_user(
+            username='unverified_target',
+            email='target@example.com',
+            password='InitialPassword123!',
+            role=User.Role.CANDIDATE,
+            is_email_verified=False
+        )
+
+        res = self.client.post(self.register_url, {
+            'username': 'unverified_target',
+            'email': 'target@example.com',
+            'password': 'NewPassword123!',
+            'role': 'ADMIN'
+        })
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('role', res.data)
+
+        user.refresh_from_db()
+        self.assertEqual(user.role, User.Role.CANDIDATE)
+
+    def test_07_unverified_resubmission_with_staff_admin_role_rejected(self):
+        """An unverified user attempting to alter role to 'STAFF_ADMIN' during re-submission is blocked."""
+        user = User.objects.create_user(
+            username='unverified_staff_target',
+            email='staff_target@example.com',
+            password='InitialPassword123!',
+            role=User.Role.CANDIDATE,
+            is_email_verified=False
+        )
+
+        res = self.client.post(self.register_url, {
+            'username': 'unverified_staff_target',
+            'email': 'staff_target@example.com',
+            'password': 'NewPassword123!',
+            'role': 'STAFF_ADMIN'
+        })
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('role', res.data)
+
+        user.refresh_from_db()
+        self.assertEqual(user.role, User.Role.CANDIDATE)
+
+    def test_08_unverified_resubmission_cannot_alter_existing_role(self):
+        """An unverified user cannot change their role from CANDIDATE to RECRUITER via re-submission."""
+        user = User.objects.create_user(
+            username='fixed_role_user',
+            email='fixed@example.com',
+            password='InitialPassword123!',
+            role=User.Role.CANDIDATE,
+            is_email_verified=False
+        )
+
+        res = self.client.post(self.register_url, {
+            'username': 'fixed_role_user',
+            'email': 'fixed@example.com',
+            'password': 'NewPassword123!',
+            'role': 'RECRUITER'
+        })
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('role', res.data)
+        self.assertIn('cannot be altered', res.data['role'][0])
+
+        user.refresh_from_db()
+        self.assertEqual(user.role, User.Role.CANDIDATE)
+
+    def test_09_unverified_admin_account_cannot_be_targeted_via_public_registration(self):
+        """A public re-registration attempt against an existing admin account is rejected."""
+        admin_user = User.objects.create_user(
+            username='pending_admin',
+            email='admin@corp.com',
+            password='AdminPassword123!',
+            role=User.Role.ADMIN,
+            is_staff=True,
+            is_email_verified=False
+        )
+
+        res = self.client.post(self.register_url, {
+            'username': 'pending_admin',
+            'email': 'admin@corp.com',
+            'password': 'HijackPassword123!',
+            'role': 'CANDIDATE'
+        })
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        admin_user.refresh_from_db()
+        self.assertTrue(admin_user.check_password('AdminPassword123!'))
+        self.assertEqual(admin_user.role, User.Role.ADMIN)
+
+    def test_10_verification_attempt_cannot_alter_role(self):
+        """Passing 'role: ADMIN' in verify-email request does not modify the user's role."""
+        user = User.objects.create_user(
+            username='verify_role_test',
+            email='verify_role@example.com',
+            password='Password123!',
+            role=User.Role.CANDIDATE,
+            is_email_verified=False
+        )
+        plain_otp = '849201'
+        EmailVerificationOTP.objects.create(
+            user=user,
+            otp_hash=make_password(plain_otp),
+            expires_at=timezone.now() + timedelta(minutes=5)
+        )
+
+        res = self.client.post(self.verify_url, {
+            'email_or_username': 'verify_role@example.com',
+            'otp': plain_otp,
+            'role': 'ADMIN'  # Malicious extra payload
+        })
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        user.refresh_from_db()
+        self.assertTrue(user.is_email_verified)
+        self.assertEqual(user.role, User.Role.CANDIDATE)
+
+

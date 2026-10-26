@@ -62,22 +62,40 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
         return None
 
 
+PUBLIC_REGISTRATION_ROLES = (User.Role.CANDIDATE, User.Role.RECRUITER)
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     # Ensures password isn't returned in JSON
     password = serializers.CharField(write_only=True)
     phone = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    role = serializers.CharField(required=False, default=User.Role.CANDIDATE)
 
     class Meta:
         model = User
         fields = ('username', 'email', 'password', 'role', 'phone')
 
+    def validate_role(self, value):
+        if not value:
+            return User.Role.CANDIDATE
+        value_clean = str(value).strip().upper()
+        if value_clean not in PUBLIC_REGISTRATION_ROLES:
+            raise serializers.ValidationError(
+                "Invalid role. Public registration only allows 'CANDIDATE' or 'RECRUITER'."
+            )
+        return value_clean
+
     def create(self, validated_data):
         phone = validated_data.pop('phone', '')
+        role = validated_data.get('role', User.Role.CANDIDATE)
+        if role not in PUBLIC_REGISTRATION_ROLES:
+            role = User.Role.CANDIDATE
+
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
             password=validated_data['password'],
-            role=validated_data.get('role', 'CANDIDATE')
+            role=role
         )
         if phone:
             if user.role == User.Role.CANDIDATE and hasattr(user, 'candidate_profile'):
