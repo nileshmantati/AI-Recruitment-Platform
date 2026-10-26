@@ -42,6 +42,8 @@ urlpatterns = [
     path('api/settings/', include('recruiter_settings.urls')),
     # Include notification-related URLs
     path('api/notifications/', include('notifications.urls')),
+    # Include admin portal URLs
+    path('api/admin/', include('admin_portal.urls')),
 ]
 
 # Required to serve uploaded resume PDFs during development

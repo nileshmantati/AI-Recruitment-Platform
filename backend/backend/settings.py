@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'companies',
     'recruiter_settings',
     'notifications',
+    'admin_portal',
     'corsheaders',
 ]
 
