@@ -7,10 +7,16 @@ from rest_framework.exceptions import AuthenticationFailed
 
 class UserSerializer(serializers.ModelSerializer):
     phone = serializers.SerializerMethodField()
+    is_superuser = serializers.SerializerMethodField()
+    is_staff = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'role', 'phone', 'is_email_verified')
+        fields = (
+            'id', 'username', 'email', 'role', 'phone', 'is_email_verified',
+            'is_superuser', 'is_staff', 'permissions'
+        )
 
     def get_phone(self, obj):
         if hasattr(obj, 'candidate_profile') and obj.candidate_profile.phone:
@@ -18,6 +24,21 @@ class UserSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'recruiter_profile') and obj.recruiter_profile.phone:
             return obj.recruiter_profile.phone
         return None
+
+    def get_is_superuser(self, obj):
+        return obj.is_superuser if obj.role == User.Role.ADMIN else False
+
+    def get_is_staff(self, obj):
+        return obj.is_staff if obj.role == User.Role.ADMIN else False
+
+    def get_permissions(self, obj):
+        if obj.role == User.Role.ADMIN:
+            if obj.is_superuser:
+                from admin_portal.constants import AdminPermission
+                return list(AdminPermission.ALL_PERMISSIONS)
+            elif hasattr(obj, 'admin_profile') and obj.admin_profile.is_active:
+                return obj.admin_profile.permissions
+        return []
 
 
 class CandidateProfileSerializer(serializers.ModelSerializer):
@@ -181,4 +202,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['username'] = self.user.username
         data['user_id'] = self.user.id
         data['is_email_verified'] = self.user.is_email_verified
+        if self.user.role == User.Role.ADMIN:
+            data['is_superuser'] = self.user.is_superuser
+            data['is_staff'] = self.user.is_staff
+            if self.user.is_superuser:
+                from admin_portal.constants import AdminPermission
+                data['permissions'] = list(AdminPermission.ALL_PERMISSIONS)
+            elif hasattr(self.user, 'admin_profile') and self.user.admin_profile.is_active:
+                data['permissions'] = self.user.admin_profile.permissions
+            else:
+                data['permissions'] = []
         return data

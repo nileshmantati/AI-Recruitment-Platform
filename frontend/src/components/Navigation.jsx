@@ -126,7 +126,7 @@ const Navigation = () => {
                             <Link to="/findjobs" className="text-base no-underline font-semibold text-indigo-600 hover:text-indigo-800 transition-colors whitespace-nowrap">
                                 Jobs
                             </Link>
-                            <Link to="/dashboard" className="text-base no-underline font-semibold text-indigo-600 hover:text-indigo-800 transition-colors whitespace-nowrap">
+                            <Link to={auth.role?.toUpperCase() === 'ADMIN' ? "/admin/dashboard" : "/dashboard"} className="text-base no-underline font-semibold text-indigo-600 hover:text-indigo-800 transition-colors whitespace-nowrap">
                                 Dashboard
                             </Link>
                             <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 shadow-sm border border-slate-200">
@@ -187,7 +187,7 @@ const Navigation = () => {
                             <Link to="/findjobs" onClick={closeMobileMenu} className="flex items-center py-3 px-4 rounded-xl text-lg font-semibold text-indigo-600 no-underline hover:bg-indigo-50 transition-colors">
                                 Jobs
                             </Link>
-                            <Link to="/dashboard" onClick={closeMobileMenu} className="flex items-center py-3 px-4 rounded-xl text-lg font-semibold text-indigo-600 no-underline hover:bg-indigo-50 transition-colors">
+                            <Link to={auth.role?.toUpperCase() === 'ADMIN' ? "/admin/dashboard" : "/dashboard"} onClick={closeMobileMenu} className="flex items-center py-3 px-4 rounded-xl text-lg font-semibold text-indigo-600 no-underline hover:bg-indigo-50 transition-colors">
                                 Dashboard
                             </Link>
                             <div className="mt-2 flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">

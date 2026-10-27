@@ -1,7 +1,8 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/Admin/AdminProtectedRoute';
 
 import { Toaster, ToastBar, toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
@@ -21,6 +22,12 @@ const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
 const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 
+// Admin Dashboard Components
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
+const AdminDashboardPage = lazy(() => import('./pages/Admin/AdminDashboardPage'));
+const AdminUsersPage = lazy(() => import('./pages/Admin/AdminUsersPage'));
+const AdminJobsPage = lazy(() => import('./pages/Admin/AdminJobsPage'));
+const AdminAnalyticsPage = lazy(() => import('./pages/Admin/AdminAnalyticsPage'));
 
 const PageLoader = () => (
   <div className="flex min-h-[90vh] w-full flex-col items-center justify-center gap-2">
@@ -36,6 +43,23 @@ const MainLayout = () => (
     <Footer />
   </>
 );
+
+const AdminIndexRedirect = () => {
+  const { auth, hasPermission } = useAuth();
+  if (auth.isSuperuser || hasPermission('dashboard.view')) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  if (hasPermission('jobs.view')) {
+    return <Navigate to="/admin/jobs" replace />;
+  }
+  if (hasPermission('users.view')) {
+    return <Navigate to="/admin/users" replace />;
+  }
+  if (hasPermission('analytics.view')) {
+    return <Navigate to="/admin/analytics" replace />;
+  }
+  return <Navigate to="/admin/dashboard" replace />;
+};
 
 function App() {
   return (
@@ -96,6 +120,7 @@ function App() {
         <div className="bg-slate-50 min-h-screen">
           <Suspense fallback={<PageLoader />}>
             <Routes>
+              {/* Public Pages with Main Navigation and Footer */}
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
@@ -107,11 +132,45 @@ function App() {
                 <Route path="/faq" element={<FAQPage />} />
                 <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
               </Route>
+
+              {/* Candidate & Recruiter Dashboard (Protected) */}
               <Route path="/dashboard/*" element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
               } />
+
+              {/* Secure Admin Portal (Protected, Dual-Tier RBAC) */}
+              <Route path="/admin" element={
+                <AdminProtectedRoute>
+                  <AdminLayout />
+                </AdminProtectedRoute>
+              }>
+                <Route index element={<AdminIndexRedirect />} />
+                <Route path="dashboard" element={
+                  <AdminProtectedRoute requiredPermission="dashboard.view">
+                    <AdminDashboardPage />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="users" element={
+                  <AdminProtectedRoute requiredPermission="users.view">
+                    <AdminUsersPage />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="jobs" element={
+                  <AdminProtectedRoute requiredPermission="jobs.view">
+                    <AdminJobsPage />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="analytics" element={
+                  <AdminProtectedRoute requiredPermission="analytics.view">
+                    <AdminAnalyticsPage />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="*" element={<NotFoundPage />} />
+              </Route>
+
+              {/* 404 Fallback */}
               <Route element={<MainLayout />}>
                 <Route path="*" element={<NotFoundPage />} />
               </Route>

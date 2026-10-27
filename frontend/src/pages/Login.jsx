@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { GlassCard, TextField } from '../ui/AuthUI';
-import { Building2, GraduationCap, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { Building2, GraduationCap, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, Shield } from 'lucide-react';
 import PrimaryButton from '../components/PrimaryButton';
 import ForgotPasswordModal from '../components/Auth/ForgotPasswordModal';
 import { T } from '../Js/theme';
@@ -28,9 +28,13 @@ const Login = () => {
 
     useEffect(() => {
         if (auth.isAuthenticated) {
-            navigate('/dashboard');
+            if (auth.role?.toUpperCase() === 'ADMIN') {
+                navigate('/admin', { replace: true });
+            } else {
+                navigate('/dashboard', { replace: true });
+            }
         }
-    }, [auth.isAuthenticated, navigate]);
+    }, [auth.isAuthenticated, auth.role, navigate]);
 
     const { register, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
         resolver: yupResolver(schema),
@@ -66,10 +70,16 @@ const Login = () => {
                 response.data.access,
                 response.data.refresh,
                 response.data.username,
-                response.data.role
+                response.data.role,
+                response.data.is_superuser,
+                response.data.permissions
             );
             toast.success('Login successful');
-            navigate('/dashboard');
+            if (response.data.role?.toUpperCase() === 'ADMIN') {
+                navigate('/admin');
+            } else {
+                navigate('/dashboard');
+            }
         } catch (err) {
             if (err.response?.data?.code === 'email_not_verified') {
                 const unverifiedEmail = err.response.data.email || '';
@@ -130,16 +140,20 @@ const Login = () => {
                         )}
 
                         <form onSubmit={handleSubmit(onSubmit)}>
-                            <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
-                                {[{ id: "recruiter", label: "Recruiter", icon: Building2 }, { id: "candidate", label: "Candidate", icon: GraduationCap }].map((r) => (
+                            <div className="mb-6 grid grid-cols-3 gap-2 rounded-xl bg-slate-100 p-1">
+                                {[
+                                    { id: "recruiter", label: "Recruiter", icon: Building2 },
+                                    { id: "candidate", label: "Candidate", icon: GraduationCap },
+                                    { id: "admin", label: "Admin", icon: Shield }
+                                ].map((r) => (
                                     <button
                                         key={r.id}
                                         type="button"
                                         onClick={() => setRole(r.id)}
-                                        className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all cursor-pointer ${role === r.id ? "bg-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                                        className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${role === r.id ? "bg-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
                                         style={role === r.id ? { color: T.primary } : {}}
                                     >
-                                        <r.icon size={16} /> {r.label}
+                                        <r.icon size={15} /> {r.label}
                                     </button>
                                 ))}
                             </div>

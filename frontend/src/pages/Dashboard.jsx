@@ -56,6 +56,10 @@ const Dashboard = () => {
     else if (normalizedPath !== '/dashboard') active = "NotFound";
 
     useEffect(() => {
+        if (role === 'admin') {
+            navigate('/admin', { replace: true });
+            return;
+        }
         if (role === 'recruiter' && !isProfileCompleted && normalizedPath !== '/dashboard/company') {
             navigate('/dashboard/company', { replace: true });
         }
