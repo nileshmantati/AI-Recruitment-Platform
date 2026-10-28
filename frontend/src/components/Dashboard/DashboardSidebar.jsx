@@ -35,6 +35,13 @@ const CandidateSidebarItems = [
     { icon: Settings, label: "Settings" },
 ];
 
+const AdminSidebarItems = [
+    { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard", permission: "dashboard.view" },
+    { icon: Users, label: "Users", path: "/admin/users", permission: "users.view" },
+    { icon: Briefcase, label: "Jobs", path: "/admin/jobs", permission: "jobs.view" },
+    { icon: BarChart3, label: "Analytics", path: "/admin/analytics", permission: "analytics.view" },
+];
+
 const CANDIDATE_SETTINGS_SECTIONS = [
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Shield },
@@ -60,7 +67,8 @@ const SETTINGS_SECTIONS = [
 const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive, role }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { logout } = useAuth();
+    const { auth, logout, hasPermission } = useAuth();
+    const effectiveRole = (role || auth?.role || '').toLowerCase();
 
     const [settingsOpen, setSettingsOpen] = useState(active === "Settings");
 
@@ -71,21 +79,58 @@ const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive, role }) 
         return () => clearTimeout(timeoutId);
     }, [active]);
 
+    const isItemActive = (item) => {
+        if (effectiveRole === 'admin') {
+            if (item.path) {
+                if (location.pathname === item.path || location.pathname.startsWith(item.path + '/')) {
+                    return true;
+                }
+                if (item.path === '/admin/dashboard' && (location.pathname === '/admin' || location.pathname === '/admin/')) {
+                    return true;
+                }
+                return false;
+            }
+            return active === item.label;
+        }
+        return active === item.label;
+    };
+
     const handleItemClick = (item) => {
+        if (effectiveRole === 'admin') {
+            if (item.path) {
+                navigate(item.path);
+            }
+            if (setActive) {
+                setActive(item.label);
+            }
+            return;
+        }
+
         if (item.label === "Settings") {
             setSettingsOpen(!settingsOpen);
-            setActive("Settings");
+            if (setActive) setActive("Settings");
         } else {
-            setActive(item.label);
+            if (setActive) setActive(item.label);
         }
     };
 
-    const defaultHash = role === 'recruiter' ? 'team' : 'notifications';
+    const defaultHash = effectiveRole === 'recruiter' ? 'team' : 'notifications';
     const currentHash = location.hash.replace('#', '') || defaultHash;
+
+    const adminNavItems = AdminSidebarItems.filter((item) => {
+        if (auth?.isSuperuser) return true;
+        return hasPermission ? hasPermission(item.permission) : true;
+    });
 
     return (
         <aside className={`flex flex-col border-r border-slate-100 bg-white transition-all duration-300 ${collapsed ? "w-20" : "w-64"}`}>
-            <div className="flex items-center gap-2.5 border-b border-slate-100 ps-3 pe-2 py-4">
+            <div
+                onClick={() => {
+                    if (effectiveRole === 'admin') navigate('/admin');
+                    else navigate('/dashboard');
+                }}
+                className="flex items-center gap-2.5 border-b border-slate-100 ps-3 pe-2 py-4 cursor-pointer"
+            >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                     <i className="bi bi-robot text-white"></i>
                 </div>
@@ -94,91 +139,136 @@ const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive, role }) 
                 </span> Recruiter</span>}
             </div>
 
+            {!collapsed && effectiveRole === 'admin' && (
+                <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                        Access Level
+                    </span>
+                    <span
+                        className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${auth?.isSuperuser
+                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            }`}
+                    >
+                        {auth?.isSuperuser ? 'Super Admin' : 'Staff Admin'}
+                    </span>
+                </div>
+            )}
+
             <nav className="flex-1 overflow-y-auto px-3 py-4">
-                {role === 'recruiter' ? RecruiterSidebarItems.map((item) => (
-                    <div key={item.label} className="mb-1">
-                        <button
-                            onClick={() => handleItemClick(item)}
-                            className={`flex w-full items-center gap-3 !rounded-xl cursor-pointer px-3 py-2.5 text-md font-medium transition-all ${active === item.label ? "text-white shadow-md" : "text-slate-600 hover:bg-slate-50"}`}
-                            style={active === item.label ? { background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` } : {}}
-                        >
-                            <item.icon size={18} className="shrink-0" />
-                            {!collapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
-                            {!collapsed && item.label === "Settings" && (
-                                <ChevronDown size={16} className={`transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`} />
-                            )}
-                        </button>
-
-                        {!collapsed && item.label === "Settings" && settingsOpen && (
-                            <div className="ml-4 py-2 space-y-1">
-                                {SETTINGS_SECTIONS.map((subItem) => {
-                                    const isActiveSub = active === "Settings" && currentHash === subItem.id;
-                                    return (
-                                        <button
-                                            key={subItem.id}
-                                            onClick={() => {
-                                                navigate('/dashboard/settings#' + subItem.id);
-                                            }}
-                                            className={`flex w-full items-center gap-3 !rounded-lg px-3 py-2 text-sm font-medium transition-all ${isActiveSub
-                                                ? subItem.danger
-                                                    ? 'bg-red-50 text-red-600'
-                                                    : 'bg-indigo-50 text-indigo-600'
-                                                : subItem.danger
-                                                    ? 'text-red-500 hover:bg-red-50'
-                                                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
-                                                }`}
-                                        >
-                                            <subItem.icon size={16} className="shrink-0" />
-                                            <span className="truncate">{subItem.label}</span>
-                                        </button>
-                                    );
-                                })}
+                {effectiveRole === 'admin' ? (
+                    adminNavItems.length === 0 ? (
+                        !collapsed && (
+                            <div className="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center">
+                                <p className="text-xs font-semibold text-slate-500">No Modules Assigned</p>
+                                <p className="text-[11px] text-slate-400 mt-0.5">Contact Super Admin to request section permissions.</p>
                             </div>
-                        )}
-                    </div>
-                )) : CandidateSidebarItems.map((item) => (
-                    <div key={item.label} className="mb-1">
-                        <button
-                            onClick={() => handleItemClick(item)}
-                            className={`flex w-full items-center gap-3 !rounded-xl cursor-pointer px-3 py-2.5 text-md font-medium transition-all ${active === item.label ? "text-white shadow-md" : "text-slate-600 hover:bg-slate-50"}`}
-                            style={active === item.label ? { background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` } : {}}
-                        >
-                            <item.icon size={18} className="shrink-0" />
-                            {!collapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
-                            {!collapsed && item.label === "Settings" && (
-                                <ChevronDown size={16} className={`transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`} />
-                            )}
-                        </button>
+                        )
+                    ) : (
+                        adminNavItems.map((item) => {
+                            const isActive = isItemActive(item);
+                            return (
+                                <div key={item.label} className="mb-1">
+                                    <button
+                                        onClick={() => handleItemClick(item)}
+                                        title={collapsed ? item.label : undefined}
+                                        className={`flex w-full items-center gap-3 !rounded-xl cursor-pointer px-3 py-2.5 text-md font-medium transition-all ${isActive ? "text-white shadow-md" : "text-slate-600 hover:bg-slate-50"}`}
+                                        style={isActive ? { background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` } : {}}
+                                    >
+                                        <item.icon size={18} className="shrink-0" />
+                                        {!collapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
+                                    </button>
+                                </div>
+                            );
+                        })
+                    )
+                ) : effectiveRole === 'recruiter' ? (
+                    RecruiterSidebarItems.map((item) => (
+                        <div key={item.label} className="mb-1">
+                            <button
+                                onClick={() => handleItemClick(item)}
+                                className={`flex w-full items-center gap-3 !rounded-xl cursor-pointer px-3 py-2.5 text-md font-medium transition-all ${active === item.label ? "text-white shadow-md" : "text-slate-600 hover:bg-slate-50"}`}
+                                style={active === item.label ? { background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` } : {}}
+                            >
+                                <item.icon size={18} className="shrink-0" />
+                                {!collapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
+                                {!collapsed && item.label === "Settings" && (
+                                    <ChevronDown size={16} className={`transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`} />
+                                )}
+                            </button>
 
-                        {!collapsed && item.label === "Settings" && settingsOpen && (
-                            <div className="ml-4 py-2 space-y-1">
-                                {CANDIDATE_SETTINGS_SECTIONS.map((subItem) => {
-                                    const isActiveSub = active === "Settings" && currentHash === subItem.id;
-                                    return (
-                                        <button
-                                            key={subItem.id}
-                                            onClick={() => {
-                                                navigate('/dashboard/settings#' + subItem.id);
-                                            }}
-                                            className={`flex w-full items-center gap-3 !rounded-lg px-3 py-2 text-sm font-medium transition-all ${isActiveSub
-                                                ? subItem.danger
-                                                    ? 'bg-red-50 text-red-600'
-                                                    : 'bg-indigo-50 text-indigo-600'
-                                                : subItem.danger
-                                                    ? 'text-red-500 hover:bg-red-50'
-                                                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
-                                                }`}
-                                        >
-                                            <subItem.icon size={16} className="shrink-0" />
-                                            <span className="truncate">{subItem.label}</span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                ))
-                }
+                            {!collapsed && item.label === "Settings" && settingsOpen && (
+                                <div className="ml-4 py-2 space-y-1">
+                                    {SETTINGS_SECTIONS.map((subItem) => {
+                                        const isActiveSub = active === "Settings" && currentHash === subItem.id;
+                                        return (
+                                            <button
+                                                key={subItem.id}
+                                                onClick={() => {
+                                                    navigate('/dashboard/settings#' + subItem.id);
+                                                }}
+                                                className={`flex w-full items-center gap-3 !rounded-lg px-3 py-2 text-sm font-medium transition-all ${isActiveSub
+                                                    ? subItem.danger
+                                                        ? 'bg-red-50 text-red-600'
+                                                        : 'bg-indigo-50 text-indigo-600'
+                                                    : subItem.danger
+                                                        ? 'text-red-500 hover:bg-red-50'
+                                                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                                                    }`}
+                                            >
+                                                <subItem.icon size={16} className="shrink-0" />
+                                                <span className="truncate">{subItem.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    ))
+                ) : (
+                    CandidateSidebarItems.map((item) => (
+                        <div key={item.label} className="mb-1">
+                            <button
+                                onClick={() => handleItemClick(item)}
+                                className={`flex w-full items-center gap-3 !rounded-xl cursor-pointer px-3 py-2.5 text-md font-medium transition-all ${active === item.label ? "text-white shadow-md" : "text-slate-600 hover:bg-slate-50"}`}
+                                style={active === item.label ? { background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` } : {}}
+                            >
+                                <item.icon size={18} className="shrink-0" />
+                                {!collapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
+                                {!collapsed && item.label === "Settings" && (
+                                    <ChevronDown size={16} className={`transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`} />
+                                )}
+                            </button>
+
+                            {!collapsed && item.label === "Settings" && settingsOpen && (
+                                <div className="ml-4 py-2 space-y-1">
+                                    {CANDIDATE_SETTINGS_SECTIONS.map((subItem) => {
+                                        const isActiveSub = active === "Settings" && currentHash === subItem.id;
+                                        return (
+                                            <button
+                                                key={subItem.id}
+                                                onClick={() => {
+                                                    navigate('/dashboard/settings#' + subItem.id);
+                                                }}
+                                                className={`flex w-full items-center gap-3 !rounded-lg px-3 py-2 text-sm font-medium transition-all ${isActiveSub
+                                                    ? subItem.danger
+                                                        ? 'bg-red-50 text-red-600'
+                                                        : 'bg-indigo-50 text-indigo-600'
+                                                    : subItem.danger
+                                                        ? 'text-red-500 hover:bg-red-50'
+                                                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                                                    }`}
+                                            >
+                                                <subItem.icon size={16} className="shrink-0" />
+                                                <span className="truncate">{subItem.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    ))
+                )}
             </nav>
 
             <div className="border-t border-slate-100 p-3">
