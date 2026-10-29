@@ -28,6 +28,8 @@ const AdminDashboardPage = lazy(() => import('./pages/Admin/AdminDashboardPage')
 const AdminUsersPage = lazy(() => import('./pages/Admin/AdminUsersPage'));
 const AdminJobsPage = lazy(() => import('./pages/Admin/AdminJobsPage'));
 const AdminAnalyticsPage = lazy(() => import('./pages/Admin/AdminAnalyticsPage'));
+const AdminStaffAdminsPage = lazy(() => import('./pages/Admin/AdminStaffAdminsPage'));
+const AdminAuditLogsPage = lazy(() => import('./pages/Admin/AdminAuditLogsPage'));
 
 const PageLoader = () => (
   <div className="flex min-h-[90vh] w-full flex-col items-center justify-center gap-2">
@@ -57,6 +59,12 @@ const AdminIndexRedirect = () => {
   }
   if (hasPermission('analytics.view')) {
     return <Navigate to="/admin/analytics" replace />;
+  }
+  if (hasPermission('audit_logs.view')) {
+    return <Navigate to="/admin/audit-logs" replace />;
+  }
+  if (auth.isSuperuser) {
+    return <Navigate to="/admin/staff-admins" replace />;
   }
   return <Navigate to="/admin/dashboard" replace />;
 };
@@ -165,6 +173,16 @@ function App() {
                 <Route path="analytics" element={
                   <AdminProtectedRoute requiredPermission="analytics.view">
                     <AdminAnalyticsPage />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="staff-admins" element={
+                  <AdminProtectedRoute requiredPermission="staff_admins.manage">
+                    <AdminStaffAdminsPage />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="audit-logs" element={
+                  <AdminProtectedRoute requiredPermission="audit_logs.view">
+                    <AdminAuditLogsPage />
                   </AdminProtectedRoute>
                 } />
                 <Route path="*" element={<NotFoundPage />} />

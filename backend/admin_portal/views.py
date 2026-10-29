@@ -19,7 +19,7 @@ from applications.models import Application
 from ai_engine.models import ResumeAnalysis
 
 from .models import AdminProfile, AuditLog
-from .constants import AdminPermission
+from .constants import AdminPermission, ASSIGNABLE_PERMISSION_METADATA
 from .permissions import HasAdminPermission
 from .services import (
     log_admin_action,
@@ -135,8 +135,18 @@ class AdminUserListView(APIView):
     required_admin_permission = AdminPermission.USERS_VIEW
 
     def get(self, request):
+        # Auto-heal: Ensure any user designated as Staff Admin has an AdminProfile record
+        staff_without_profile = User.objects.filter(
+            role=User.Role.ADMIN,
+            is_staff=True,
+            is_superuser=False,
+            admin_profile__isnull=True
+        )
+        for u in staff_without_profile:
+            AdminProfile.objects.get_or_create(user=u, defaults={'permissions': []})
+
         qs = User.objects.all().select_related(
-            'candidate_profile', 'recruiter_profile', 'company'
+            'candidate_profile', 'recruiter_profile', 'company', 'admin_profile'
         ).order_by('-date_joined')
 
         # Filter by role
@@ -248,6 +258,104 @@ class AdminUserStatusView(APIView):
                 target_repr=target_user.username,
                 summary=f"User '{target_user.username}' (ID {target_user.id}) status changed from {old_status} to {new_status}. Reason: {reason or 'No reason provided'}",
                 changes={'previous_is_active': old_status, 'new_is_active': new_status, 'reason': reason},
+                request=request
+            )
+
+        return Response(AdminUserListSerializer(target_user).data, status=status.HTTP_200_OK)
+
+
+class AdminUserPromoteToStaffView(APIView):
+    """
+    POST /api/admin/users/<id>/promote-to-staff/
+    Promotes an existing user (Candidate or Recruiter) to Staff Admin,
+    assigning them explicit permissions. Strictly Superadmin exclusive.
+    """
+    permission_classes = [HasAdminPermission]
+    required_admin_permission = AdminPermission.STAFF_ADMINS_MANAGE
+
+    def post(self, request, user_id):
+        target_user = get_object_or_404(User, pk=user_id)
+
+        if target_user.is_superuser:
+            raise ValidationError("Target user is already a Super Admin.")
+
+        serializer = StaffAdminPermissionsUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cleaned_permissions = serializer.validated_data['permissions']
+
+        with transaction.atomic():
+            old_role = target_user.role
+            target_user.role = User.Role.ADMIN
+            target_user.is_staff = True
+            target_user.is_email_verified = True
+            target_user.save(update_fields=['role', 'is_staff', 'is_email_verified'])
+
+            profile, _ = AdminProfile.objects.get_or_create(
+                user=target_user,
+                defaults={'created_by': request.user}
+            )
+            profile.permissions = cleaned_permissions
+            profile.is_active = True
+            if not profile.created_by:
+                profile.created_by = request.user
+            profile.save()
+
+            log_admin_action(
+                actor=request.user,
+                action="USER_PROMOTED_TO_STAFF",
+                target_type="USER",
+                target_id=target_user.id,
+                target_repr=target_user.username,
+                summary=f"User '{target_user.username}' (formerly {old_role}) promoted to Staff Admin with {len(cleaned_permissions)} permissions.",
+                changes={"previous_role": old_role, "new_role": "ADMIN", "permissions": cleaned_permissions},
+                request=request
+            )
+
+        return Response(StaffAdminProfileSerializer(profile).data, status=status.HTTP_200_OK)
+
+
+class AdminUserDemoteFromStaffView(APIView):
+    """
+    POST /api/admin/users/<id>/demote-from-staff/
+    Reverts a Staff Admin back to Candidate or Recruiter role. Strictly Superadmin exclusive.
+    """
+    permission_classes = [HasAdminPermission]
+    required_admin_permission = AdminPermission.STAFF_ADMINS_MANAGE
+
+    def post(self, request, user_id):
+        target_user = get_object_or_404(User, pk=user_id)
+
+        if target_user.is_superuser:
+            raise PermissionDenied("Cannot demote a Super Admin account.")
+
+        if target_user.pk == request.user.pk:
+            raise PermissionDenied("You cannot demote your own account.")
+
+        if not target_user.is_staff and target_user.role != User.Role.ADMIN:
+            raise ValidationError("Target user is not a Staff Admin.")
+
+        target_role = (request.data.get('role') or User.Role.CANDIDATE).strip().upper()
+        if target_role not in (User.Role.CANDIDATE, User.Role.RECRUITER):
+            raise ValidationError("Target role must be either CANDIDATE or RECRUITER.")
+
+        with transaction.atomic():
+            target_user.role = target_role
+            target_user.is_staff = False
+            target_user.save(update_fields=['role', 'is_staff'])
+
+            if hasattr(target_user, 'admin_profile'):
+                target_user.admin_profile.permissions = []
+                target_user.admin_profile.is_active = False
+                target_user.admin_profile.save(update_fields=['permissions', 'is_active'])
+
+            log_admin_action(
+                actor=request.user,
+                action="USER_DEMOTED_FROM_STAFF",
+                target_type="USER",
+                target_id=target_user.id,
+                target_repr=target_user.username,
+                summary=f"Staff Admin '{target_user.username}' demoted to {target_role}.",
+                changes={"previous_role": "ADMIN", "new_role": target_role},
                 request=request
             )
 
@@ -700,6 +808,16 @@ class AdminStaffAdminListCreateView(APIView):
     required_admin_permission = AdminPermission.STAFF_ADMINS_MANAGE
 
     def get(self, request):
+        # Auto-heal: Ensure any user designated as Staff Admin has an AdminProfile record
+        staff_without_profile = User.objects.filter(
+            role=User.Role.ADMIN,
+            is_staff=True,
+            is_superuser=False,
+            admin_profile__isnull=True
+        )
+        for u in staff_without_profile:
+            AdminProfile.objects.get_or_create(user=u, defaults={'permissions': []})
+
         qs = AdminProfile.objects.select_related('user', 'created_by').filter(
             user__role=User.Role.ADMIN,
             user__is_staff=True,
@@ -729,6 +847,19 @@ class AdminStaffAdminListCreateView(APIView):
             StaffAdminProfileSerializer(admin_profile).data,
             status=status.HTTP_201_CREATED
         )
+
+
+class AdminStaffAssignablePermissionsView(APIView):
+    """
+    GET /api/admin/staff-admins/assignable-permissions/
+    Returns list of permissions that can be assigned to Staff Admins,
+    along with user-friendly metadata. Accessible strictly to Super Admins.
+    """
+    permission_classes = [HasAdminPermission]
+    required_admin_permission = AdminPermission.STAFF_ADMINS_MANAGE
+
+    def get(self, request):
+        return Response(list(ASSIGNABLE_PERMISSION_METADATA), status=status.HTTP_200_OK)
 
 
 class AdminStaffAdminPermissionsView(APIView):

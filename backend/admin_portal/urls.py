@@ -4,6 +4,8 @@ from .views import (
     AdminUserListView,
     AdminUserDetailView,
     AdminUserStatusView,
+    AdminUserPromoteToStaffView,
+    AdminUserDemoteFromStaffView,
     AdminRecruiterListView,
     AdminRecruiterDetailView,
     AdminRecruiterVerificationView,
@@ -14,6 +16,7 @@ from .views import (
     AdminAIMonitoringView,
     AdminAuditLogListView,
     AdminStaffAdminListCreateView,
+    AdminStaffAssignablePermissionsView,
     AdminStaffAdminPermissionsView,
     AdminStaffAdminStatusView,
 )
@@ -28,6 +31,8 @@ urlpatterns = [
     path('users/', AdminUserListView.as_view(), name='user-list'),
     path('users/<int:user_id>/', AdminUserDetailView.as_view(), name='user-detail'),
     path('users/<int:user_id>/status/', AdminUserStatusView.as_view(), name='user-status'),
+    path('users/<int:user_id>/promote-to-staff/', AdminUserPromoteToStaffView.as_view(), name='user-promote-to-staff'),
+    path('users/<int:user_id>/demote-from-staff/', AdminUserDemoteFromStaffView.as_view(), name='user-demote-from-staff'),
 
     # 3. Recruiter Verification
     path('recruiters/', AdminRecruiterListView.as_view(), name='recruiter-list'),
@@ -50,6 +55,7 @@ urlpatterns = [
 
     # 8. Staff Admin Management (Super Admin Exclusive)
     path('staff-admins/', AdminStaffAdminListCreateView.as_view(), name='staff-admin-list-create'),
+    path('staff-admins/assignable-permissions/', AdminStaffAssignablePermissionsView.as_view(), name='staff-admin-assignable-permissions'),
     path('staff-admins/<int:user_id>/permissions/', AdminStaffAdminPermissionsView.as_view(), name='staff-admin-permissions'),
     path('staff-admins/<int:user_id>/status/', AdminStaffAdminStatusView.as_view(), name='staff-admin-status'),
 ]

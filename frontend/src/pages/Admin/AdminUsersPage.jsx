@@ -4,6 +4,10 @@ import {
     getAdminUsers,
     getAdminUserDetails,
     updateAdminUserStatus,
+    getAssignablePermissions,
+    promoteUserToStaff,
+    updateStaffAdminPermissions,
+    demoteUserFromStaff,
 } from '../../services/adminApi';
 import {
     Users,
@@ -17,6 +21,8 @@ import {
     ChevronRight,
     Briefcase,
     GraduationCap,
+    Key,
+    Lock,
 } from 'lucide-react';
 import { T } from '../../Js/theme';
 import toast from 'react-hot-toast';
@@ -49,6 +55,20 @@ const AdminUsersPage = () => {
     const [statusModalUser, setStatusModalUser] = useState(null);
     const [statusReason, setStatusReason] = useState('');
     const [submittingStatus, setSubmittingStatus] = useState(false);
+
+    // Staff Promotion & Governance State (Superadmin Only)
+    const [availablePermissions, setAvailablePermissions] = useState([]);
+    const [promoteModalUser, setPromoteModalUser] = useState(null);
+    const [promotePermissions, setPromotePermissions] = useState([]);
+    const [submittingPromote, setSubmittingPromote] = useState(false);
+
+    const [editPermUser, setEditPermUser] = useState(null);
+    const [editPermissions, setEditPermissions] = useState([]);
+    const [submittingEditPerm, setSubmittingEditPerm] = useState(false);
+
+    const [demoteModalUser, setDemoteModalUser] = useState(null);
+    const [demoteRole, setDemoteRole] = useState('CANDIDATE');
+    const [submittingDemote, setSubmittingDemote] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -163,6 +183,68 @@ const AdminUsersPage = () => {
         // Staff Admin cannot modify other Staff Admins
         if (targetUser.is_staff && !auth.isSuperuser) return false;
         return true;
+    };
+
+    useEffect(() => {
+        if (auth?.isSuperuser) {
+            getAssignablePermissions()
+                .then((data) => setAvailablePermissions(Array.isArray(data) ? data : []))
+                .catch(() => { });
+        }
+    }, [auth?.isSuperuser]);
+
+    const handlePromoteSubmit = async (e) => {
+        e.preventDefault();
+        if (!promoteModalUser) return;
+        setSubmittingPromote(true);
+        try {
+            await promoteUserToStaff(promoteModalUser.id, promotePermissions);
+            toast.success(`User '${promoteModalUser.username}' successfully promoted to Staff Admin!`);
+            setPromoteModalUser(null);
+            fetchUsers();
+        } catch (err) {
+            const data = err.response?.data;
+            const errMsg = data?.detail || data?.error || (typeof data === 'object' ? Object.values(data)[0] : null) || 'Failed to promote user.';
+            toast.error(String(errMsg));
+        } finally {
+            setSubmittingPromote(false);
+        }
+    };
+
+    const handleEditPermSubmit = async (e) => {
+        e.preventDefault();
+        if (!editPermUser) return;
+        setSubmittingEditPerm(true);
+        try {
+            await updateStaffAdminPermissions(editPermUser.id, editPermissions);
+            toast.success(`Permissions updated for '${editPermUser.username}'!`);
+            setEditPermUser(null);
+            fetchUsers();
+        } catch (err) {
+            const data = err.response?.data;
+            const errMsg = data?.detail || 'Failed to update permissions.';
+            toast.error(String(errMsg));
+        } finally {
+            setSubmittingEditPerm(false);
+        }
+    };
+
+    const handleDemoteSubmit = async (e) => {
+        e.preventDefault();
+        if (!demoteModalUser) return;
+        setSubmittingDemote(true);
+        try {
+            await demoteUserFromStaff(demoteModalUser.id, demoteRole);
+            toast.success(`User '${demoteModalUser.username}' demoted to ${demoteRole}.`);
+            setDemoteModalUser(null);
+            fetchUsers();
+        } catch (err) {
+            const data = err.response?.data;
+            const errMsg = data?.detail || 'Failed to demote user.';
+            toast.error(String(errMsg));
+        } finally {
+            setSubmittingDemote(false);
+        }
     };
 
     return (
@@ -342,13 +424,66 @@ const AdminUsersPage = () => {
                                             </td>
 
                                             {/* Actions */}
-                                            <td className="py-3.5 pr-6 whitespace-nowrap text-right space-x-2">
+                                            <td className="py-3.5 pr-6 whitespace-nowrap text-right space-x-1.5">
                                                 <button
                                                     onClick={() => handleOpenDetail(u)}
                                                     className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                                                 >
                                                     <Eye size={12} /> View
                                                 </button>
+
+                                                {/* Superadmin Promotion & Governance Controls */}
+                                                {auth?.isSuperuser && (
+                                                    <>
+                                                        {!u.is_superuser && !u.is_staff && u.role !== 'ADMIN' && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setPromoteModalUser(u);
+                                                                    setPromotePermissions([]);
+                                                                }}
+                                                                className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors cursor-pointer"
+                                                                title="Promote this user to Staff Admin with permissions"
+                                                            >
+                                                                <Shield size={12} className="text-indigo-600" /> Make Staff
+                                                            </button>
+                                                        )}
+
+                                                        {u.is_staff && !u.is_superuser && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setEditPermUser(u);
+                                                                        setEditPermissions(u.admin_permissions || []);
+                                                                        getAdminUserDetails(u.id)
+                                                                            .then((det) => {
+                                                                                if (det.profile?.permissions) {
+                                                                                    setEditPermissions(det.profile.permissions);
+                                                                                }
+                                                                            })
+                                                                            .catch(() => { });
+                                                                    }}
+                                                                    className="inline-flex items-center gap-1 rounded-lg border border-purple-200 bg-purple-50 px-2.5 py-1 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 transition-colors cursor-pointer"
+                                                                    title="Manage Staff Admin permissions"
+                                                                >
+                                                                    <Key size={12} className="text-purple-600" /> Permissions
+                                                                </button>
+
+                                                                {!isSelf && (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setDemoteModalUser(u);
+                                                                            setDemoteRole('CANDIDATE');
+                                                                        }}
+                                                                        className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700 hover:bg-amber-100 transition-colors cursor-pointer"
+                                                                        title="Demote to normal Candidate or Recruiter"
+                                                                    >
+                                                                        Demote
+                                                                    </button>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </>
+                                                )}
 
                                                 {canManageUsers && (
                                                     <button
@@ -614,6 +749,297 @@ const AdminUsersPage = () => {
                                 {submittingStatus ? 'Updating...' : statusModalUser.is_active ? 'Confirm Deactivate' : 'Confirm Activate'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Promote to Staff Admin Modal */}
+            {promoteModalUser && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+                    onClick={() => !submittingPromote && setPromoteModalUser(null)}
+                >
+                    <div
+                        className="relative w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
+                                    <Shield size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900 text-base">
+                                        Promote to Staff Administrator
+                                    </h3>
+                                    <p className="text-xs text-slate-500">
+                                        Target: <span className="font-semibold text-slate-700">{promoteModalUser.username}</span> ({promoteModalUser.email}) • Current Role: <span className="font-semibold">{promoteModalUser.role}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setPromoteModalUser(null)}
+                                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handlePromoteSubmit} className="space-y-4">
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-xs font-bold text-slate-700">
+                                        Assign Module Permissions ({promotePermissions.length} selected)
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setPromotePermissions(availablePermissions.map((p) => p.id))}
+                                            className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+                                        >
+                                            Select All
+                                        </button>
+                                        <span className="text-slate-300">|</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setPromotePermissions([])}
+                                            className="text-[11px] font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto rounded-xl border border-slate-200 p-3 bg-slate-50/50">
+                                    {availablePermissions.map((perm) => {
+                                        const isChecked = promotePermissions.includes(perm.id);
+                                        return (
+                                            <label
+                                                key={perm.id}
+                                                className={`flex items-start gap-2.5 rounded-lg border p-2 text-xs transition-colors cursor-pointer ${isChecked
+                                                    ? 'bg-indigo-50/60 border-indigo-200 text-slate-800'
+                                                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                    }`}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isChecked}
+                                                    onChange={(e) => {
+                                                        const next = e.target.checked
+                                                            ? [...promotePermissions, perm.id]
+                                                            : promotePermissions.filter((p) => p !== perm.id);
+                                                        setPromotePermissions(next);
+                                                    }}
+                                                    className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                                />
+                                                <div>
+                                                    <div className="font-semibold">{perm.name}</div>
+                                                    <div className="text-[10px] text-slate-400 font-mono">{perm.id}</div>
+                                                </div>
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800 flex items-start gap-2">
+                                <Lock size={15} className="shrink-0 mt-0.5 text-amber-600" />
+                                <div>
+                                    <span className="font-bold">Privilege Boundary:</span> Promoting this user converts them into a Staff Admin with only the permissions checked above. They cannot self-escalate or grant admin access to others.
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2.5 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setPromoteModalUser(null)}
+                                    className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submittingPromote}
+                                    className="rounded-xl px-4 py-2 text-xs font-bold text-white shadow-md transition-all cursor-pointer disabled:opacity-50"
+                                    style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
+                                >
+                                    {submittingPromote ? 'Promoting...' : 'Confirm Promotion to Staff Admin'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Staff Permissions Modal */}
+            {editPermUser && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+                    onClick={() => !submittingEditPerm && setEditPermUser(null)}
+                >
+                    <div
+                        className="relative w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
+                                    <Key size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900 text-base">
+                                        Manage Staff Permissions
+                                    </h3>
+                                    <p className="text-xs text-slate-500">
+                                        Staff Admin: <span className="font-semibold text-slate-700">{editPermUser.username}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setEditPermUser(null)}
+                                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleEditPermSubmit} className="space-y-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="block text-xs font-bold text-slate-700">
+                                    Assigned Permissions ({editPermissions.length} selected)
+                                </label>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditPermissions(availablePermissions.map((p) => p.id))}
+                                        className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+                                    >
+                                        Select All
+                                    </button>
+                                    <span className="text-slate-300">|</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditPermissions([])}
+                                        className="text-[11px] font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto rounded-xl border border-slate-200 p-3 bg-slate-50/50">
+                                {availablePermissions.map((perm) => {
+                                    const isChecked = editPermissions.includes(perm.id);
+                                    return (
+                                        <label
+                                            key={perm.id}
+                                            className={`flex items-start gap-2.5 rounded-lg border p-2 text-xs transition-colors cursor-pointer ${isChecked
+                                                ? 'bg-purple-50/60 border-purple-200 text-slate-800'
+                                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                }`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={isChecked}
+                                                onChange={(e) => {
+                                                    const next = e.target.checked
+                                                        ? [...editPermissions, perm.id]
+                                                        : editPermissions.filter((p) => p !== perm.id);
+                                                    setEditPermissions(next);
+                                                }}
+                                                className="mt-0.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                                            />
+                                            <div>
+                                                <div className="font-semibold">{perm.name}</div>
+                                                <div className="text-[10px] text-slate-400 font-mono">{perm.id}</div>
+                                            </div>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2.5 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditPermUser(null)}
+                                    className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submittingEditPerm}
+                                    className="rounded-xl px-4 py-2 text-xs font-bold text-white shadow-md transition-all cursor-pointer disabled:opacity-50"
+                                    style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}
+                                >
+                                    {submittingEditPerm ? 'Saving...' : 'Save Permissions'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Demote from Staff Admin Modal */}
+            {demoteModalUser && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+                    onClick={() => !submittingDemote && setDemoteModalUser(null)}
+                >
+                    <div
+                        className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-200"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                                <AlertTriangle size={24} />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-base">
+                                    Demote from Staff Admin
+                                </h3>
+                                <p className="text-xs text-slate-400">Target: {demoteModalUser.username}</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleDemoteSubmit} className="space-y-4">
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                                This will revoke all administrative portal access and staff privileges for{' '}
+                                <span className="font-bold text-slate-800">{demoteModalUser.username}</span>.
+                            </p>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-700 mb-1">
+                                    Target Role after Demotion:
+                                </label>
+                                <select
+                                    value={demoteRole}
+                                    onChange={(e) => setDemoteRole(e.target.value)}
+                                    className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500"
+                                >
+                                    <option value="CANDIDATE">Candidate</option>
+                                    <option value="RECRUITER">Recruiter</option>
+                                </select>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2.5 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setDemoteModalUser(null)}
+                                    className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submittingDemote}
+                                    className="rounded-xl bg-amber-600 hover:bg-amber-700 px-4 py-2 text-xs font-bold text-white shadow-md transition-all cursor-pointer disabled:opacity-50"
+                                >
+                                    {submittingDemote ? 'Demoting...' : 'Confirm Demotion'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

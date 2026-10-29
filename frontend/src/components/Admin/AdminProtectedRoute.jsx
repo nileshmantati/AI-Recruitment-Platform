@@ -4,7 +4,7 @@ import { ShieldAlert, ArrowLeft, Home, LogOut } from 'lucide-react';
 import { T } from '../../Js/theme';
 
 const AdminProtectedRoute = ({ children, requiredPermission = null }) => {
-    const { auth, hasPermission, logout } = useAuth();
+    const { auth, hasPermission, logout, isSyncing } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -13,7 +13,16 @@ const AdminProtectedRoute = ({ children, requiredPermission = null }) => {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    // 2. Role boundary check: Candidates and Recruiters must never access Admin routes
+    // 2. While verifying user role with server on page load/refresh, avoid flashing "No Permissions"
+    if (isSyncing) {
+        return (
+            <div className="flex min-h-[70vh] items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600" />
+            </div>
+        );
+    }
+
+    // 3. Role boundary check: Candidates and Recruiters must never access Admin routes
     if (auth.role?.toUpperCase() !== 'ADMIN') {
         return <Navigate to="/dashboard" replace />;
     }
@@ -68,7 +77,11 @@ const AdminProtectedRoute = ({ children, requiredPermission = null }) => {
                         ? { path: '/admin/users', label: 'Go to User Management' }
                         : hasPermission('analytics.view') && location.pathname !== '/admin/analytics'
                             ? { path: '/admin/analytics', label: 'Go to Application Analytics' }
-                            : null;
+                            : hasPermission('audit_logs.view') && location.pathname !== '/admin/audit-logs'
+                                ? { path: '/admin/audit-logs', label: 'Go to Audit Logs' }
+                                : auth.isSuperuser && location.pathname !== '/admin/staff-admins'
+                                    ? { path: '/admin/staff-admins', label: 'Go to Staff Admins' }
+                                    : null;
 
         return (
             <div className="flex min-h-[70vh] flex-col items-center justify-center p-6 text-center">

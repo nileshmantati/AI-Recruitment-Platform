@@ -40,6 +40,8 @@ const AdminSidebarItems = [
     { icon: Users, label: "Users", path: "/admin/users", permission: "users.view" },
     { icon: Briefcase, label: "Jobs", path: "/admin/jobs", permission: "jobs.view" },
     { icon: BarChart3, label: "Analytics", path: "/admin/analytics", permission: "analytics.view" },
+    { icon: Shield, label: "Staff Admins", path: "/admin/staff-admins", permission: "staff_admins.manage", superAdminOnly: true },
+    { icon: FileText, label: "Audit Logs", path: "/admin/audit-logs", permission: "audit_logs.view" },
 ];
 
 const CANDIDATE_SETTINGS_SECTIONS = [
@@ -118,6 +120,7 @@ const DashboardSidebar = ({ collapsed, setCollapsed, active, setActive, role }) 
     const currentHash = location.hash.replace('#', '') || defaultHash;
 
     const adminNavItems = AdminSidebarItems.filter((item) => {
+        if (item.superAdminOnly && !auth?.isSuperuser) return false;
         if (auth?.isSuperuser) return true;
         return hasPermission ? hasPermission(item.permission) : true;
     });

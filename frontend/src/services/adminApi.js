@@ -93,3 +93,48 @@ export const getAdminAuditLogs = async (params = {}) => {
     const response = await api.get('admin/audit-logs/', { params: cleanParams });
     return response.data;
 };
+
+// 6. Staff Admin Management (Super Admin Exclusive)
+export const getStaffAdmins = async () => {
+    const response = await api.get('admin/staff-admins/');
+    return response.data;
+};
+
+export const getAssignablePermissions = async () => {
+    const response = await api.get('admin/staff-admins/assignable-permissions/');
+    return response.data;
+};
+
+export const provisionStaffAdmin = async (payload) => {
+    const response = await api.post('admin/staff-admins/', payload);
+    return response.data;
+};
+
+export const updateStaffAdminPermissions = async (userId, permissions) => {
+    const response = await api.patch(`admin/staff-admins/${userId}/permissions/`, {
+        permissions,
+    });
+    return response.data;
+};
+
+export const updateStaffAdminStatus = async (userId, isActive, reason = '') => {
+    const response = await api.patch(`admin/staff-admins/${userId}/status/`, {
+        is_active: isActive,
+        reason: (reason || '').trim(),
+    });
+    return response.data;
+};
+
+export const promoteUserToStaff = async (userId, permissions) => {
+    const response = await api.post(`admin/users/${userId}/promote-to-staff/`, {
+        permissions,
+    });
+    return response.data;
+};
+
+export const demoteUserFromStaff = async (userId, role = 'CANDIDATE') => {
+    const response = await api.post(`admin/users/${userId}/demote-from-staff/`, {
+        role,
+    });
+    return response.data;
+};

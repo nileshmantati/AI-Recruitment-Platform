@@ -17,6 +17,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
     """Safe, read-only serializer for administrative user listing."""
     phone = serializers.SerializerMethodField()
     company_name = serializers.SerializerMethodField()
+    admin_permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -24,7 +25,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             'id', 'username', 'email', 'first_name', 'last_name',
             'role', 'is_active', 'is_staff', 'is_superuser',
             'is_email_verified', 'date_joined', 'last_login',
-            'phone', 'company_name'
+            'phone', 'company_name', 'admin_permissions'
         )
         read_only_fields = fields
 
@@ -41,6 +42,11 @@ class AdminUserListSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'recruiter_profile') and obj.recruiter_profile.company:
             return obj.recruiter_profile.company
         return None
+
+    def get_admin_permissions(self, obj):
+        if hasattr(obj, 'admin_profile') and obj.admin_profile:
+            return obj.admin_profile.permissions or []
+        return []
 
 
 class AdminUserDetailSerializer(AdminUserListSerializer):

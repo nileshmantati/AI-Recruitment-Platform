@@ -26,7 +26,7 @@ import CandidateSettingsPage from '../components/Dashboard/Candidate/CandidateSe
 import JobsPage from './JobsPage.jsx';
 
 const Dashboard = () => {
-    const { auth } = useAuth();
+    const { auth, isSyncing } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
@@ -56,6 +56,7 @@ const Dashboard = () => {
     else if (normalizedPath !== '/dashboard') active = "NotFound";
 
     useEffect(() => {
+        if (isSyncing) return;
         if (role === 'admin') {
             navigate('/admin', { replace: true });
             return;
@@ -63,7 +64,7 @@ const Dashboard = () => {
         if (role === 'recruiter' && !isProfileCompleted && normalizedPath !== '/dashboard/company') {
             navigate('/dashboard/company', { replace: true });
         }
-    }, [role, isProfileCompleted, normalizedPath, navigate]);
+    }, [role, isSyncing, isProfileCompleted, normalizedPath, navigate]);
 
     const handleSetActive = (tab) => {
         if (role === 'recruiter' && !isProfileCompleted && tab !== 'Company' && tab !== 'Settings' && tab !== 'Profile') {

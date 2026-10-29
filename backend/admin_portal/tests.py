@@ -1,5 +1,7 @@
+import io
 from django.test import TestCase, RequestFactory
 from django.core.exceptions import ValidationError
+from django.core.management import call_command, CommandError
 from django.urls import reverse
 from rest_framework.test import APIRequestFactory, APIClient, force_authenticate
 from rest_framework.views import APIView
@@ -1101,3 +1103,423 @@ class AdminRestApiTests(TestCase):
         )
         self.assertEqual(react_res.status_code, status.HTTP_200_OK)
         self.assertTrue(react_res.json()['is_active'])
+
+
+class ComprehensiveRBACTests(TestCase):
+    """
+    Focused test suite covering all 12 primary RBAC and administrative security requirements:
+    1. Public registration cannot create Superadmin or Staff Admin.
+    2. Candidate and Recruiter cannot access administrative endpoints.
+    3. Staff Admin cannot access Superadmin-only endpoints.
+    4. Staff Admin cannot perform actions without corresponding permission.
+    5. Staff Admin with job_moderation can moderate jobs but cannot manage users without user_management.
+    6. Staff Admin cannot grant permissions, promote themselves, or modify protected role fields.
+    7. Superadmin can manage Staff Admin accounts and their allowed permissions.
+    8. Unauthorized and unauthenticated requests return appropriate status codes (401 vs 403).
+    9. Object-level authorization prevents unauthorized resource modifications.
+    10. Revoked permissions are enforced immediately on subsequent backend requests.
+    11. Critical administrative safeguards prevent accidental loss of the last Superadmin account.
+    12. bootstrap_superadmin management command securely provisions the initial Superadmin.
+    """
+
+    def setUp(self):
+        self.client = APIClient()
+
+        # Super Admin
+        self.super_admin = User.objects.create_superuser(
+            username="test_superadmin",
+            email="superadmin@airecruitment.com",
+            password="SuperPassword123!",
+            role=User.Role.ADMIN
+        )
+
+        # Candidate
+        self.candidate = User.objects.create_user(
+            username="test_candidate_user",
+            email="candidate@airecruitment.com",
+            password="CandidatePassword123!",
+            role=User.Role.CANDIDATE,
+            is_email_verified=True
+        )
+
+        # Recruiter
+        self.recruiter = User.objects.create_user(
+            username="test_recruiter_user",
+            email="recruiter@airecruitment.com",
+            password="RecruiterPassword123!",
+            role=User.Role.RECRUITER,
+            is_email_verified=True
+        )
+
+        # Staff Admin with job_moderation only
+        self.job_moderator_staff = User.objects.create_user(
+            username="job_mod_staff",
+            email="jobmod@airecruitment.com",
+            password="StaffPassword123!",
+            role=User.Role.ADMIN,
+            is_staff=True,
+            is_superuser=False,
+            is_email_verified=True
+        )
+        self.job_mod_profile = AdminProfile.objects.create(
+            user=self.job_moderator_staff,
+            permissions=[AdminPermission.JOBS_VIEW, AdminPermission.JOBS_MODERATE],
+            created_by=self.super_admin
+        )
+
+        # Create a sample job for moderation tests
+        self.sample_job = Job.objects.create(
+            recruiter=self.recruiter,
+            title="Senior Full-Stack Engineer",
+            description="Leading AI development team",
+            type="Full-time",
+            is_active=True
+        )
+
+    def test_01_public_registration_cannot_create_superadmin_or_staff_admin(self):
+        """Attacker passes role=ADMIN, is_staff=True, is_superuser=True to public register."""
+        attack_payloads = [
+            {"username": "hacker1", "email": "h1@test.com", "password": "Password123!", "role": "ADMIN"},
+            {"username": "hacker2", "email": "h2@test.com", "password": "Password123!", "role": "SUPERADMIN"},
+            {"username": "hacker3", "email": "h3@test.com", "password": "Password123!", "is_staff": True},
+            {"username": "hacker4", "email": "h4@test.com", "password": "Password123!", "is_superuser": True},
+        ]
+        for payload in attack_payloads:
+            res = self.client.post("/api/users/register/", payload)
+            if res.status_code == 201:
+                # If registration succeeded (e.g. ignoring is_staff/is_superuser fields), verify role was NOT escalated
+                created_user = User.objects.get(username=payload['username'])
+                self.assertNotEqual(created_user.role, User.Role.ADMIN)
+                self.assertFalse(created_user.is_staff)
+                self.assertFalse(created_user.is_superuser)
+            else:
+                self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_02_candidate_and_recruiter_cannot_access_administrative_endpoints(self):
+        """Candidates and Recruiters must receive 403 Forbidden on all admin endpoints."""
+        endpoints = [
+            "/api/admin/dashboard/stats/",
+            "/api/admin/users/",
+            "/api/admin/jobs/",
+            "/api/admin/analytics/",
+            "/api/admin/audit-logs/",
+            "/api/admin/staff-admins/",
+        ]
+        for user in [self.candidate, self.recruiter]:
+            self.client.force_authenticate(user=user)
+            for url in endpoints:
+                res = self.client.get(url)
+                self.assertEqual(
+                    res.status_code,
+                    status.HTTP_403_FORBIDDEN,
+                    f"User {user.username} with role {user.role} was not denied access to {url}"
+                )
+
+    def test_03_staff_admin_cannot_access_superadmin_only_endpoints(self):
+        """Staff Admin cannot access Superadmin exclusive management endpoints."""
+        self.client.force_authenticate(user=self.job_moderator_staff)
+
+        # Cannot list or create staff admins
+        res_list = self.client.get("/api/admin/staff-admins/")
+        self.assertEqual(res_list.status_code, status.HTTP_403_FORBIDDEN)
+
+        res_create = self.client.post("/api/admin/staff-admins/", {
+            "username": "unauthorized_staff",
+            "email": "unauth@test.com",
+            "password": "Password123!",
+            "permissions": [AdminPermission.DASHBOARD_VIEW]
+        })
+        self.assertEqual(res_create.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Cannot access assignable-permissions endpoint
+        res_perms = self.client.get("/api/admin/staff-admins/assignable-permissions/")
+        self.assertEqual(res_perms.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_04_staff_admin_cannot_perform_actions_without_corresponding_permission(self):
+        """Staff Admin with only jobs permissions cannot view users, audit logs, or analytics."""
+        self.client.force_authenticate(user=self.job_moderator_staff)
+
+        # Denied users view
+        res_users = self.client.get("/api/admin/users/")
+        self.assertEqual(res_users.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Denied analytics view
+        res_analytics = self.client.get("/api/admin/analytics/")
+        self.assertEqual(res_analytics.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Denied audit logs view
+        res_audit = self.client.get("/api/admin/audit-logs/")
+        self.assertEqual(res_audit.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_05_staff_admin_with_job_moderation_can_moderate_jobs_but_not_manage_users(self):
+        """Staff Admin can perform authorized job moderation but cannot manage user statuses."""
+        self.client.force_authenticate(user=self.job_moderator_staff)
+
+        # Can view jobs
+        res_jobs = self.client.get("/api/admin/jobs/")
+        self.assertEqual(res_jobs.status_code, status.HTTP_200_OK)
+
+        # Can moderate job (deactivate job)
+        res_mod = self.client.patch(
+            f"/api/admin/jobs/{self.sample_job.id}/moderation/",
+            {"is_active": False, "reason": "Violates job posting policy"}
+        )
+        self.assertEqual(res_mod.status_code, status.HTTP_200_OK)
+        self.sample_job.refresh_from_db()
+        self.assertFalse(self.sample_job.is_active)
+
+        # Cannot modify candidate user status
+        res_user_status = self.client.patch(
+            f"/api/admin/users/{self.candidate.id}/status/",
+            {"is_active": False, "reason": "Unauthorized attempt"}
+        )
+        self.assertEqual(res_user_status.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_06_staff_admin_cannot_grant_permissions_or_escalate_themselves(self):
+        """Staff Admin cannot call permissions endpoint to grant themselves or others permissions."""
+        self.client.force_authenticate(user=self.job_moderator_staff)
+
+        # Attempt to grant full permissions
+        res = self.client.patch(
+            f"/api/admin/staff-admins/{self.job_moderator_staff.id}/permissions/",
+            {"permissions": [AdminPermission.USERS_MANAGE, AdminPermission.STAFF_ADMINS_MANAGE]}
+        )
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Verify permissions were not changed in database
+        self.job_mod_profile.refresh_from_db()
+        self.assertEqual(
+            self.job_mod_profile.permissions,
+            [AdminPermission.JOBS_VIEW, AdminPermission.JOBS_MODERATE]
+        )
+
+    def test_07_superadmin_can_manage_staff_admins_and_allowed_permissions(self):
+        """Superadmin has full lifecycle management of Staff Admin accounts."""
+        self.client.force_authenticate(user=self.super_admin)
+
+        # 1. Provision new Staff Admin
+        create_res = self.client.post("/api/admin/staff-admins/", {
+            "username": "lifecycle_staff",
+            "email": "lifecycle@airecruitment.com",
+            "password": "SecurePassword123!",
+            "permissions": [AdminPermission.DASHBOARD_VIEW]
+        })
+        self.assertEqual(create_res.status_code, status.HTTP_201_CREATED)
+        new_staff_id = create_res.json()['user_id']
+
+        # 2. Update allowed permissions
+        perm_res = self.client.patch(
+            f"/api/admin/staff-admins/{new_staff_id}/permissions/",
+            {"permissions": [AdminPermission.DASHBOARD_VIEW, AdminPermission.ANALYTICS_VIEW]}
+        )
+        self.assertEqual(perm_res.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            set(perm_res.json()['permissions']),
+            {AdminPermission.DASHBOARD_VIEW, AdminPermission.ANALYTICS_VIEW}
+        )
+
+        # 3. Super Admin cannot grant SUPER_ADMIN_EXCLUSIVE to Staff Admin
+        invalid_perm_res = self.client.patch(
+            f"/api/admin/staff-admins/{new_staff_id}/permissions/",
+            {"permissions": [AdminPermission.STAFF_ADMINS_MANAGE]}
+        )
+        self.assertEqual(invalid_perm_res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_08_unauthorized_and_unauthenticated_status_codes(self):
+        """Unauthenticated requests must return 401 Unauthorized."""
+        self.client.force_authenticate(user=None)
+        res = self.client.get("/api/admin/dashboard/stats/")
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_09_revoked_permissions_enforced_immediately(self):
+        """When permission is revoked, subsequent requests are immediately blocked."""
+        # 1. Staff Admin starts with jobs.view permission
+        self.client.force_authenticate(user=self.job_moderator_staff)
+        res_before = self.client.get("/api/admin/jobs/")
+        self.assertEqual(res_before.status_code, status.HTTP_200_OK)
+
+        # 2. Superadmin revokes jobs.view
+        self.job_mod_profile.permissions = [AdminPermission.DASHBOARD_VIEW]
+        self.job_mod_profile.save()
+
+        # 3. Subsequent request by Staff Admin must now fail with 403
+        res_after = self.client.get("/api/admin/jobs/")
+        self.assertEqual(res_after.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_10_critical_safeguard_prevents_deactivating_last_active_superadmin(self):
+        """Platform safeguards prevent deactivating the last remaining active Super Admin."""
+        # Ensure only 1 active superadmin
+        self.assertEqual(User.objects.filter(is_superuser=True, is_active=True).count(), 1)
+
+        self.client.force_authenticate(user=self.super_admin)
+
+        # 1. Self status modification is rejected
+        res_self = self.client.patch(
+            f"/api/admin/users/{self.super_admin.id}/status/",
+            {"is_active": False}
+        )
+        self.assertEqual(res_self.status_code, status.HTTP_403_FORBIDDEN)
+
+        # 2. Direct service function raises ValidationError
+        with self.assertRaises(ValidationError) as ctx:
+            deactivate_admin_account(
+                super_admin=self.super_admin,
+                target_user=self.super_admin,
+                reason="Should be blocked"
+            )
+        self.assertIn("last remaining active Super Admin", str(ctx.exception))
+
+    def test_11_bootstrap_superadmin_command(self):
+        """bootstrap_superadmin management command securely creates the initial Superadmin."""
+        out = io.StringIO()
+        err = io.StringIO()
+
+        # 1. Create a fresh Superadmin via command
+        call_command(
+            'bootstrap_superadmin',
+            '--username=bootstrap_admin',
+            '--email=bootstrap@airecruitment.com',
+            '--password=BootstrapPassword123!',
+            '--no-input',
+            stdout=out,
+            stderr=err
+        )
+
+        created_admin = User.objects.get(username="bootstrap_admin")
+        self.assertTrue(created_admin.is_superuser)
+        self.assertTrue(created_admin.is_staff)
+        self.assertEqual(created_admin.role, User.Role.ADMIN)
+        self.assertTrue(created_admin.is_email_verified)
+
+        # Verify audit log was recorded
+        log_entry = AuditLog.objects.filter(
+            action="SUPER_ADMIN_BOOTSTRAPPED",
+            target_repr="bootstrap_admin"
+        ).first()
+        self.assertIsNotNone(log_entry)
+        # Verify password is not in metadata
+        self.assertNotIn("password", str(log_entry.metadata))
+
+        # 2. Running again with same username informs user without error or duplication
+        out_dup = io.StringIO()
+        call_command(
+            'bootstrap_superadmin',
+            '--username=bootstrap_admin',
+            '--email=bootstrap@airecruitment.com',
+            '--password=BootstrapPassword123!',
+            '--no-input',
+            stdout=out_dup
+        )
+        self.assertIn("already exists", out_dup.getvalue())
+
+        # 3. Running with existing non-admin username fails safely
+        with self.assertRaises(CommandError) as ctx:
+            call_command(
+                'bootstrap_superadmin',
+                f'--username={self.candidate.username}',
+                '--email=newemail@test.com',
+                '--password=BootstrapPassword123!',
+                '--no-input'
+            )
+        self.assertIn("non-superadmin user", str(ctx.exception))
+
+        # 4. Short password fails
+        with self.assertRaises(CommandError) as ctx:
+            call_command(
+                'bootstrap_superadmin',
+                '--username=short_pw_admin',
+                '--email=short@test.com',
+                '--password=short',
+                '--no-input'
+            )
+        self.assertIn("at least 8 characters", str(ctx.exception))
+
+    def test_12_staff_assignable_permissions_endpoint_accessible_only_to_superadmin(self):
+        """GET /api/admin/staff-admins/assignable-permissions/ returns metadata to Superadmin, 403 to others."""
+        # 1. Super Admin access
+        self.client.force_authenticate(user=self.super_admin)
+        res = self.client.get("/api/admin/staff-admins/assignable-permissions/")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.json()
+        self.assertIsInstance(data, list)
+        self.assertGreater(len(data), 0)
+        perm_ids = [item['id'] for item in data]
+        self.assertIn(AdminPermission.JOBS_MODERATE, perm_ids)
+        self.assertIn(AdminPermission.USERS_MANAGE, perm_ids)
+        # Super Admin exclusive permissions must NEVER be in assignable list
+        self.assertNotIn(AdminPermission.STAFF_ADMINS_MANAGE, perm_ids)
+
+        # 2. Staff Admin access -> 403
+        self.client.force_authenticate(user=self.job_moderator_staff)
+        res_staff = self.client.get("/api/admin/staff-admins/assignable-permissions/")
+        self.assertEqual(res_staff.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_13_superadmin_can_promote_candidate_to_staff_admin(self):
+        """Superadmin can promote a candidate to staff admin with explicitly assigned permissions."""
+        fresh_candidate = User.objects.create_user(
+            username="promotable_candidate",
+            email="promotable@test.com",
+            password="Password123!",
+            role=User.Role.CANDIDATE
+        )
+
+        # 1. Staff Admin cannot promote users
+        self.client.force_authenticate(user=self.job_moderator_staff)
+        res_staff = self.client.post(
+            f"/api/admin/users/{fresh_candidate.id}/promote-to-staff/",
+            {"permissions": [AdminPermission.JOBS_VIEW]},
+            format='json'
+        )
+        self.assertEqual(res_staff.status_code, status.HTTP_403_FORBIDDEN)
+
+        # 2. Superadmin promotes successfully
+        self.client.force_authenticate(user=self.super_admin)
+        res_super = self.client.post(
+            f"/api/admin/users/{fresh_candidate.id}/promote-to-staff/",
+            {"permissions": [AdminPermission.JOBS_VIEW, AdminPermission.JOBS_MODERATE]},
+            format='json'
+        )
+        self.assertEqual(res_super.status_code, status.HTTP_200_OK)
+
+        fresh_candidate.refresh_from_db()
+        self.assertEqual(fresh_candidate.role, User.Role.ADMIN)
+        self.assertTrue(fresh_candidate.is_staff)
+        self.assertFalse(fresh_candidate.is_superuser)
+        self.assertEqual(
+            set(fresh_candidate.admin_profile.permissions),
+            {AdminPermission.JOBS_VIEW, AdminPermission.JOBS_MODERATE}
+        )
+
+    def test_14_superadmin_can_demote_staff_admin(self):
+        """Superadmin can demote a staff admin back to candidate or recruiter."""
+        # 1. Staff Admin cannot demote others or self
+        self.client.force_authenticate(user=self.job_moderator_staff)
+        res_staff = self.client.post(
+            f"/api/admin/users/{self.job_moderator_staff.id}/demote-from-staff/",
+            {"role": "CANDIDATE"},
+            format='json'
+        )
+        self.assertEqual(res_staff.status_code, status.HTTP_403_FORBIDDEN)
+
+        # 2. Superadmin demotes staff to CANDIDATE
+        self.client.force_authenticate(user=self.super_admin)
+        res_demote = self.client.post(
+            f"/api/admin/users/{self.job_moderator_staff.id}/demote-from-staff/",
+            {"role": "CANDIDATE"},
+            format='json'
+        )
+        self.assertEqual(res_demote.status_code, status.HTTP_200_OK)
+
+        self.job_moderator_staff.refresh_from_db()
+        self.assertEqual(self.job_moderator_staff.role, User.Role.CANDIDATE)
+        self.assertFalse(self.job_moderator_staff.is_staff)
+        self.assertEqual(self.job_moderator_staff.admin_profile.permissions, [])
+        self.assertFalse(self.job_moderator_staff.admin_profile.is_active)
+
+        # 3. Demoting a non-staff user is rejected
+        res_invalid = self.client.post(
+            f"/api/admin/users/{self.job_moderator_staff.id}/demote-from-staff/",
+            {"role": "CANDIDATE"},
+            format='json'
+        )
+        self.assertEqual(res_invalid.status_code, status.HTTP_400_BAD_REQUEST)
