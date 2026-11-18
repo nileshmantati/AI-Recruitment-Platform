@@ -637,7 +637,7 @@ const AdminUsersPage = () => {
                                         <div>
                                             <span className="text-slate-400 block">Company</span>
                                             <span className="font-semibold text-slate-700">
-                                                {selectedUser.profile.company || 'Not specified'}
+                                                {selectedUser.profile.company || selectedUser.company_name || 'Not specified'}
                                             </span>
                                         </div>
                                         <div>
@@ -652,6 +652,67 @@ const AdminUsersPage = () => {
                                                 {selectedUser.profile.company_verified ? 'Verified' : 'Pending Verification'}
                                             </span>
                                         </div>
+                                        {selectedUser.profile.company_details && (
+                                            <div className="pt-2.5 mt-2.5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                                {selectedUser.profile.company_details.industry && (
+                                                    <div>
+                                                        <span className="text-slate-400 block">Industry</span>
+                                                        <span className="font-semibold text-slate-700">
+                                                            {selectedUser.profile.company_details.industry}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedUser.profile.company_details.size && (
+                                                    <div>
+                                                        <span className="text-slate-400 block">Company Size</span>
+                                                        <span className="font-semibold text-slate-700">
+                                                            {selectedUser.profile.company_details.size}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {(selectedUser.profile.company_details.city || selectedUser.profile.company_details.country) && (
+                                                    <div>
+                                                        <span className="text-slate-400 block">Location</span>
+                                                        <span className="font-semibold text-slate-700">
+                                                            {[
+                                                                selectedUser.profile.company_details.city,
+                                                                selectedUser.profile.company_details.state,
+                                                                selectedUser.profile.company_details.country,
+                                                            ].filter(Boolean).join(', ')}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedUser.profile.company_details.email && (
+                                                    <div>
+                                                        <span className="text-slate-400 block">Company Email</span>
+                                                        <span className="font-semibold text-slate-700 break-all">
+                                                            {selectedUser.profile.company_details.email}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedUser.profile.company_details.phone && (
+                                                    <div>
+                                                        <span className="text-slate-400 block">Company Phone</span>
+                                                        <span className="font-semibold text-slate-700">
+                                                            {selectedUser.profile.company_details.phone}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedUser.profile.company_details.website && (
+                                                    <div>
+                                                        <span className="text-slate-400 block">Website</span>
+                                                        <a
+                                                            href={selectedUser.profile.company_details.website}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="font-semibold text-indigo-600 hover:underline break-all"
+                                                        >
+                                                            {selectedUser.profile.company_details.website}
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 

@@ -71,16 +71,25 @@ class AdminUserDetailSerializer(AdminUserListSerializer):
                 'bio': p.bio,
                 'has_resume': bool(p.resume),
             }
-        elif obj.role == User.Role.RECRUITER and hasattr(obj, 'recruiter_profile'):
-            p = obj.recruiter_profile
-            company_verified = obj.company.is_verified if hasattr(obj, 'company') else False
+        elif obj.role == User.Role.RECRUITER and (hasattr(obj, 'recruiter_profile') or hasattr(obj, 'company')):
+            p = getattr(obj, 'recruiter_profile', None)
+            company_obj = getattr(obj, 'company', None)
+            company_verified = company_obj.is_verified if company_obj else False
+            company_name = (
+                company_obj.name if company_obj and company_obj.name
+                else (p.company if p and p.company else '')
+            )
             return {
                 'type': 'RECRUITER',
-                'first_name': p.first_name,
-                'last_name': p.last_name,
-                'company': p.company,
-                'position': p.position,
+                'first_name': p.first_name if p else '',
+                'last_name': p.last_name if p else '',
+                'company': company_name,
+                'position': p.position if p else None,
                 'company_verified': company_verified,
+                'company_details': (
+                    AdminRecruiterCompanySerializer(company_obj).data
+                    if company_obj else None
+                ),
             }
         elif obj.role == User.Role.ADMIN and hasattr(obj, 'admin_profile'):
             ap = obj.admin_profile
