@@ -21,7 +21,7 @@ const BasicInfoStep = ({ formData, setFormData }) => {
         setUploadingLogo(true);
         try {
             const res = await companyService.uploadLogo(file);
-            setFormData({ ...formData, logo: res.logo_url });
+            setFormData((prev) => ({ ...prev, logo: res.logo_url }));
             toast.success("Logo uploaded!");
         } catch {
             toast.error("Failed to upload logo.");
@@ -37,7 +37,7 @@ const BasicInfoStep = ({ formData, setFormData }) => {
         setUploadingBanner(true);
         try {
             const res = await companyService.uploadBanner(file);
-            setFormData({ ...formData, cover_banner: res.banner_url });
+            setFormData((prev) => ({ ...prev, cover_banner: res.banner_url }));
             toast.success("Banner uploaded!");
         } catch {
             toast.error("Failed to upload banner.");
