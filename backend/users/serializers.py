@@ -65,6 +65,7 @@ class CandidateProfileSerializer(serializers.ModelSerializer):
 class RecruiterProfileSerializer(serializers.ModelSerializer):
     email = serializers.SerializerMethodField()
     profile_image = serializers.SerializerMethodField()
+    company = serializers.SerializerMethodField()
 
     class Meta:
         model = RecruiterProfile
@@ -81,6 +82,12 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.profile_image.url)
             return obj.profile_image.url
         return None
+
+    def get_company(self, obj):
+        company_obj = getattr(obj.user, 'company', None)
+        if company_obj and company_obj.name:
+            return company_obj.name
+        return obj.company or ''
 
 
 PUBLIC_REGISTRATION_ROLES = (User.Role.CANDIDATE, User.Role.RECRUITER)

@@ -59,6 +59,14 @@ class CompanySerializer(serializers.ModelSerializer):
         exclude = ('user',)
         read_only_fields = ('is_verified', 'created_at', 'updated_at')
 
+    def _sync_recruiter_company_name(self, company):
+        recruiter_profile = getattr(company.user, 'recruiter_profile', None)
+        if recruiter_profile is not None and company.name:
+            synced_name = company.name[:100]
+            if recruiter_profile.company != synced_name:
+                recruiter_profile.company = synced_name
+                recruiter_profile.save(update_fields=['company'])
+
     def create(self, validated_data):
         socials_data = validated_data.pop('socials', None) or {}
         branding_data = validated_data.pop('branding', None) or {}
@@ -69,6 +77,7 @@ class CompanySerializer(serializers.ModelSerializer):
         CompanySocial.objects.create(company=company, **socials_data)
         CompanyBranding.objects.create(company=company, **branding_data)
         CompanyAIPreferences.objects.create(company=company, **ai_prefs_data)
+        self._sync_recruiter_company_name(company)
 
         return company
 
@@ -81,6 +90,7 @@ class CompanySerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
+        self._sync_recruiter_company_name(instance)
 
         # Update Socials
         if socials_data is not None:
