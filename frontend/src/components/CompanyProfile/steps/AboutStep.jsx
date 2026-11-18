@@ -13,6 +13,10 @@ const quillModules = {
 };
 
 const AboutStep = ({ formData, setFormData }) => {
+    const handleQuillChange = (field) => (val) => {
+        setFormData((prev) => (prev[field] === val ? prev : { ...prev, [field]: val }));
+    };
+
     return (
         <div className="space-y-6 pb-8">
             <div className="space-y-1">
@@ -20,8 +24,8 @@ const AboutStep = ({ formData, setFormData }) => {
                 <div className="bg-white rounded-xl overflow-hidden border border-slate-200">
                     <ReactQuill
                         theme="snow"
-                        value={formData.about}
-                        onChange={(val) => setFormData({ ...formData, about: val })}
+                        value={formData.about || ''}
+                        onChange={handleQuillChange('about')}
                         modules={quillModules}
                         className="h-48"
                     />
@@ -33,8 +37,8 @@ const AboutStep = ({ formData, setFormData }) => {
                 <div className="bg-white rounded-xl overflow-hidden border border-slate-200">
                     <ReactQuill
                         theme="snow"
-                        value={formData.mission}
-                        onChange={(val) => setFormData({ ...formData, mission: val })}
+                        value={formData.mission || ''}
+                        onChange={handleQuillChange('mission')}
                         modules={quillModules}
                         className="h-32"
                     />
@@ -46,8 +50,8 @@ const AboutStep = ({ formData, setFormData }) => {
                 <div className="bg-white rounded-xl overflow-hidden border border-slate-200">
                     <ReactQuill
                         theme="snow"
-                        value={formData.vision}
-                        onChange={(val) => setFormData({ ...formData, vision: val })}
+                        value={formData.vision || ''}
+                        onChange={handleQuillChange('vision')}
                         modules={quillModules}
                         className="h-32"
                     />
@@ -59,8 +63,8 @@ const AboutStep = ({ formData, setFormData }) => {
                 <div className="bg-white rounded-xl overflow-hidden border border-slate-200">
                     <ReactQuill
                         theme="snow"
-                        value={formData.why_join_us}
-                        onChange={(val) => setFormData({ ...formData, why_join_us: val })}
+                        value={formData.why_join_us || ''}
+                        onChange={handleQuillChange('why_join_us')}
                         modules={quillModules}
                         className="h-32"
                     />
