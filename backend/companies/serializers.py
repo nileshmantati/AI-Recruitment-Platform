@@ -47,9 +47,9 @@ class CompanyAIPreferencesSerializer(serializers.ModelSerializer):
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    socials = CompanySocialSerializer(required=False)
-    branding = CompanyBrandingSerializer(required=False)
-    ai_preferences = CompanyAIPreferencesSerializer(required=False)
+    socials = CompanySocialSerializer(required=False, allow_null=True)
+    branding = CompanyBrandingSerializer(required=False, allow_null=True)
+    ai_preferences = CompanyAIPreferencesSerializer(required=False, allow_null=True)
     locations = CompanyLocationSerializer(many=True, read_only=True)
     documents = CompanyDocumentSerializer(many=True, read_only=True)
     gallery_images = CompanyGallerySerializer(many=True, read_only=True)
@@ -60,9 +60,9 @@ class CompanySerializer(serializers.ModelSerializer):
         read_only_fields = ('is_verified', 'created_at', 'updated_at')
 
     def create(self, validated_data):
-        socials_data = validated_data.pop('socials', {})
-        branding_data = validated_data.pop('branding', {})
-        ai_prefs_data = validated_data.pop('ai_preferences', {})
+        socials_data = validated_data.pop('socials', None) or {}
+        branding_data = validated_data.pop('branding', None) or {}
+        ai_prefs_data = validated_data.pop('ai_preferences', None) or {}
 
         company = Company.objects.create(**validated_data)
 

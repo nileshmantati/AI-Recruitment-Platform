@@ -21,7 +21,7 @@ export const companyService = {
 
     // Update existing company profile
     updateProfile: async (id, data) => {
-        const response = await api.put(`company/${id}/`, data);
+        const response = await api.patch(`company/${id}/`, data);
         return response.data;
     },
 

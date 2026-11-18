@@ -54,13 +54,33 @@ const CompanyProfileForm = ({ onComplete, initialData = null }) => {
         setLoading(true);
         try {
             const cleanedData = { ...formData };
+            [
+                'id', 'logo', 'cover_banner', 'locations', 'documents',
+                'gallery_images', 'is_verified', 'created_at', 'updated_at'
+            ].forEach((field) => delete cleanedData[field]);
+
+            if (!cleanedData.socials) {
+                delete cleanedData.socials;
+            }
+            if (!cleanedData.branding) {
+                delete cleanedData.branding;
+            }
+            if (!cleanedData.ai_preferences) {
+                delete cleanedData.ai_preferences;
+            } else {
+                cleanedData.ai_preferences = { ...cleanedData.ai_preferences };
+                if (cleanedData.ai_preferences.minimum_experience_years === '') {
+                    cleanedData.ai_preferences.minimum_experience_years = 0;
+                }
+                if (cleanedData.ai_preferences.minimum_resume_score === '') {
+                    cleanedData.ai_preferences.minimum_resume_score = 70;
+                }
+            }
+
             if (cleanedData.founded_year === '') cleanedData.founded_year = null;
-            if (cleanedData.ai_preferences?.minimum_experience_years === '') {
-                cleanedData.ai_preferences.minimum_experience_years = 0;
-            }
-            if (cleanedData.ai_preferences?.minimum_resume_score === '') {
-                cleanedData.ai_preferences.minimum_resume_score = 70;
-            }
+            if (cleanedData.website === '') cleanedData.website = null;
+            if (cleanedData.google_map_link === '') cleanedData.google_map_link = null;
+            if (cleanedData.email === '') cleanedData.email = null;
 
             if (initialData?.id) {
                 await companyService.updateProfile(initialData.id, cleanedData);
@@ -72,7 +92,24 @@ const CompanyProfileForm = ({ onComplete, initialData = null }) => {
             if (onComplete) onComplete();
         } catch (error) {
             console.error('Error saving profile:', error);
-            toast.error(error.response?.data?.detail || 'Failed to save profile. Please try again.');
+            const formatError = (val) => {
+                if (Array.isArray(val)) return val.join(', ');
+                if (val && typeof val === 'object') {
+                    return Object.entries(val)
+                        .map(([k, v]) => `${k}: ${formatError(v)}`)
+                        .join(', ');
+                }
+                return String(val);
+            };
+            const data = error.response?.data;
+            const errorMessage =
+                data?.detail ||
+                (data && typeof data === 'object'
+                    ? Object.entries(data)
+                        .map(([field, msgs]) => `${field}: ${formatError(msgs)}`)
+                        .join(' | ')
+                    : null);
+            toast.error(errorMessage || 'Failed to save profile. Please try again.');
         } finally {
             setLoading(false);
         }
