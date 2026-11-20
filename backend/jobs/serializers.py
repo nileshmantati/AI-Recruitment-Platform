@@ -68,7 +68,7 @@ class JobSerializer(serializers.ModelSerializer):
                     'country': None,
                     'logo': None,
                     'cover_banner': None,
-                    'is_verified': profile.is_company_verified,
+                    'is_verified': getattr(profile, 'is_company_verified', False),
                 }
             return None
 

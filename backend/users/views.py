@@ -466,10 +466,6 @@ def generate_and_send_verification_otp(user):
         )
 
     logger.info("Generated email verification OTP for user: %s", user.username)
-    print("\n=======================================================")
-    print(f"[EMAIL VERIFICATION OTP] User: {user.username} | Email: {user.email}")
-    print(f"VERIFICATION CODE: {otp}")
-    print("=======================================================\n")
     email_sent = send_verification_email(user, otp)
     return otp, email_sent
 
@@ -522,10 +518,6 @@ class ForgotPasswordView(APIView):
             PasswordResetOTP.objects.create(user=user, otp=otp)
 
         logger.info("Generated password reset OTP for user: %s", user.username)
-        print("\n=======================================================")
-        print(f"[PASSWORD RESET OTP] User: {user.username} | Email: {user.email}")
-        print(f"RESET CODE: {otp}")
-        print("=======================================================\n")
 
         # Send email
         email_sent = send_otp_email(user, otp)
