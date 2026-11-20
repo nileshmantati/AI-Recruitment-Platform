@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import CompanyProfileForm from '../../CompanyProfile/CompanyProfileForm';
 import { companyService } from '../../../services/companyService';
+import { resolveMediaUrl } from '../../../services/api';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
@@ -115,14 +116,14 @@ const RecruiterCompanyProfilePage = ({ isProfileCompleted, setIsProfileCompleted
                     <div className={`lg:col-span-4 ${glassClasses} p-6 flex flex-col items-center text-center`}>
                         <div className="relative mb-4 w-full h-32 bg-slate-100 rounded-2xl overflow-hidden">
                             {company.cover_banner ? (
-                                <img src={company.cover_banner} alt="Banner" className="w-full h-full object-cover" />
+                                <img src={resolveMediaUrl(company.cover_banner)} alt="Banner" className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100" />
                             )}
                         </div>
                         <div className="w-24 h-24 rounded-2xl bg-white shadow-xl border border-slate-100 p-2 -mt-16 relative z-10">
                             {company.logo ? (
-                                <img src={company.logo} alt="Logo" className="w-full h-full object-contain rounded-xl" />
+                                <img src={resolveMediaUrl(company.logo)} alt="Logo" className="w-full h-full object-contain rounded-xl" />
                             ) : (
                                 <div className="w-full h-full bg-slate-50 rounded-xl flex items-center justify-center">
                                     <Building2 className="w-8 h-8 text-slate-300" />

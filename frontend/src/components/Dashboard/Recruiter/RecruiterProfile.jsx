@@ -4,7 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Loader2, User, Mail, Phone, Building2, Briefcase, Edit3, Save, X, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../../../services/api';
+import api, { resolveMediaUrl } from '../../../services/api';
 import { motion } from 'framer-motion';
 import { T } from '../../../Js/theme';
 
@@ -225,7 +225,7 @@ const RecruiterProfile = () => {
                     <div className="flex h-24 w-24 items-center justify-center rounded-2xl text-white text-3xl font-extrabold shadow-lg overflow-hidden"
                         style={{ background: `linear-gradient(135deg, ${T.primary}, ${T.accent})` }}>
                         {profileImage ? (
-                            <img src={profileImage} alt="Profile" className="h-full w-full object-cover" />
+                            <img src={resolveMediaUrl(profileImage) || profileImage} alt="Profile" className="h-full w-full object-cover" />
                         ) : (
                             initials
                         )}

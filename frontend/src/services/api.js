@@ -256,4 +256,39 @@ export const analyzeJobDescriptionBias = async (payload) => {
     return response.data;
 };
 
+/**
+ * Resolves uploaded media URLs (logos, banners, avatars) to work consistently across dev and production.
+ * Handles relative paths (/media/...), localhost URLs returned behind proxies, and mixed-content http/https.
+ */
+export const resolveMediaUrl = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    const trimmed = url.trim();
+    if (!trimmed) return null;
+
+    if (trimmed.startsWith('blob:') || trimmed.startsWith('data:')) {
+        return trimmed;
+    }
+
+    let backendOrigin = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/').trim();
+    backendOrigin = backendOrigin.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+
+    if (trimmed.startsWith('/media/') || trimmed.startsWith('media/')) {
+        const cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+        return `${backendOrigin}${cleanPath}`;
+    }
+
+    if (trimmed.includes('localhost') || trimmed.includes('127.0.0.1') || trimmed.includes('0.0.0.0')) {
+        const mediaIndex = trimmed.indexOf('/media/');
+        if (mediaIndex !== -1) {
+            return `${backendOrigin}${trimmed.substring(mediaIndex)}`;
+        }
+    }
+
+    if (trimmed.startsWith('http://') && (trimmed.includes('.onrender.com') || trimmed.includes('.vercel.app'))) {
+        return trimmed.replace(/^http:\/\//i, 'https://');
+    }
+
+    return trimmed;
+};
+
 export default api;

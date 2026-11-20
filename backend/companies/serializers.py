@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 from .models import (
     Company,
@@ -47,6 +48,8 @@ class CompanyAIPreferencesSerializer(serializers.ModelSerializer):
 
 
 class CompanySerializer(serializers.ModelSerializer):
+    logo = serializers.SerializerMethodField()
+    cover_banner = serializers.SerializerMethodField()
     socials = CompanySocialSerializer(required=False, allow_null=True)
     branding = CompanyBrandingSerializer(required=False, allow_null=True)
     ai_preferences = CompanyAIPreferencesSerializer(required=False, allow_null=True)
@@ -58,6 +61,28 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         exclude = ('user',)
         read_only_fields = ('is_verified', 'created_at', 'updated_at')
+
+    def get_logo(self, obj):
+        if obj.logo:
+            request = self.context.get('request')
+            if request is not None:
+                url = request.build_absolute_uri(obj.logo.url)
+                if (request.is_secure() or getattr(settings, 'SECURE_PROXY_SSL_HEADER', None)) and url.startswith('http://'):
+                    url = 'https://' + url[7:]
+                return url
+            return obj.logo.url
+        return None
+
+    def get_cover_banner(self, obj):
+        if obj.cover_banner:
+            request = self.context.get('request')
+            if request is not None:
+                url = request.build_absolute_uri(obj.cover_banner.url)
+                if (request.is_secure() or getattr(settings, 'SECURE_PROXY_SSL_HEADER', None)) and url.startswith('http://'):
+                    url = 'https://' + url[7:]
+                return url
+            return obj.cover_banner.url
+        return None
 
     def _sync_recruiter_company_name(self, company):
         recruiter_profile = getattr(company.user, 'recruiter_profile', None)

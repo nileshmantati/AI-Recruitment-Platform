@@ -1,5 +1,6 @@
 import { Building2, Globe, Phone, Mail, FileText, Briefcase, Hash } from 'lucide-react';
 import { companyService } from '../../../services/companyService';
+import { resolveMediaUrl } from '../../../services/api';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
 
@@ -53,7 +54,7 @@ const BasicInfoStep = ({ formData, setFormData }) => {
                     <div className="relative group">
                         <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center bg-white overflow-hidden relative">
                             {formData.logo ? (
-                                <img src={formData.logo} alt="Logo" className="w-full h-full object-cover" />
+                                <img src={resolveMediaUrl(formData.logo)} alt="Logo" className="w-full h-full object-cover" />
                             ) : (
                                 <Building2 className="w-8 h-8 text-slate-300" />
                             )}
@@ -65,7 +66,7 @@ const BasicInfoStep = ({ formData, setFormData }) => {
                     <div className="relative flex-1 w-full group">
                         <div className="w-full h-24 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center bg-white overflow-hidden relative">
                             {formData.cover_banner ? (
-                                <img src={formData.cover_banner} alt="Banner" className="w-full h-full object-cover" />
+                                <img src={resolveMediaUrl(formData.cover_banner)} alt="Banner" className="w-full h-full object-cover" />
                             ) : (
                                 <span className="text-sm font-medium text-slate-400">Click to upload cover banner (1200x400)</span>
                             )}

@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -145,7 +146,10 @@ class CompanyViewSet(viewsets.ModelViewSet):
         if 'logo' in request.FILES:
             company.logo = request.FILES['logo']
             company.save()
-            return Response({"logo_url": request.build_absolute_uri(company.logo.url)})
+            url = request.build_absolute_uri(company.logo.url)
+            if (request.is_secure() or getattr(settings, 'SECURE_PROXY_SSL_HEADER', None)) and url.startswith('http://'):
+                url = 'https://' + url[7:]
+            return Response({"logo_url": url})
         return Response({"detail": "No logo provided."}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['POST'])
@@ -157,7 +161,10 @@ class CompanyViewSet(viewsets.ModelViewSet):
         if 'banner' in request.FILES:
             company.cover_banner = request.FILES['banner']
             company.save()
-            return Response({"banner_url": request.build_absolute_uri(company.cover_banner.url)})
+            url = request.build_absolute_uri(company.cover_banner.url)
+            if (request.is_secure() or getattr(settings, 'SECURE_PROXY_SSL_HEADER', None)) and url.startswith('http://'):
+                url = 'https://' + url[7:]
+            return Response({"banner_url": url})
         return Response({"detail": "No banner provided."}, status=status.HTTP_400_BAD_REQUEST)
 
 
