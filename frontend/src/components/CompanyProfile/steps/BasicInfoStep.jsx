@@ -2,7 +2,7 @@ import { Building2, Globe, Phone, Mail, FileText, Briefcase, Hash } from 'lucide
 import { companyService } from '../../../services/companyService';
 import { resolveMediaUrl } from '../../../services/api';
 import toast from 'react-hot-toast';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const inputClasses = "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300";
 const labelClasses = "block text-sm font-semibold text-slate-700 mb-1.5";
@@ -10,16 +10,11 @@ const labelClasses = "block text-sm font-semibold text-slate-700 mb-1.5";
 const BasicInfoStep = ({ formData, setFormData }) => {
     const [uploadingLogo, setUploadingLogo] = useState(false);
     const [uploadingBanner, setUploadingBanner] = useState(false);
-    const [logoError, setLogoError] = useState(false);
-    const [bannerError, setBannerError] = useState(false);
+    const [failedLogoUrl, setFailedLogoUrl] = useState(null);
+    const [failedBannerUrl, setFailedBannerUrl] = useState(null);
 
-    useEffect(() => {
-        setLogoError(false);
-    }, [formData?.logo]);
-
-    useEffect(() => {
-        setBannerError(false);
-    }, [formData?.cover_banner]);
+    const isLogoError = Boolean(formData?.logo && failedLogoUrl === formData.logo);
+    const isBannerError = Boolean(formData?.cover_banner && failedBannerUrl === formData.cover_banner);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -63,12 +58,12 @@ const BasicInfoStep = ({ formData, setFormData }) => {
                 <div className="col-span-1 md:col-span-2 flex flex-col sm:flex-row gap-6 items-start sm:items-center p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                     <div className="relative group">
                         <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center bg-white overflow-hidden relative">
-                            {formData.logo && !logoError ? (
+                            {formData.logo && !isLogoError ? (
                                 <img
                                     src={resolveMediaUrl(formData.logo)}
                                     alt="Logo"
                                     className="w-full h-full object-cover"
-                                    onError={() => setLogoError(true)}
+                                    onError={() => setFailedLogoUrl(formData.logo)}
                                 />
                             ) : (
                                 <Building2 className="w-8 h-8 text-slate-300" />
@@ -80,12 +75,12 @@ const BasicInfoStep = ({ formData, setFormData }) => {
                     </div>
                     <div className="relative flex-1 w-full group">
                         <div className="w-full h-24 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center bg-white overflow-hidden relative">
-                            {formData.cover_banner && !bannerError ? (
+                            {formData.cover_banner && !isBannerError ? (
                                 <img
                                     src={resolveMediaUrl(formData.cover_banner)}
                                     alt="Banner"
                                     className="w-full h-full object-cover"
-                                    onError={() => setBannerError(true)}
+                                    onError={() => setFailedBannerUrl(formData.cover_banner)}
                                 />
                             ) : (
                                 <span className="text-sm font-medium text-slate-400">Click to upload cover banner (1200x400)</span>
