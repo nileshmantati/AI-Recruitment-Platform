@@ -71,6 +71,15 @@ const CandidateProfilePage = () => {
         fetchProfile();
     }, [auth]);
 
+    const normalizeUrl = (url) => {
+        if (!url || !url.trim()) return null;
+        const trimmed = url.trim();
+        if (!/^https?:\/\//i.test(trimmed)) {
+            return `https://${trimmed}`;
+        }
+        return trimmed;
+    };
+
     const handleSave = async () => {
         setSaving(true);
         try {
@@ -81,17 +90,35 @@ const CandidateProfilePage = () => {
             await api.patch('candidate/profile/', {
                 first_name: firstName,
                 last_name: lastName,
-                phone: profile.phone,
-                portfolio_url: profile.website || null,
-                github_url: profile.linkedin || null,
-                bio: profile.bio,
-                experience: profile.experience_years || profile.current_role || '',
+                phone: profile.phone ? profile.phone.trim() : null,
+                portfolio_url: normalizeUrl(profile.website),
+                github_url: normalizeUrl(profile.linkedin),
+                bio: profile.bio || '',
+                experience: (profile.experience_years || profile.current_role || '').trim().slice(0, 50),
                 skills,
             });
             toast.success('Profile updated!');
             setEditMode(false);
-        } catch {
-            toast.error('Failed to update profile.');
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            const formatError = (val) => {
+                if (Array.isArray(val)) return val.join(', ');
+                if (val && typeof val === 'object') {
+                    return Object.entries(val)
+                        .map(([k, v]) => `${k}: ${formatError(v)}`)
+                        .join(', ');
+                }
+                return String(val);
+            };
+            const data = error.response?.data;
+            const errorMsg =
+                data?.detail ||
+                (data && typeof data === 'object'
+                    ? Object.entries(data)
+                        .map(([field, msgs]) => `${field}: ${formatError(msgs)}`)
+                        .join(' | ')
+                    : null);
+            toast.error(errorMsg || 'Failed to update profile. Please try again.');
         } finally {
             setSaving(false);
         }
@@ -184,7 +211,7 @@ const CandidateProfilePage = () => {
             <SectionCard title="Personal Information" icon={User}>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Field label="Full Name" value={profile.full_name} icon={User} onChange={e => setProfile(p => ({ ...p, full_name: e.target.value }))} placeholder="John Doe" disabled={!editMode} />
-                    <Field label="Email" value={profile.email} icon={Mail} type="email" onChange={e => setProfile(p => ({ ...p, email: e.target.value }))} placeholder="john@example.com" disabled={!editMode} />
+                    <Field label="Email" value={profile.email} icon={Mail} type="email" placeholder="john@example.com" disabled={true} />
                     <Field label="Phone" value={profile.phone} icon={Phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} placeholder="+91 98765 43210" disabled={!editMode} />
                     <Field label="Location" value={profile.location} icon={MapPin} onChange={e => setProfile(p => ({ ...p, location: e.target.value }))} placeholder="Mumbai, India" disabled={!editMode} />
                     <Field label="Current Role" value={profile.current_role} icon={Briefcase} onChange={e => setProfile(p => ({ ...p, current_role: e.target.value }))} placeholder="Software Engineer" disabled={!editMode} />

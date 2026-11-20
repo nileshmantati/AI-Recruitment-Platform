@@ -50,6 +50,46 @@ class CandidateProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'first_name', 'last_name', 'phone', 'profile_image', 'skills',
                   'experience', 'resume', 'portfolio_url', 'github_url', 'bio', 'email')
 
+    def to_internal_value(self, data):
+        data = data.copy() if hasattr(data, 'copy') else dict(data)
+
+        # Normalize URL fields: auto-prepend https:// if missing, convert empty strings to None
+        for url_field in ('portfolio_url', 'github_url'):
+            if url_field in data:
+                val = data[url_field]
+                if not val or not str(val).strip():
+                    data[url_field] = None
+                else:
+                    val_str = str(val).strip()
+                    if not val_str.startswith(('http://', 'https://')):
+                        data[url_field] = f'https://{val_str}'
+                    else:
+                        data[url_field] = val_str
+
+        # Clean and clamp phone number if provided
+        if 'phone' in data:
+            if not data['phone'] or not str(data['phone']).strip():
+                data['phone'] = None
+            else:
+                data['phone'] = str(data['phone']).strip()[:15]
+
+        # Clamp experience to max_length=50
+        if 'experience' in data and data['experience'] is not None:
+            data['experience'] = str(data['experience']).strip()[:50]
+
+        return super().to_internal_value(data)
+
+    def update(self, instance, validated_data):
+        first_name = validated_data.get('first_name')
+        last_name = validated_data.get('last_name')
+        if first_name is not None and instance.user.first_name != first_name:
+            instance.user.first_name = first_name
+            instance.user.save(update_fields=['first_name'])
+        if last_name is not None and instance.user.last_name != last_name:
+            instance.user.last_name = last_name
+            instance.user.save(update_fields=['last_name'])
+        return super().update(instance, validated_data)
+
     def get_email(self, obj):
         return obj.user.email
 
