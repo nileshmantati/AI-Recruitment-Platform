@@ -226,7 +226,6 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'no
 
 # Reverse proxy headers (Render, Vercel, load balancers)
 USE_X_FORWARDED_HOST = True
-USE_X_FORWARDED_PORT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Security settings for production

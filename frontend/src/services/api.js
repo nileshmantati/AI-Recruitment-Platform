@@ -258,7 +258,7 @@ export const analyzeJobDescriptionBias = async (payload) => {
 
 /**
  * Resolves uploaded media URLs (logos, banners, avatars) to work consistently across dev and production.
- * Handles relative paths (/media/...), localhost URLs returned behind proxies, and mixed-content http/https.
+ * Handles relative paths (/media/...), localhost/proxy URLs with internal ports, and mixed-content http/https.
  */
 export const resolveMediaUrl = (url) => {
     if (!url || typeof url !== 'string') return null;
@@ -272,19 +272,21 @@ export const resolveMediaUrl = (url) => {
     let backendOrigin = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/').trim();
     backendOrigin = backendOrigin.replace(/\/api\/?$/, '').replace(/\/+$/, '');
 
-    if (trimmed.startsWith('/media/') || trimmed.startsWith('media/')) {
-        const cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-        return `${backendOrigin}${cleanPath}`;
+    // Extract any /media/... path and map it directly to backendOrigin
+    const mediaIndex = trimmed.indexOf('/media/');
+    if (mediaIndex !== -1) {
+        return `${backendOrigin}${trimmed.substring(mediaIndex)}`;
     }
 
-    if (trimmed.includes('localhost') || trimmed.includes('127.0.0.1') || trimmed.includes('0.0.0.0')) {
-        const mediaIndex = trimmed.indexOf('/media/');
-        if (mediaIndex !== -1) {
-            return `${backendOrigin}${trimmed.substring(mediaIndex)}`;
-        }
+    if (trimmed.startsWith('media/')) {
+        return `${backendOrigin}/${trimmed}`;
     }
 
-    if (trimmed.startsWith('http://') && (trimmed.includes('.onrender.com') || trimmed.includes('.vercel.app'))) {
+    if (trimmed.startsWith('company/') || trimmed.startsWith('profile_images/') || trimmed.startsWith('resumes/')) {
+        return `${backendOrigin}/media/${trimmed}`;
+    }
+
+    if (trimmed.startsWith('http://') && typeof window !== 'undefined' && window.location?.protocol === 'https:') {
         return trimmed.replace(/^http:\/\//i, 'https://');
     }
 

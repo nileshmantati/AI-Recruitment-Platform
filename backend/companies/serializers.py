@@ -67,6 +67,7 @@ class CompanySerializer(serializers.ModelSerializer):
             request = self.context.get('request')
             if request is not None:
                 url = request.build_absolute_uri(obj.logo.url)
+                url = url.replace(':10000', '')
                 if (request.is_secure() or getattr(settings, 'SECURE_PROXY_SSL_HEADER', None)) and url.startswith('http://'):
                     url = 'https://' + url[7:]
                 return url
@@ -78,6 +79,7 @@ class CompanySerializer(serializers.ModelSerializer):
             request = self.context.get('request')
             if request is not None:
                 url = request.build_absolute_uri(obj.cover_banner.url)
+                url = url.replace(':10000', '')
                 if (request.is_secure() or getattr(settings, 'SECURE_PROXY_SSL_HEADER', None)) and url.startswith('http://'):
                     url = 'https://' + url[7:]
                 return url
