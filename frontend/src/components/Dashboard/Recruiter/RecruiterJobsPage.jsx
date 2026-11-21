@@ -41,6 +41,35 @@ const getTimeAgo = (date) => {
     return `${Math.floor(d / 30)}mo ago`;
 };
 
+const parseSalaryNumber = (str) => {
+    if (!str) return 0;
+    if (typeof str === 'number') return str;
+    const clean = String(str).toLowerCase().trim();
+    const hasCr = /\b(cr|crore|crores)\b/i.test(clean);
+    const hasLakh = /\b(l|lakh|lac|lakhs|lacs)\b/i.test(clean) || /\d+\s*l\b/i.test(clean);
+    const hasK = /\b(k)\b/i.test(clean) || /\d+\s*k\b/i.test(clean);
+
+    const withoutCurrency = clean.replace(/[₹$,]/g, '').trim();
+    const match = withoutCurrency.match(/(\d+(?:\.\d+)?)/);
+    if (!match) return 0;
+    let num = parseFloat(match[1]);
+    if (isNaN(num)) return 0;
+
+    if (hasCr) num *= 10000000;
+    else if (hasLakh) num *= 100000;
+    else if (hasK) num *= 1000;
+    return num;
+};
+
+const getSalaryValue = (salaryStr, type = 'high') => {
+    if (!salaryStr) return 0;
+    const parts = String(salaryStr).split(/[-–—]|to/i).map(s => s.trim()).filter(Boolean);
+    if (parts.length === 0) return 0;
+    const values = parts.map(parseSalaryNumber).filter(v => v > 0);
+    if (values.length === 0) return 0;
+    return type === 'low' ? Math.min(...values) : Math.max(...values);
+};
+
 const RecruiterJobsPage = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -136,10 +165,38 @@ const RecruiterJobsPage = () => {
             );
         }
         switch (sortBy) {
-            case 'Most Applicants': result.sort((a, b) => (b.applicants || 0) - (a.applicants || 0)); break;
-            case 'Salary (High)': result.sort((a, b) => parseFloat(b.salary || 0) - parseFloat(a.salary || 0)); break;
-            case 'Salary (Low)': result.sort((a, b) => parseFloat(a.salary || 0) - parseFloat(b.salary || 0)); break;
-            default: result.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            case 'Most Applicants':
+                result.sort((a, b) => {
+                    const countA = Number(a.applicants ?? a.applicants_count ?? a.applicant_count ?? 0) || 0;
+                    const countB = Number(b.applicants ?? b.applicants_count ?? b.applicant_count ?? 0) || 0;
+                    return countB - countA;
+                });
+                break;
+            case 'Salary (High)':
+                result.sort((a, b) => {
+                    const valA = getSalaryValue(a.salary, 'high');
+                    const valB = getSalaryValue(b.salary, 'high');
+                    return valB - valA;
+                });
+                break;
+            case 'Salary (Low)':
+                result.sort((a, b) => {
+                    const valA = getSalaryValue(a.salary, 'low');
+                    const valB = getSalaryValue(b.salary, 'low');
+                    if (valA === 0 && valB > 0) return 1;
+                    if (valB === 0 && valA > 0) return -1;
+                    return valA - valB;
+                });
+                break;
+            default:
+                result.sort((a, b) => {
+                    const dateA = new Date(a.created_at || a.posted_at || a.posted_date || a.created || 0).getTime();
+                    const dateB = new Date(b.created_at || b.posted_at || b.posted_date || b.created || 0).getTime();
+                    if (!isNaN(dateA) && !isNaN(dateB) && dateB !== dateA) {
+                        return dateB - dateA;
+                    }
+                    return (b.id || 0) - (a.id || 0);
+                });
         }
         return result;
     }, [jobs, searchQuery, sortBy]);
