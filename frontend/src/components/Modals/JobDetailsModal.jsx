@@ -53,7 +53,7 @@ const JobDetailsModal = ({ show, handleClose, job, onApply, isSaved, onToggleSav
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
                 {/* Backdrop Click Dismiss */}
                 <motion.div
                     initial={{ opacity: 0 }}
