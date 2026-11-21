@@ -10,9 +10,14 @@ import {
 
 const getTimeAgo = (date) => {
     if (!date) return 'Recently';
-    const diff = Date.now() - new Date(date).getTime();
+    const parsed = new Date(date).getTime();
+    if (isNaN(parsed)) return 'Recently';
+    const diff = Math.max(0, Date.now() - parsed);
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Today';
+    if (minutes < 60) return minutes <= 1 ? 'Just now' : `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days}d ago`;
     if (days < 30) return `${Math.floor(days / 7)}w ago`;
@@ -37,6 +42,7 @@ const JobDetailsModal = ({ show, handleClose, job, onApply, isSaved, onToggleSav
     const isBannerError = Boolean(company.cover_banner && failedBannerUrl === company.cover_banner);
 
     const companyLocation = [company.city, company.state, company.country].filter(Boolean).join(', ');
+    const applicantCount = Number(job.applicants ?? job.applicants_count ?? job.applicant_count ?? (Array.isArray(job.applications) ? job.applications.length : 0)) || 0;
 
     const handleApplyClick = () => {
         handleClose();
@@ -66,8 +72,8 @@ const JobDetailsModal = ({ show, handleClose, job, onApply, isSaved, onToggleSav
                     className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-3xl bg-white shadow-2xl overflow-hidden z-10 border border-slate-100 my-auto"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Header Banner */}
-                    <div className="relative h-32 sm:h-40 w-full shrink-0 overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900">
+                    {/* Header Banner - Unique attractive luminous mesh gradient (non-dark) */}
+                    <div className="relative h-28 sm:h-36 w-full shrink-0 overflow-hidden bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-indigo-100/60">
                         {company.cover_banner && !isBannerError ? (
                             <img
                                 src={resolveMediaUrl(company.cover_banner)}
@@ -76,46 +82,38 @@ const JobDetailsModal = ({ show, handleClose, job, onApply, isSaved, onToggleSav
                                 onError={() => setFailedBannerUrl(company.cover_banner)}
                             />
                         ) : (
-                            <div
-                                className="w-full h-full opacity-30"
-                                style={{
-                                    backgroundImage: `radial-gradient(circle at 20% 50%, ${T.primary} 0%, transparent 60%), radial-gradient(circle at 80% 50%, ${T.accent} 0%, transparent 60%)`
-                                }}
-                            />
+                            <>
+                                {/* Ambient colorful glow orbs */}
+                                <div className="absolute -top-10 -left-10 h-44 w-44 rounded-full bg-indigo-400/25 blur-2xl pointer-events-none" />
+                                <div className="absolute -top-8 right-12 h-40 w-40 rounded-full bg-purple-400/25 blur-2xl pointer-events-none" />
+                                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 h-32 w-72 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none" />
+                                {/* Subtle tech dots pattern */}
+                                <div
+                                    className="absolute inset-0 opacity-[0.06] pointer-events-none"
+                                    style={{
+                                        backgroundImage: `radial-gradient(${T.primary} 1.5px, transparent 1.5px)`,
+                                        backgroundSize: '16px 16px'
+                                    }}
+                                />
+                            </>
                         )}
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/30" />
 
                         {/* Close button */}
                         <button
                             onClick={handleClose}
-                            className="absolute top-3 right-3 p-2 rounded-full bg-black/40 text-white/90 hover:text-white hover:bg-black/60 backdrop-blur-md transition-all cursor-pointer z-10"
+                            className="absolute top-3 right-3 p-2 rounded-full bg-white/80 text-slate-600 hover:text-slate-900 hover:bg-white shadow-sm border border-slate-200/80 backdrop-blur-md transition-all cursor-pointer z-10"
                             aria-label="Close dialog"
                         >
                             <X size={18} />
                         </button>
-
-                        {/* Badges on Banner */}
-                        <div className="absolute top-3 left-4 flex flex-wrap gap-2">
-                            {job.type && (
-                                <span className="rounded-full bg-white/20 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white border border-white/20">
-                                    {job.type}
-                                </span>
-                            )}
-                            {job.salary && (
-                                <span className="rounded-full bg-emerald-500/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-white border border-emerald-400/30 flex items-center gap-1">
-                                    <IndianRupee size={11} /> {job.salary}
-                                </span>
-                            )}
-                        </div>
                     </div>
 
                     {/* Identity Bar */}
                     <div className="relative px-5 sm:px-8 pb-4 pt-0 border-b border-slate-100 bg-white shrink-0">
-                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-12 sm:-mt-14 mb-3">
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-3">
                             <div className="flex items-end gap-3 sm:gap-4">
                                 {/* Logo Avatar */}
-                                <div className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-2xl bg-white shadow-xl border-4 border-white p-2 overflow-hidden flex items-center justify-center relative z-10">
+                                <div className="-mt-10 sm:-mt-14 h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-2xl bg-white shadow-xl border-4 border-white p-2 overflow-hidden flex items-center justify-center relative z-10">
                                     {company.logo && !isLogoError ? (
                                         <img
                                             src={resolveMediaUrl(company.logo)}
@@ -135,31 +133,32 @@ const JobDetailsModal = ({ show, handleClose, job, onApply, isSaved, onToggleSav
 
                                 <div className="min-w-0 pb-1">
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                        <span className="text-sm font-semibold text-slate-700 flex items-center gap-1">
-                                            {company.name || job.company || job.recruiter_name}
+                                        <span className="text-sm font-bold text-indigo-600 flex items-center gap-1.5">
+                                            <Building2 size={14} className="text-indigo-500 shrink-0" />
+                                            {company.name || job.company || job.recruiter_name || 'Hiring Company'}
                                         </span>
                                         {company.is_verified && (
-                                            <span className="inline-flex items-center gap-0.5 text-blue-600" title="Verified Company">
-                                                <CheckCircle size={14} className="fill-blue-600 text-white" />
-                                                <span className="text-[11px] font-bold text-blue-600">Verified</span>
+                                            <span className="inline-flex items-center gap-1 bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded-full text-blue-700 text-[11px] font-bold" title="Verified Company">
+                                                <CheckCircle size={12} className="fill-blue-600 text-white" />
+                                                Verified
                                             </span>
                                         )}
                                     </div>
-                                    <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 capitalize truncate">
+                                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 capitalize truncate tracking-tight mt-0.5">
                                         {job.title}
                                     </h2>
                                 </div>
                             </div>
 
-                            {/* Meta pills on right */}
-                            <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5 text-xs text-slate-500">
-                                <span className="flex items-center gap-1 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg font-medium">
-                                    <Clock size={12} className="text-slate-400" />
-                                    Posted {getTimeAgo(job.created_at)}
+                            {/* Meta pills on right: Posted Day & Applied Candidates */}
+                            <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-2 text-xs">
+                                <span className="inline-flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/90 text-slate-700 px-3 py-1 rounded-full font-semibold shadow-2xs">
+                                    <Clock size={12} className="text-indigo-500" />
+                                    Posted {getTimeAgo(job.created_at || job.posted_at || job.posted_date || job.created)}
                                 </span>
-                                <span className="flex items-center gap-1 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg font-medium">
-                                    <Users size={12} className="text-indigo-500" />
-                                    {job.applicants ?? 0} candidates applied
+                                <span className="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-semibold shadow-2xs">
+                                    <Users size={12} className="text-indigo-600" />
+                                    {applicantCount === 1 ? '1 candidate applied' : `${applicantCount} candidates applied`}
                                 </span>
                             </div>
                         </div>
@@ -196,35 +195,35 @@ const JobDetailsModal = ({ show, handleClose, job, onApply, isSaved, onToggleSav
                             <>
                                 {/* Quick Meta Highlights */}
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                    <div className="p-3.5 bg-white rounded-2xl border border-slate-100 shadow-xs">
+                                    <div className="p-3.5 bg-white rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
                                         <div className="text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1">
-                                            <IndianRupee size={13} className="text-emerald-500" /> Compensation
+                                            <IndianRupee size={13} className="text-emerald-500 shrink-0" /> Compensation
                                         </div>
-                                        <div className="text-sm font-bold text-slate-800 truncate">
+                                        <div className="text-sm font-bold text-slate-800 break-words leading-snug" title={job.salary}>
                                             {job.salary || 'Competitive'}
                                         </div>
                                     </div>
-                                    <div className="p-3.5 bg-white rounded-2xl border border-slate-100 shadow-xs">
+                                    <div className="p-3.5 bg-white rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
                                         <div className="text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1">
-                                            <Briefcase size={13} className="text-indigo-500" /> Job Type
+                                            <Briefcase size={13} className="text-indigo-500 shrink-0" /> Job Type
                                         </div>
-                                        <div className="text-sm font-bold text-slate-800 truncate">
+                                        <div className="text-sm font-bold text-slate-800 break-words leading-snug">
                                             {job.type || 'Full-time'}
                                         </div>
                                     </div>
-                                    <div className="p-3.5 bg-white rounded-2xl border border-slate-100 shadow-xs">
+                                    <div className="p-3.5 bg-white rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
                                         <div className="text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1">
-                                            <MapPin size={13} className="text-rose-500" /> Location
+                                            <MapPin size={13} className="text-rose-500 shrink-0" /> Location
                                         </div>
-                                        <div className="text-sm font-bold text-slate-800 truncate">
+                                        <div className="text-sm font-bold text-slate-800 break-words leading-snug" title={companyLocation || 'Remote / Hybrid'}>
                                             {companyLocation || 'Remote / Hybrid'}
                                         </div>
                                     </div>
-                                    <div className="p-3.5 bg-white rounded-2xl border border-slate-100 shadow-xs">
+                                    <div className="p-3.5 bg-white rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
                                         <div className="text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1">
-                                            <Calendar size={13} className="text-purple-500" /> Mode
+                                            <Calendar size={13} className="text-purple-500 shrink-0" /> Mode
                                         </div>
-                                        <div className="text-sm font-bold text-slate-800 truncate">
+                                        <div className="text-sm font-bold text-slate-800 break-words leading-snug">
                                             {company.working_mode || 'Hybrid'}
                                         </div>
                                     </div>
