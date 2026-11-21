@@ -27,9 +27,14 @@ const itemVariants = {
 
 const getTimeAgo = (date) => {
     if (!date) return 'Recently';
-    const diff = Date.now() - new Date(date).getTime();
+    const parsed = new Date(date).getTime();
+    if (isNaN(parsed)) return 'Recently';
+    const diff = Math.max(0, Date.now() - parsed);
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
     const d = Math.floor(diff / 864e5);
-    if (d === 0) return 'Today';
+    if (minutes < 60) return minutes <= 1 ? 'Just now' : `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
     if (d === 1) return 'Yesterday';
     if (d < 7) return `${d}d ago`;
     if (d < 30) return `${Math.floor(d / 7)}w ago`;

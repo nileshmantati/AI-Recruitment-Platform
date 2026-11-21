@@ -14,9 +14,14 @@ const SORT_OPTIONS = ['Newest First', 'Most Applicants', 'Salary (High)', 'Salar
 
 const getTimeAgo = (date) => {
     if (!date) return 'Recently';
-    const diff = Date.now() - new Date(date).getTime();
+    const parsed = new Date(date).getTime();
+    if (isNaN(parsed)) return 'Recently';
+    const diff = Math.max(0, Date.now() - parsed);
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Today';
+    if (minutes < 60) return minutes <= 1 ? 'Just now' : `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days}d ago`;
     if (days < 30) return `${Math.floor(days / 7)}w ago`;
@@ -56,7 +61,7 @@ const JobCard = ({ job, onApply, isSaved, onToggleSave, onSelectJob }) => {
                             {/* Time Badge */}
                             <div className="flex shrink-0 items-center gap-1 rounded-lg border border-slate-100 bg-slate-50 px-2 py-1 text-[11px] font-bold text-slate-600">
                                 <Clock size={11} className="text-slate-400" />
-                                {getTimeAgo(job.created_at)}
+                                {getTimeAgo(job.created_at || job.posted_at || job.posted_date || job.created)}
                             </div>
                         </div>
                         {/* Recruiter — replaced Bootstrap `bi bi-building` with lucide Building2 icon */}
@@ -179,7 +184,7 @@ const JobRow = ({ job, onApply, isSaved, onToggleSave, onSelectJob }) => {
                         <Building2 size={12} className="text-slate-400" /> {job.recruiter_name}
                     </span>
                     <span className="flex items-center gap-1 text-xs font-semibold text-slate-500">
-                        <Clock size={12} className="text-slate-400" /> {getTimeAgo(job.created_at)}
+                        <Clock size={12} className="text-slate-400" /> {getTimeAgo(job.created_at || job.posted_at || job.posted_date || job.created)}
                     </span>
                     <span className="flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-600">
                         <IndianRupee size={11} /> {job.salary || 'N/A'}

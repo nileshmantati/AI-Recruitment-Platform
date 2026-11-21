@@ -12,8 +12,15 @@ const STORAGE_KEY = 'candidate_saved_jobs';
 
 const getTimeAgo = (date) => {
     if (!date) return 'Recently';
-    const d = Math.floor((Date.now() - new Date(date)) / 864e5);
-    if (d === 0) return 'Today'; if (d === 1) return 'Yesterday';
+    const parsed = new Date(date).getTime();
+    if (isNaN(parsed)) return 'Recently';
+    const diff = Math.max(0, Date.now() - parsed);
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const d = Math.floor(diff / 864e5);
+    if (minutes < 60) return minutes <= 1 ? 'Just now' : `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (d === 1) return 'Yesterday';
     if (d < 7) return `${d}d ago`;
     return new Date(date).toLocaleDateString();
 };
